@@ -6,16 +6,22 @@
     "meaning": "hari, matahari"
   },
   {
-    "kanji": "水",
-    "furigana": "みず",
-    "romaji": "mizu",
-    "meaning": "air"
+    "kanji": "月",
+    "furigana": "つき",
+    "romaji": "tsuki",
+    "meaning": "bulan"
   },
   {
     "kanji": "火",
     "furigana": "ひ",
     "romaji": "hi",
     "meaning": "api"
+  },
+  {
+    "kanji": "水",
+    "furigana": "みず",
+    "romaji": "mizu",
+    "meaning": "air"
   },
   {
     "kanji": "木",
@@ -28,5 +34,485 @@
     "furigana": "かね",
     "romaji": "kane",
     "meaning": "uang, emas"
+  },
+  {
+    "kanji": "土",
+    "furigana": "つち",
+    "romaji": "tsuchi",
+    "meaning": "tanah"
+  },
+  {
+    "kanji": "人",
+    "furigana": "ひと",
+    "romaji": "hito",
+    "meaning": "orang"
+  },
+  {
+    "kanji": "山",
+    "furigana": "やま",
+    "romaji": "yama",
+    "meaning": "gunung"
+  },
+  {
+    "kanji": "川",
+    "furigana": "かわ",
+    "romaji": "kawa",
+    "meaning": "sungai"
+  },
+  {
+    "kanji": "田",
+    "furigana": "た",
+    "romaji": "ta",
+    "meaning": "sawah"
+  },
+  {
+    "kanji": "口",
+    "furigana": "くち",
+    "romaji": "kuchi",
+    "meaning": "mulut"
+  },
+  {
+    "kanji": "目",
+    "furigana": "め",
+    "romaji": "me",
+    "meaning": "mata"
+  },
+  {
+    "kanji": "耳",
+    "furigana": "みみ",
+    "romaji": "mimi",
+    "meaning": "telinga"
+  },
+  {
+    "kanji": "手",
+    "furigana": "て",
+    "romaji": "te",
+    "meaning": "tangan"
+  },
+  {
+    "kanji": "足",
+    "furigana": "あし",
+    "romaji": "ashi",
+    "meaning": "kaki"
+  },
+  {
+    "kanji": "子",
+    "furigana": "こ",
+    "romaji": "ko",
+    "meaning": "anak"
+  },
+  {
+    "kanji": "女",
+    "furigana": "おんな",
+    "romaji": "onna",
+    "meaning": "perempuan"
+  },
+  {
+    "kanji": "男",
+    "furigana": "おとこ",
+    "romaji": "otoko",
+    "meaning": "laki-laki"
+  },
+  {
+    "kanji": "父",
+    "furigana": "ちち",
+    "romaji": "chichi",
+    "meaning": "ayah"
+  },
+  {
+    "kanji": "母",
+    "furigana": "はは",
+    "romaji": "haha",
+    "meaning": "ibu"
+  },
+  {
+    "kanji": "友",
+    "furigana": "とも",
+    "romaji": "tomo",
+    "meaning": "teman"
+  },
+  {
+    "kanji": "学",
+    "furigana": "がく",
+    "romaji": "gaku",
+    "meaning": "belajar"
+  },
+  {
+    "kanji": "校",
+    "furigana": "こう",
+    "romaji": "kou",
+    "meaning": "sekolah"
+  },
+  {
+    "kanji": "生",
+    "furigana": "せい",
+    "romaji": "sei",
+    "meaning": "hidup"
+  },
+  {
+    "kanji": "先",
+    "furigana": "せん",
+    "romaji": "sen",
+    "meaning": "sebelum, pertama"
+  },
+  {
+    "kanji": "年",
+    "furigana": "ねん",
+    "romaji": "nen",
+    "meaning": "tahun"
+  },
+  {
+    "kanji": "上",
+    "furigana": "うえ",
+    "romaji": "ue",
+    "meaning": "atas"
+  },
+  {
+    "kanji": "下",
+    "furigana": "した",
+    "romaji": "shita",
+    "meaning": "bawah"
+  },
+  {
+    "kanji": "中",
+    "furigana": "なか",
+    "romaji": "naka",
+    "meaning": "tengah"
+  },
+  {
+    "kanji": "大",
+    "furigana": "だい",
+    "romaji": "dai",
+    "meaning": "besar"
+  },
+  {
+    "kanji": "小",
+    "furigana": "しょう",
+    "romaji": "shou",
+    "meaning": "kecil"
+  },
+  {
+    "kanji": "本",
+    "furigana": "ほん",
+    "romaji": "hon",
+    "meaning": "buku, asli"
+  },
+  {
+    "kanji": "車",
+    "furigana": "くるま",
+    "romaji": "kuruma",
+    "meaning": "mobil"
+  },
+  {
+    "kanji": "電",
+    "furigana": "でん",
+    "romaji": "den",
+    "meaning": "listrik"
+  },
+  {
+    "kanji": "気",
+    "furigana": "き",
+    "romaji": "ki",
+    "meaning": "energi, perasaan"
+  },
+  {
+    "kanji": "天",
+    "furigana": "てん",
+    "romaji": "ten",
+    "meaning": "langit"
+  },
+  {
+    "kanji": "雨",
+    "furigana": "あめ",
+    "romaji": "ame",
+    "meaning": "hujan"
+  },
+  {
+    "kanji": "食",
+    "furigana": "しょく",
+    "romaji": "shoku",
+    "meaning": "makan"
+  },
+  {
+    "kanji": "飲",
+    "furigana": "いん",
+    "romaji": "in",
+    "meaning": "minum"
+  },
+  {
+    "kanji": "行",
+    "furigana": "こう",
+    "romaji": "kou",
+    "meaning": "pergi"
+  },
+  {
+    "kanji": "来",
+    "furigana": "らい",
+    "romaji": "rai",
+    "meaning": "datang"
+  },
+  {
+    "kanji": "見",
+    "furigana": "み",
+    "romaji": "mi",
+    "meaning": "melihat"
+  },
+  {
+    "kanji": "聞",
+    "furigana": "き",
+    "romaji": "ki",
+    "meaning": "mendengar"
+  },
+  {
+    "kanji": "話",
+    "furigana": "はな",
+    "romaji": "hana",
+    "meaning": "berbicara"
+  },
+  {
+    "kanji": "読",
+    "furigana": "よ",
+    "romaji": "yo",
+    "meaning": "membaca"
+  },
+  {
+    "kanji": "書",
+    "furigana": "か",
+    "romaji": "ka",
+    "meaning": "menulis"
+  },
+  {
+    "kanji": "休",
+    "furigana": "きゅう",
+    "romaji": "kyuu",
+    "meaning": "istirahat"
+  },
+  {
+    "kanji": "仕",
+    "furigana": "し",
+    "romaji": "shi",
+    "meaning": "bekerja"
+  },
+  {
+    "kanji": "事",
+    "furigana": "こと",
+    "romaji": "koto",
+    "meaning": "hal, urusan"
+  },
+  {
+    "kanji": "好",
+    "furigana": "す",
+    "romaji": "su",
+    "meaning": "suka"
+  },
+  {
+    "kanji": "新",
+    "furigana": "しん",
+    "romaji": "shin",
+    "meaning": "baru"
+  },
+  {
+    "kanji": "古",
+    "furigana": "ふる",
+    "romaji": "furu",
+    "meaning": "lama"
+  },
+  {
+    "kanji": "多",
+    "furigana": "おお",
+    "romaji": "oo",
+    "meaning": "banyak"
+  },
+  {
+    "kanji": "少",
+    "furigana": "すこ",
+    "romaji": "suko",
+    "meaning": "sedikit"
+  },
+  {
+    "kanji": "半",
+    "furigana": "はん",
+    "romaji": "han",
+    "meaning": "setengah"
+  },
+  {
+    "kanji": "時",
+    "furigana": "とき",
+    "romaji": "toki",
+    "meaning": "waktu"
+  },
+  {
+    "kanji": "間",
+    "furigana": "あいだ",
+    "romaji": "aida",
+    "meaning": "interval, antara"
+  },
+  {
+    "kanji": "分",
+    "furigana": "ふん",
+    "romaji": "fun",
+    "meaning": "menit, mengerti"
+  },
+  {
+    "kanji": "今",
+    "furigana": "いま",
+    "romaji": "ima",
+    "meaning": "sekarang"
+  },
+  {
+    "kanji": "前",
+    "furigana": "まえ",
+    "romaji": "mae",
+    "meaning": "depan, sebelum"
+  },
+  {
+    "kanji": "後",
+    "furigana": "あと",
+    "romaji": "ato",
+    "meaning": "belakang, setelah"
+  },
+  {
+    "kanji": "左",
+    "furigana": "ひだり",
+    "romaji": "hidari",
+    "meaning": "kiri"
+  },
+  {
+    "kanji": "右",
+    "furigana": "みぎ",
+    "romaji": "migi",
+    "meaning": "kanan"
+  },
+  {
+    "kanji": "東",
+    "furigana": "ひがし",
+    "romaji": "higashi",
+    "meaning": "timur"
+  },
+  {
+    "kanji": "西",
+    "furigana": "にし",
+    "romaji": "nishi",
+    "meaning": "barat"
+  },
+  {
+    "kanji": "南",
+    "furigana": "みなみ",
+    "romaji": "minami",
+    "meaning": "selatan"
+  },
+  {
+    "kanji": "北",
+    "furigana": "きた",
+    "romaji": "kita",
+    "meaning": "utara"
+  },
+  {
+    "kanji": "外",
+    "furigana": "そと",
+    "romaji": "soto",
+    "meaning": "luar"
+  },
+  {
+    "kanji": "名",
+    "furigana": "な",
+    "romaji": "na",
+    "meaning": "nama"
+  },
+  {
+    "kanji": "高",
+    "furigana": "たか",
+    "romaji": "taka",
+    "meaning": "tinggi"
+  },
+  {
+    "kanji": "安",
+    "furigana": "やす",
+    "romaji": "yasu",
+    "meaning": "murah, aman"
+  },
+  {
+    "kanji": "長",
+    "furigana": "なが",
+    "romaji": "naga",
+    "meaning": "panjang"
+  },
+  {
+    "kanji": "白",
+    "furigana": "しろ",
+    "romaji": "shiro",
+    "meaning": "putih"
+  },
+  {
+    "kanji": "百",
+    "furigana": "ひゃく",
+    "romaji": "hyaku",
+    "meaning": "seratus"
+  },
+  {
+    "kanji": "千",
+    "furigana": "せん",
+    "romaji": "sen",
+    "meaning": "seribu"
+  },
+  {
+    "kanji": "万",
+    "furigana": "まん",
+    "romaji": "man",
+    "meaning": "sepuluh ribu"
+  },
+  {
+    "kanji": "円",
+    "furigana": "えん",
+    "romaji": "en",
+    "meaning": "yen, lingkaran"
+  },
+  {
+    "kanji": "語",
+    "furigana": "ご",
+    "romaji": "go",
+    "meaning": "bahasa"
+  },
+  {
+    "kanji": "英",
+    "furigana": "えい",
+    "romaji": "ei",
+    "meaning": "Inggris"
+  },
+  {
+    "kanji": "店",
+    "furigana": "みせ",
+    "romaji": "mise",
+    "meaning": "toko"
+  },
+  {
+    "kanji": "駅",
+    "furigana": "えき",
+    "romaji": "eki",
+    "meaning": "stasiun"
+  },
+  {
+    "kanji": "道",
+    "furigana": "みち",
+    "romaji": "michi",
+    "meaning": "jalan"
+  },
+  {
+    "kanji": "社",
+    "furigana": "しゃ",
+    "romaji": "sha",
+    "meaning": "kuil, perusahaan"
+  },
+  {
+    "kanji": "会",
+    "furigana": "かい",
+    "romaji": "kai",
+    "meaning": "bertemu, perkumpulan"
+  },
+  {
+    "kanji": "国",
+    "furigana": "くに",
+    "romaji": "kuni",
+    "meaning": "negara"
   }
 ]
