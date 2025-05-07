@@ -240,13 +240,14 @@
     }
     
     // Fungsi pencarian
+    let searchTimer;
     document.getElementById("searchInput").addEventListener('input', (e) => {
-      const keyword = e.target.value.toLowerCase().trim();
-      
-      if (!keyword) {
-        renderKanji(kanjiData); // Reset ke semua data jika kolom kosong
-        return;
-      }
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(() => {
+        const keyword = e.target.value.toLowerCase();
+        // Proses pencarian...
+      }, 300); // Delay 300ms
+    });
       
       const filteredData = kanjiData.filter(item => 
         item.kanji.includes(keyword) || 
