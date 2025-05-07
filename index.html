@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Belajar Kanji + Dark Mode</title>
+  <title>Belajar Kanji N5 - Paginasi & Pencarian</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     :root {
       --primary: #4f46e5;
-      --secondary: #f59e0b;
+      --secondary: #fbbf24;
       --bg: #f8fafc;
       --text: #1e293b;
       --card-bg: #ffffff;
@@ -17,7 +18,7 @@
 
     [data-theme="dark"] {
       --primary: #818cf8;
-      --secondary: #fbbf24;
+      --secondary: #f59e0b;
       --bg: #1e293b;
       --text: #f8fafc;
       --card-bg: #334155;
@@ -74,14 +75,20 @@
       margin-bottom: 10px;
     }
 
-    /* Search Box */
-    .search-container {
-      max-width: 500px;
-      margin: 0 auto 30px;
+    /* Search & Controls */
+    .controls {
+      max-width: 800px;
+      margin: 0 auto 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: center;
     }
 
     #searchInput {
-      width: 100%;
+      flex: 1;
+      min-width: 200px;
       padding: 12px;
       background: var(--card-bg);
       color: var(--text);
@@ -91,9 +98,24 @@
       outline: none;
     }
 
-    #searchInput::placeholder {
+    .pagination-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    select, button {
+      padding: 10px 15px;
+      background: var(--card-bg);
       color: var(--text);
-      opacity: 0.7;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
 
     /* Kanji Grid */
@@ -148,7 +170,7 @@
       opacity: 1;
     }
 
-    /* Message State */
+    /* Message & Status */
     .message {
       text-align: center;
       grid-column: 1 / -1;
@@ -156,71 +178,165 @@
       color: var(--text);
     }
 
+    .status {
+      text-align: center;
+      margin-top: 10px;
+      color: var(--primary);
+      font-size: 0.9rem;
+    }
+
     @media (max-width: 600px) {
       .kanji-grid {
         grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
       }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      #searchInput {
+        width: 100%;
+      }
     }
   </style>
-  <!-- Font Awesome untuk icon -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-  <!-- Dark Mode Toggle Button -->
   <div class="theme-toggle" id="themeToggle">
     <i class="fas fa-moon"></i>
   </div>
 
   <header>
-    <h1>Belajar Kanji</h1>
-    <p>Cari kanji berdasarkan huruf, arti, atau romaji</p>
+    <h1>Belajar Kanji N5</h1>
+    <p>Paginasi + Pencarian Cepat</p>
   </header>
   
-  <!-- Search Box -->
-  <div class="search-container">
+  <div class="controls">
     <input 
       type="text" 
       id="searchInput" 
       placeholder="Cari kanji (contoh: 水, mizu, air...)" 
       autocomplete="off"
     >
+    
+    <div class="pagination-controls">
+      <select id="perPage">
+        <option value="10">10 per halaman</option>
+        <option value="20">20 per halaman</option>
+        <option value="50">50 per halaman</option>
+        <option value="0">Tampilkan Semua</option>
+      </select>
+      
+      <button id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+      <span id="pageInfo">Halaman 1</span>
+      <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+    </div>
   </div>
   
-  <!-- Kanji Container -->
   <div class="kanji-grid" id="kanjiContainer">
     <div class="message">Memuat data kanji...</div>
   </div>
+  
+  <div class="status" id="statusInfo"></div>
 
   <script>
-    let kanjiData = []; // Menyimpan data JSON
+    // Config
+    let kanjiData = [];
+    let currentPage = 1;
+    let perPage = 10;
+    let filteredData = [];
     
-    // Load data dari JSON
+    // DOM Elements
+    const searchInput = document.getElementById('searchInput');
+    const perPageSelect = document.getElementById('perPage');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageInfo = document.getElementById('pageInfo');
+    const statusInfo = document.getElementById('statusInfo');
+    
+    // Init
     document.addEventListener('DOMContentLoaded', () => {
-      fetch('kanji.json')
-        .then(response => response.json())
-        .then(data => {
-          kanjiData = data;
-          renderKanji(data); // Tampilkan semua data awal
-        })
-        .catch(error => {
-          document.getElementById("kanjiContainer").innerHTML = `
-            <div class="message error">
-              Gagal memuat data. Pastikan file <strong>kanji.json</strong> ada di folder yang sama.
-            </div>
-          `;
-          console.error("Error:", error);
-        });
-
-      // Set theme awal dari localStorage
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      setTheme(savedTheme);
+      loadData();
+      setupEventListeners();
+      loadTheme();
     });
     
-    // Fungsi render kanji ke HTML
-    function renderKanji(data) {
+    // Load JSON Data
+    async function loadData() {
+      try {
+        const response = await fetch('kanji.json');
+        kanjiData = await response.json();
+        filteredData = [...kanjiData];
+        renderKanji();
+        updateStatus();
+      } catch (error) {
+        document.getElementById("kanjiContainer").innerHTML = `
+          <div class="message error">
+            Gagal memuat data. Pastikan file <strong>kanji.json</strong> ada di folder yang sama.
+          </div>
+        `;
+        console.error("Error:", error);
+      }
+    }
+    
+    // Event Listeners
+    function setupEventListeners() {
+      // Search with debounce
+      searchInput.addEventListener('input', debounce(handleSearch, 300));
+      
+      // Pagination controls
+      perPageSelect.addEventListener('change', () => {
+        perPage = parseInt(perPageSelect.value);
+        currentPage = 1;
+        renderKanji();
+        updateStatus();
+      });
+      
+      prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderKanji();
+          updateStatus();
+        }
+      });
+      
+      nextBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredData.length / perPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderKanji();
+          updateStatus();
+        }
+      });
+      
+      // Theme toggle
+      document.getElementById("themeToggle").addEventListener('click', toggleTheme);
+    }
+    
+    // Optimized Search Function
+    function handleSearch() {
+      const keyword = searchInput.value.toLowerCase().trim();
+      
+      if (!keyword) {
+        filteredData = [...kanjiData];
+      } else {
+        filteredData = kanjiData.filter(item => 
+          item.kanji.includes(keyword) || 
+          item.furigana.toLowerCase().includes(keyword) ||
+          item.romaji.toLowerCase().includes(keyword) || 
+          item.meaning.toLowerCase().includes(keyword)
+        );
+      }
+      
+      currentPage = 1;
+      renderKanji();
+      updateStatus();
+    }
+    
+    // Render Kanji Cards
+    function renderKanji() {
       const container = document.getElementById("kanjiContainer");
       
-      if (data.length === 0) {
+      if (filteredData.length === 0) {
         container.innerHTML = `
           <div class="message">
             Tidak ditemukan kanji yang cocok.
@@ -229,7 +345,17 @@
         return;
       }
       
-      container.innerHTML = data.map(item => `
+      // Pagination logic
+      let dataToRender;
+      if (perPage === 0) { // Show All
+        dataToRender = filteredData;
+      } else {
+        const start = (currentPage - 1) * perPage;
+        const end = start + perPage;
+        dataToRender = filteredData.slice(start, end);
+      }
+      
+      container.innerHTML = dataToRender.map(item => `
         <div class="kanji-card">
           <div class="kanji">${item.kanji}</div>
           <div class="furigana">${item.furigana}</div>
@@ -239,34 +365,50 @@
       `).join('');
     }
     
-    // Fungsi pencarian
-    let searchTimer;
-    document.getElementById("searchInput").addEventListener('input', (e) => {
-      clearTimeout(searchTimer);
-      searchTimer = setTimeout(() => {
-        const keyword = e.target.value.toLowerCase();
-        // Proses pencarian...
-      }, 300); // Delay 300ms
-    });
+    // Update Pagination Status
+    function updateStatus() {
+      const totalItems = filteredData.length;
+      let statusText = '';
       
-      const filteredData = kanjiData.filter(item => 
-        item.kanji.includes(keyword) || 
-        item.furigana.toLowerCase().includes(keyword) ||
-        item.romaji.toLowerCase().includes(keyword) || 
-        item.meaning.toLowerCase().includes(keyword)
-      );
+      if (perPage === 0) {
+        statusText = `Menampilkan semua ${totalItems} kanji`;
+      } else {
+        const totalPages = Math.ceil(totalItems / perPage);
+        const start = (currentPage - 1) * perPage + 1;
+        const end = Math.min(currentPage * perPage, totalItems);
+        
+        statusText = `Menampilkan ${start}-${end} dari ${totalItems} kanji`;
+        pageInfo.textContent = `Halaman ${currentPage}/${totalPages}`;
+        
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages;
+      }
       
-      renderKanji(filteredData);
-    });
-
-    // Dark Mode Toggle
-    document.getElementById("themeToggle").addEventListener('click', () => {
+      statusInfo.textContent = statusText;
+    }
+    
+    // Debounce Function for Search Optimization
+    function debounce(func, timeout = 300) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+      };
+    }
+    
+    // Theme Functions
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      setTheme(savedTheme);
+    }
+    
+    function toggleTheme() {
       const currentTheme = document.documentElement.getAttribute('data-theme');
       const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
       setTheme(newTheme);
       localStorage.setItem('theme', newTheme);
-    });
-
+    }
+    
     function setTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
       const icon = document.querySelector('.theme-toggle i');
