@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belajar Kanji dengan JSON Eksternal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --secondary: #f59e0b;
+      --bg: #f8fafc;
+      --text: #1e293b;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      min-height: 100vh;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    h1 {
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+    
+    .kanji-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 15px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .kanji-card {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      text-align: center;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    
+    .kanji-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .kanji {
+      font-size: 2.5rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    
+    .furigana, .meaning {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      font-size: 0.9rem;
+    }
+    
+    .furigana {
+      color: var(--primary);
+      margin-bottom: 5px;
+    }
+    
+    .meaning {
+      color: var(--secondary);
+      font-weight: 500;
+    }
+    
+    .kanji-card:hover .furigana,
+    .kanji-card:hover .meaning {
+      opacity: 1;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: var(--primary);
+      grid-column: 1 / -1;
+    }
+    
+    .error {
+      color: #ef4444;
+      text-align: center;
+    }
+    
+    @media (max-width: 600px) {
+      .kanji-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Belajar Kanji</h1>
+    <p>Data di-load dari file JSON terpisah</p>
+  </header>
+  
+  <div class="kanji-grid" id="kanjiContainer">
+    <div class="loading">Memuat data kanji...</div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      fetch('kanji.json')
+        .then(response => {
+          if (!response.ok) throw new Error("Gagal memuat data");
+          return response.json();
+        })
+        .then(data => {
+          const container = document.getElementById("kanjiContainer");
+          container.innerHTML = '';
+          
+          data.forEach(item => {
+            const card = document.createElement("div");
+            card.className = "kanji-card";
+            card.innerHTML = `
+              <div class="kanji">${item.kanji}</div>
+              <div class="furigana">${item.furigana} (${item.romaji})</div>
+              <div class="meaning">${item.meaning}</div>
+            `;
+            container.appendChild(card);
+          });
+        })
+        .catch(error => {
+          document.getElementById("kanjiContainer").innerHTML = `
+            <div class="error">
+              <p>Gagal memuat data kanji.</p>
+              <p>${error.message}</p>
+            </div>
+          `;
+        });
+    });
+  </script>
+</body>
+</html>
