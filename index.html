@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Belajar Kanji dengan JSON Eksternal</title>
+  <title>Belajar Kanji + Dark Mode</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -11,33 +11,92 @@
       --secondary: #f59e0b;
       --bg: #f8fafc;
       --text: #1e293b;
+      --card-bg: #ffffff;
+      --border: #e2e8f0;
     }
-    
+
+    [data-theme="dark"] {
+      --primary: #818cf8;
+      --secondary: #fbbf24;
+      --bg: #1e293b;
+      --text: #f8fafc;
+      --card-bg: #334155;
+      --border: #475569;
+    }
+
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
       font-family: 'Poppins', sans-serif;
+      transition: background 0.3s, color 0.1s;
     }
-    
+
     body {
       background: var(--bg);
       color: var(--text);
       padding: 20px;
       min-height: 100vh;
     }
-    
+
+    /* Dark Mode Toggle */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 100;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .theme-toggle i {
+      font-size: 1.2rem;
+      color: var(--text);
+    }
+
     header {
       text-align: center;
       margin-bottom: 30px;
+      padding-top: 10px;
     }
-    
+
     h1 {
       color: var(--primary);
       font-weight: 600;
       margin-bottom: 10px;
     }
-    
+
+    /* Search Box */
+    .search-container {
+      max-width: 500px;
+      margin: 0 auto 30px;
+    }
+
+    #searchInput {
+      width: 100%;
+      padding: 12px;
+      background: var(--card-bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
+
+    #searchInput::placeholder {
+      color: var(--text);
+      opacity: 0.7;
+    }
+
+    /* Kanji Grid */
     .kanji-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -45,109 +104,178 @@
       max-width: 1000px;
       margin: 0 auto;
     }
-    
+
     .kanji-card {
-      background: white;
+      background: var(--card-bg);
       border-radius: 12px;
       padding: 20px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
       text-align: center;
-      transition: all 0.3s ease;
+      transition: transform 0.3s ease;
       cursor: pointer;
+      border: 1px solid var(--border);
     }
-    
+
     .kanji-card:hover {
       transform: translateY(-5px);
       box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
     }
-    
+
     .kanji {
       font-size: 2.5rem;
       font-weight: 500;
       margin-bottom: 8px;
     }
-    
+
     .furigana, .meaning {
       opacity: 0;
       transition: opacity 0.2s ease;
       font-size: 0.9rem;
     }
-    
+
     .furigana {
       color: var(--primary);
       margin-bottom: 5px;
     }
-    
+
     .meaning {
       color: var(--secondary);
       font-weight: 500;
     }
-    
+
     .kanji-card:hover .furigana,
     .kanji-card:hover .meaning {
       opacity: 1;
     }
-    
-    .loading {
+
+    /* Message State */
+    .message {
       text-align: center;
-      padding: 20px;
-      color: var(--primary);
       grid-column: 1 / -1;
+      padding: 20px;
+      color: var(--text);
     }
-    
-    .error {
-      color: #ef4444;
-      text-align: center;
-    }
-    
+
     @media (max-width: 600px) {
       .kanji-grid {
         grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
       }
     }
   </style>
+  <!-- Font Awesome untuk icon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
+  <!-- Dark Mode Toggle Button -->
+  <div class="theme-toggle" id="themeToggle">
+    <i class="fas fa-moon"></i>
+  </div>
+
   <header>
     <h1>Belajar Kanji</h1>
-    <p>Data di-load dari file JSON terpisah</p>
+    <p>Cari kanji berdasarkan huruf, arti, atau romaji</p>
   </header>
   
+  <!-- Search Box -->
+  <div class="search-container">
+    <input 
+      type="text" 
+      id="searchInput" 
+      placeholder="Cari kanji (contoh: 水, mizu, air...)" 
+      autocomplete="off"
+    >
+  </div>
+  
+  <!-- Kanji Container -->
   <div class="kanji-grid" id="kanjiContainer">
-    <div class="loading">Memuat data kanji...</div>
+    <div class="message">Memuat data kanji...</div>
   </div>
 
   <script>
+    let kanjiData = []; // Menyimpan data JSON
+    
+    // Load data dari JSON
     document.addEventListener('DOMContentLoaded', () => {
       fetch('kanji.json')
-        .then(response => {
-          if (!response.ok) throw new Error("Gagal memuat data");
-          return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-          const container = document.getElementById("kanjiContainer");
-          container.innerHTML = '';
-          
-          data.forEach(item => {
-            const card = document.createElement("div");
-            card.className = "kanji-card";
-            card.innerHTML = `
-              <div class="kanji">${item.kanji}</div>
-              <div class="furigana">${item.furigana} (${item.romaji})</div>
-              <div class="meaning">${item.meaning}</div>
-            `;
-            container.appendChild(card);
-          });
+          kanjiData = data;
+          renderKanji(data); // Tampilkan semua data awal
         })
         .catch(error => {
           document.getElementById("kanjiContainer").innerHTML = `
-            <div class="error">
-              <p>Gagal memuat data kanji.</p>
-              <p>${error.message}</p>
+            <div class="message error">
+              Gagal memuat data. Pastikan file <strong>kanji.json</strong> ada di folder yang sama.
             </div>
           `;
+          console.error("Error:", error);
         });
+
+      // Set theme awal dari localStorage
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      setTheme(savedTheme);
     });
+    
+    // Fungsi render kanji ke HTML
+    function renderKanji(data) {
+      const container = document.getElementById("kanjiContainer");
+      
+      if (data.length === 0) {
+        container.innerHTML = `
+          <div class="message">
+            Tidak ditemukan kanji yang cocok.
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = data.map(item => `
+        <div class="kanji-card">
+          <div class="kanji">${item.kanji}</div>
+          <div class="furigana">${item.furigana}</div>
+          <div class="meaning">${item.meaning}</div>
+          <div class="romaji">${item.romaji}</div>
+        </div>
+      `).join('');
+    }
+    
+    // Fungsi pencarian
+    document.getElementById("searchInput").addEventListener('input', (e) => {
+      const keyword = e.target.value.toLowerCase().trim();
+      
+      if (!keyword) {
+        renderKanji(kanjiData); // Reset ke semua data jika kolom kosong
+        return;
+      }
+      
+      const filteredData = kanjiData.filter(item => 
+        item.kanji.includes(keyword) || 
+        item.furigana.toLowerCase().includes(keyword) ||
+        item.romaji.toLowerCase().includes(keyword) || 
+        item.meaning.toLowerCase().includes(keyword)
+      );
+      
+      renderKanji(filteredData);
+    });
+
+    // Dark Mode Toggle
+    document.getElementById("themeToggle").addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+      localStorage.setItem('theme', newTheme);
+    });
+
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      const icon = document.querySelector('.theme-toggle i');
+      
+      if (theme === 'dark') {
+        icon.classList.replace('fa-moon', 'fa-sun');
+      } else {
+        icon.classList.replace('fa-sun', 'fa-moon');
+      }
+    }
   </script>
 </body>
 </html>
