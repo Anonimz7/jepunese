@@ -9,20 +9,30 @@
   <style>
     :root {
       --primary: #4f46e5;
+      --primary-light: #6366f1;
       --secondary: #fbbf24;
+      --secondary-light: #fcd34d;
       --bg: #f8fafc;
       --text: #1e293b;
+      --text-light: #64748b;
       --card-bg: #ffffff;
+      --card-bg-alt: #f1f5f9;
       --border: #e2e8f0;
+      --shadow: rgba(0, 0, 0, 0.1);
     }
 
     [data-theme="dark"] {
       --primary: #818cf8;
+      --primary-light: #a5b4fc;
       --secondary: #f59e0b;
+      --secondary-light: #fbbf24;
       --bg: #1e293b;
       --text: #f8fafc;
+      --text-light: #94a3b8;
       --card-bg: #334155;
+      --card-bg-alt: #475569;
       --border: #475569;
+      --shadow: rgba(0, 0, 0, 0.2);
     }
 
     * {
@@ -123,63 +133,139 @@
     /* Kanji Grid */
     .kanji-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-      gap: 15px;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 20px;
       max-width: 1000px;
       margin: 0 auto;
     }
 
-    .kanji-card {
-      background: var(--card-bg);
+    /* Flip Card Container */
+    .flip-card {
+      background-color: transparent;
+      perspective: 1000px;
+      height: 200px;
+      border-radius: 12px;
+    }
+
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      box-shadow: 0 4px 8px var(--shadow);
+      border-radius: 12px;
+    }
+
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
       border-radius: 12px;
       padding: 20px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-      text-align: center;
-      transition: transform 0.3s ease;
-      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .flip-card-front {
+      background: var(--card-bg);
+      color: var(--text);
       border: 1px solid var(--border);
     }
 
-    .kanji-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    .flip-card-back {
+      background: var(--card-bg-alt);
+      color: var(--text);
+      transform: rotateY(180deg);
+      overflow-y: auto;
+      text-align: left;
     }
 
+    /* Front Card Content */
     .kanji {
+      font-size: 3.5rem;
+      font-weight: 500;
+      margin-bottom: 10px;
+      line-height: 1;
+    }
+
+    .romaji-basic {
+      font-size: 1.2rem;
+      color: var(--primary);
+      font-weight: 500;
+    }
+
+    /* Back Card Content */
+    .kanji-back {
       font-size: 2.5rem;
       font-weight: 500;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
+      text-align: center;
+      color: var(--primary);
     }
 
-    .furigana, .meaning {
-      opacity: 0;
-      transition: opacity 0.2s ease;
+    .section-title {
+      color: var(--primary);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 10px 0 5px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 3px;
+    }
+
+    .reading-item {
+      margin-bottom: 5px;
       font-size: 0.9rem;
     }
 
-    .furigana {
-      color: var(--primary);
-      margin-bottom: 5px;
+    .reading-type {
+      font-weight: 500;
+      color: var(--secondary);
     }
 
-    .meaning {
-      color: var(--secondary);
+    .meaning-item {
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
+
+    .example-item {
+      background: rgba(79, 70, 229, 0.1);
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
+
+    .example-japanese {
       font-weight: 500;
     }
 
-    .romaji {
-      opacity: 0;
-      transition: opacity 0.2s ease;
-      font-size: 1rem;
-      color: #cbcbcb;
+    .example-meaning {
+      color: var(--text-light);
       font-style: italic;
-      margin-bottom: 5px;
     }
 
-    .kanji-card:hover .furigana,
-    .kanji-card:hover .meaning,
-    .kanji-card:hover .romaji{
-      opacity: 1;
+    .metadata {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .metadata-item {
+      background: var(--card-bg);
+      padding: 3px 8px;
+      border-radius: 12px;
     }
 
     /* Status & Message */
@@ -211,7 +297,7 @@
       justify-content: center;
       cursor: pointer;
       z-index: 100;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 5px var(--shadow);
     }
 
     .theme-toggle i {
@@ -229,7 +315,11 @@
       }
       
       .kanji-grid {
-        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+      
+      .flip-card {
+        height: 180px;
       }
     }
   </style>
@@ -254,7 +344,7 @@
     <input 
       type="text" 
       id="searchInput" 
-      placeholder="Cari kanji (contoh: 水, mizu, air...)" 
+      placeholder="Cari kanji (contoh: 見, miru, melihat...)" 
       autocomplete="off"
     >
     
@@ -386,9 +476,12 @@
       } else {
         filteredData = kanjiData.filter(item => 
           item.kanji.includes(keyword) || 
-          item.furigana.toLowerCase().includes(keyword) ||
-          item.romaji.toLowerCase().includes(keyword) || 
-          item.meaning.toLowerCase().includes(keyword)
+          item.romaji_basic.toLowerCase().includes(keyword) ||
+          (item.meanings && item.meanings.some(m => m.meaning.toLowerCase().includes(keyword))) ||
+          (item.readings && (
+            (item.readings.kunyomi && item.readings.kunyomi.some(r => r.reading.includes(keyword) || r.romaji.includes(keyword))) ||
+            (item.readings.onyomi && item.readings.onyomi.some(r => r.reading.includes(keyword) || r.romaji.includes(keyword)))
+          )
         );
       }
       
@@ -419,11 +512,60 @@
       }
       
       kanjiContainer.innerHTML = dataToRender.map(item => `
-        <div class="kanji-card">
-          <div class="kanji">${item.kanji}</div>
-          <div class="furigana">${item.furigana}</div>
-          <div class="romaji">${item.romaji}</div>
-          <div class="meaning">${item.meaning}</div>
+        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="kanji">${item.kanji}</div>
+              <div class="romaji-basic">${item.romaji_basic}</div>
+            </div>
+            <div class="flip-card-back">
+              <div class="kanji-back">${item.kanji}</div>
+              
+              ${item.readings ? `
+                <div class="section-title">Bacaan</div>
+                ${item.readings.kunyomi ? `
+                  <div class="reading-item">
+                    <span class="reading-type">Kunyomi:</span> 
+                    ${item.readings.kunyomi.map(r => `${r.reading} (${r.romaji})`).join(', ')}
+                  </div>
+                ` : ''}
+                ${item.readings.onyomi ? `
+                  <div class="reading-item">
+                    <span class="reading-type">Onyomi:</span> 
+                    ${item.readings.onyomi.map(r => `${r.reading} (${r.romaji})`).join(', ')}
+                  </div>
+                ` : ''}
+              ` : ''}
+              
+              ${item.meanings ? `
+                <div class="section-title">Arti</div>
+                ${item.meanings.map(m => `
+                  <div class="meaning-item">
+                    ${m.form ? `<strong>${m.form}</strong> (${m.romaji}): ` : ''}
+                    ${m.meaning}
+                  </div>
+                `).join('')}
+              ` : ''}
+              
+              ${item.examples ? `
+                <div class="section-title">Contoh Kalimat</div>
+                ${item.examples.map(e => `
+                  <div class="example-item">
+                    <div class="example-japanese">${e.japanese}</div>
+                    <div class="example-meaning">${e.meaning}</div>
+                  </div>
+                `).join('')}
+              ` : ''}
+              
+              ${item.metadata ? `
+                <div class="metadata">
+                  ${item.metadata.jlpt_level ? `<div class="metadata-item">JLPT ${item.metadata.jlpt_level}</div>` : ''}
+                  ${item.metadata.stroke_count ? `<div class="metadata-item">${item.metadata.stroke_count} stroke</div>` : ''}
+                  ${item.metadata.frequency_rank ? `<div class="metadata-item">#${item.metadata.frequency_rank}</div>` : ''}
+                </div>
+              ` : ''}
+            </div>
+          </div>
         </div>
       `).join('');
     }
