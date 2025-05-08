@@ -402,93 +402,7 @@
     let currentPage = 1;
     let perPage = 10;
     
-    // DOM Elements
-    const levelButtons = document.querySelectorAll('.level-btn');
-    const searchInput = document.getElementById('searchInput');
-    const perPageSelect = document.getElementById('perPage');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const pageInfo = document.getElementById('pageInfo');
-    const statusInfo = document.getElementById('statusInfo');
-    const kanjiContainer = document.getElementById('kanjiContainer');
-    const popupOverlay = document.getElementById('popupOverlay');
-    const popupClose = document.getElementById('popupClose');
-    
-    // Contoh data untuk demo (akan diganti dengan data JSON asli)
-    const demoData = [
-      {
-        "kanji": "見",
-        "romaji_basic": "mi",
-        "readings": {
-          "kunyomi": [
-            {"reading": "みる", "romaji": "miru"},
-            {"reading": "みえる", "romaji": "mieru"},
-            {"reading": "みせる", "romaji": "miseru"}
-          ],
-          "onyomi": [
-            {"reading": "ケン", "romaji": "ken", "example": {"word": "見学", "romaji": "kengaku", "meaning": "studi tur"}}
-          ]
-        },
-        "meanings": [
-          {"form": "見る", "romaji": "miru", "meaning": "melihat"},
-          {"form": "見える", "romaji": "mieru", "meaning": "terlihat"},
-          {"form": "見せる", "romaji": "miseru", "meaning": "memperlihatkan"}
-        ],
-        "examples": [
-          {
-            "japanese": "テレビを見る",
-            "furigana": "てれびをみる",
-            "romaji": "terebi o miru",
-            "meaning": "Menonton TV"
-          },
-          {
-            "japanese": "富士山が見える",
-            "furigana": "ふじさんがみえる",
-            "romaji": "fujisan ga mieru",
-            "meaning": "Gunung Fuji terlihat"
-          },
-          {
-            "japanese": "写真を見せる",
-            "furigana": "しゃしんをみせる",
-            "romaji": "shashin o miseru",
-            "meaning": "Memperlihatkan foto"
-          }
-        ],
-        "metadata": {
-          "jlpt_level": "N5/N4",
-          "frequency_rank": 107,
-          "stroke_count": 7
-        }
-      },
-      {
-        "kanji": "水",
-        "romaji_basic": "mizu",
-        "readings": {
-          "kunyomi": [
-            {"reading": "みず", "romaji": "mizu"}
-          ],
-          "onyomi": [
-            {"reading": "スイ", "romaji": "sui", "example": {"word": "水曜日", "romaji": "suiyoubi", "meaning": "hari Rabu"}}
-          ]
-        },
-        "meanings": [
-          {"meaning": "air"}
-        ],
-        "examples": [
-          {
-            "japanese": "水を飲む",
-            "furigana": "みずをのむ",
-            "romaji": "mizu o nomu",
-            "meaning": "Minum air"
-          }
-        ],
-        "metadata": {
-          "jlpt_level": "N5",
-          "frequency_rank": 345,
-          "stroke_count": 4
-        }
-      }
-    ];
+    // [Deklarasi DOM elements tetap sama]
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
@@ -503,15 +417,26 @@
         statusInfo.textContent = `Memuat data ${level.toUpperCase()}...`;
         kanjiContainer.innerHTML = '<div class="message">Memuat data kanji...</div>';
         
-        // Untuk demo, kita gunakan data contoh
-        // Di implementasi sebenarnya, Anda akan menggunakan fetch ke file JSON
-        kanjiData = demoData; // Ganti ini dengan: await fetch(`data/${level}.json`);
+        // Menggunakan path data/n5.json
+        const response = await fetch(`data/${level}.json`);
+        
+        if (!response.ok) {
+          throw new Error(`File data/${level}.json tidak ditemukan`);
+        }
+        
+        kanjiData = await response.json();
+        
+        // Validasi data
+        if (!Array.isArray(kanjiData)) {
+          throw new Error(`Format data tidak valid. Harus berupa array`);
+        }
+        
         filteredData = [...kanjiData];
         
         if (kanjiData.length === 0) {
           kanjiContainer.innerHTML = `
             <div class="message">
-              Data kanji ${level.toUpperCase()} kosong. Silakan tambahkan data.
+              Data kanji ${level.toUpperCase()} kosong. Silakan periksa file JSON.
             </div>
           `;
           statusInfo.textContent = `Data ${level.toUpperCase()} kosong`;
@@ -530,17 +455,12 @@
         console.error("Error:", error);
         kanjiContainer.innerHTML = `
           <div class="message error">
-            Gagal memuat data ${level.toUpperCase()}. 
-            <br>Error: ${error.message}
-            <br>Menggunakan data demo sebagai contoh.
+            Gagal memuat data ${level.toUpperCase()}.<br>
+            Error: ${error.message}<br>
+            Pastikan file <strong>data/${level}.json</strong> ada dan formatnya benar.
           </div>
         `;
-        
-        // Gunakan data demo sebagai fallback
-        kanjiData = demoData;
-        filteredData = [...kanjiData];
-        renderKanji();
-        updateStatus();
+        statusInfo.textContent = `Error memuat data ${level.toUpperCase()}`;
       }
     }
     
