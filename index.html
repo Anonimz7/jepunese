@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belajar Kanji JLPT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css"> </head>
+<body>
+  <div class="theme-toggle" id="themeToggle">
+    <i class="fas fa-moon"></i>
+  </div>
+
+  <header>
+    <h1>Belajar Kanji JLPT</h1>
+    <div class="level-selector" id="levelSelector">
+      <button class="level-btn active" data-level="n5">N5</button>
+      <button class="level-btn" data-level="n4">N4</button>
+      <button class="level-btn" data-level="n3">N3</button>
+      <button class="level-btn" data-level="n2">N2</button>
+      <button class="level-btn" data-level="n1">N1</button>
+    </div>
+  </header>
+
+  <div class="controls">
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Cari kanji (contoh: 水, mizu, air...)"
+      autocomplete="off"
+    >
+
+    <div class="pagination-controls">
+      <select id="perPage">
+        <option value="10">10 per halaman</option>
+        <option value="20">20 per halaman</option>
+        <option value="50">50 per halaman</option>
+        <option value="0">Tampilkan Semua</option>
+      </select>
+
+      <button id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+      <span id="pageInfo">Halaman 1</span>
+      <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+    </div>
+  </div>
+
+  <div class="status" id="statusInfo">Memuat data N5...</div>
+
+  <div class="kanji-grid" id="kanjiContainer">
+    <div class="message">Memuat data kanji...</div>
+  </div>
+
+  <script src="script.js"></script> </body>
+</html>
