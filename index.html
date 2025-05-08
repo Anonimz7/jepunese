@@ -167,8 +167,18 @@
       font-weight: 500;
     }
 
+    .romaji {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      font-size: 0.8rem;
+      color: #666;
+      font-style: italic;
+      margin-bottom: 5px;
+    }
+
     .kanji-card:hover .furigana,
-    .kanji-card:hover .meaning {
+    .kanji-card:hover .meaning,
+    .kanji-card:hover .romaji{
       opacity: 1;
     }
 
@@ -413,6 +423,7 @@
           <div class="kanji">${item.kanji}</div>
           <div class="furigana">${item.furigana}</div>
           <div class="meaning">${item.meaning}</div>
+          <div class="romaji">${item.romaji}</div>
         </div>
       `).join('');
     }
