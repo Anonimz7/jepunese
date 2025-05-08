@@ -1,892 +1,766 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Belajar Kanji JLPT</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #4f46e5;
-            --secondary: #fbbf24;
-            --bg: #f8fafc;
-            --text: #1e293b;
-            --card-bg: #ffffff;
-            --border: #e2e8f0;
-            --overlay-bg: rgba(0, 0, 0, 0.6);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belajar Kanji JLPT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-light: #6366f1;
+      --secondary: #fbbf24;
+      --secondary-light: #fcd34d;
+      --bg: #f8fafc;
+      --text: #1e293b;
+      --text-light: #64748b;
+      --card-bg: #ffffff;
+      --card-bg-alt: #f1f5f9;
+      --border: #e2e8f0;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
 
-        [data-theme="dark"] {
-            --primary: #818cf8;
-            --secondary: #f59e0b;
-            --bg: #1e293b;
-            --text: #f8fafc;
-            --card-bg: #334155;
-            --border: #475569;
-            --overlay-bg: rgba(0, 0, 0, 0.8);
-        }
+    [data-theme="dark"] {
+      --primary: #818cf8;
+      --primary-light: #a5b4fc;
+      --secondary: #f59e0b;
+      --secondary-light: #fbbf24;
+      --bg: #1e293b;
+      --text: #f8fafc;
+      --text-light: #94a3b8;
+      --card-bg: #334155;
+      --card-bg-alt: #475569;
+      --border: #475569;
+      --shadow: rgba(0, 0, 0, 0.2);
+    }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Poppins', sans-serif;
-            transition: background 0.3s, color 0.1s;
-        }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+      transition: background 0.3s, color 0.1s;
+    }
 
-        body {
-            background: var(--bg);
-            color: var(--text);
-            padding: 20px;
-            min-height: 100vh;
-            line-height: 1.6;
-        }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 20px;
+      min-height: 100vh;
+    }
 
-        /* Header */
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            position: relative;
-        }
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      position: relative;
+    }
 
-        h1 {
-            color: var(--primary);
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
+    h1 {
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
 
-        /* Controls */
-        .controls {
-            max-width: 1000px;
-            margin: 0 auto 20px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            align-items: center;
-            justify-content: center;
-        }
+    /* Controls */
+    .controls {
+      max-width: 1000px;
+      margin: 0 auto 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .level-selector {
-            display: flex;
-            gap: 5px;
-            background: var(--card-bg);
-            padding: 5px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
+    .level-selector {
+      display: flex;
+      gap: 5px;
+      background: var(--card-bg);
+      padding: 5px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
 
-        .level-btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: 500;
-            background: transparent;
-            color: var(--text);
-            transition: background 0.2s ease, color 0.2s ease;
-        }
+    .level-btn {
+      padding: 8px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: 500;
+      background: transparent;
+      color: var(--text);
+    }
 
-        .level-btn:hover {
-            background: var(--border);
-        }
+    .level-btn.active {
+      background: var(--primary);
+      color: white;
+    }
 
-        .level-btn.active {
-            background: var(--primary);
-            color: white;
-        }
+    #searchInput {
+      flex: 1;
+      min-width: 200px;
+      padding: 12px;
+      background: var(--card-bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+    }
 
-        #searchInput {
-            flex: 1;
-            min-width: 200px;
-            padding: 12px;
-            background: var(--card-bg);
-            color: var(--text);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-        }
+    .pagination-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
 
-        .pagination-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+    select, button {
+      padding: 10px 15px;
+      background: var(--card-bg);
+      color: var(--text);
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+    }
 
-        select, button {
-            padding: 10px 15px;
-            background: var(--card-bg);
-            color: var(--text);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            cursor: pointer;
-        }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-        button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
+    /* Kanji Grid */
+    .kanji-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
 
-        /* Kanji Grid */
-        .kanji-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Slightly smaller cards */
-            gap: 15px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+    /* Flip Card Container */
+    .flip-card {
+      background-color: transparent;
+      perspective: 1000px;
+      height: 200px;
+      border-radius: 12px;
+    }
 
-        .kanji-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 15px; /* Reduced padding */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            cursor: pointer;
-            border: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            aspect-ratio: 1 / 1.2; /* Make cards slightly taller than wide */
-        }
+    .flip-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+      box-shadow: 0 4px 8px var(--shadow);
+      border-radius: 12px;
+    }
 
-        .kanji-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
+    .flip-card.flipped .flip-card-inner {
+      transform: rotateY(180deg);
+    }
 
-        .kanji-card .kanji {
-            font-size: 2.2rem; /* Slightly smaller kanji */
-            font-weight: 500;
-            margin-bottom: 5px; /* Reduced margin */
-            color: var(--text); /* Ensure kanji color is based on theme */
-        }
+    .flip-card-front, .flip-card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
 
-        .kanji-card .romaji-basic {
-            font-size: 0.8rem; /* Smaller romaji */
-            color: #64748b; /* A neutral grey */
-            font-style: italic;
-        }
+    .flip-card-front {
+      background: var(--card-bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
 
-        /* Status & Message */
-        .status {
-            text-align: center;
-            margin: 20px 0;
-            color: var(--primary);
-        }
+    .flip-card-back {
+      background: var(--card-bg-alt);
+      color: var(--text);
+      transform: rotateY(180deg);
+      overflow-y: auto;
+      text-align: left;
+    }
 
-        .message {
-            text-align: center;
-            grid-column: 1 / -1;
-            padding: 20px;
-            color: var(--text);
-        }
+    /* Front Card Content */
+    .kanji {
+      font-size: 3.5rem;
+      font-weight: 500;
+      margin-bottom: 10px;
+      line-height: 1;
+    }
 
-        /* Theme Toggle */
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--card-bg);
-            border: 2px solid var(--border);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            transition: background 0.3s, border-color 0.3s;
-        }
+    .romaji-basic {
+      font-size: 1.2rem;
+      color: var(--primary);
+      font-weight: 500;
+    }
 
-        .theme-toggle i {
-            font-size: 1.2rem;
-            color: var(--text);
-            transition: color 0.3s;
-        }
+    /* Back Card Content */
+    .kanji-back {
+      font-size: 2.5rem;
+      font-weight: 500;
+      margin-bottom: 10px;
+      text-align: center;
+      color: var(--primary);
+    }
 
-        /* Modal & Flashcard Styles */
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--overlay-bg);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
+    .section-title {
+      color: var(--primary);
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin: 10px 0 5px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 3px;
+    }
 
-        .modal-overlay.visible {
-            opacity: 1;
-            visibility: visible;
-        }
+    .reading-item {
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
 
-        .flashcard {
-            background: var(--card-bg);
-            color: var(--text);
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 600px; /* Max width for the flashcard */
-            width: 90%;
-            max-height: 90vh; /* Max height to prevent overflow */
-            overflow-y: auto; /* Enable scrolling if content is too long */
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-            position: relative;
-            transform: rotateY(180deg) scale(0.8); /* Initial state for animation */
-            opacity: 0;
-            transition: transform 0.6s ease-out, opacity 0.6s ease-out;
-            perspective: 1000px; /* Perspective for 3D effect */
-        }
+    .reading-type {
+      font-weight: 500;
+      color: var(--secondary);
+    }
 
-        .modal-overlay.visible .flashcard {
-            transform: rotateY(0deg) scale(1); /* Final state */
-            opacity: 1;
-        }
+    .meaning-item {
+      margin-bottom: 5px;
+      font-size: 0.9rem;
+    }
 
-        .flashcard-close {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--text);
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
+    .example-item {
+      background: rgba(79, 70, 229, 0.1);
+      padding: 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+    }
 
-        .flashcard-close:hover {
-            color: var(--primary);
-        }
+    .example-japanese {
+      font-weight: 500;
+    }
 
-        .flashcard h2 {
-            text-align: center;
-            font-size: 3.5rem;
-            margin-bottom: 10px;
-            color: var(--primary);
-            font-weight: 700;
-        }
-        
-        .flashcard .romaji-basic-modal {
-            text-align: center;
-            font-size: 1.1rem;
-            font-style: italic;
-            color: #64748b; /* Neutral grey */
-            margin-bottom: 20px;
-        }
+    .example-meaning {
+      color: var(--text-light);
+      font-style: italic;
+    }
 
+    .metadata {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--text-light);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
 
-        .flashcard h3 {
-            margin-top: 20px;
-            margin-bottom: 10px;
-            color: var(--primary);
-            font-weight: 600;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 5px;
-        }
+    .metadata-item {
+      background: var(--card-bg);
+      padding: 3px 8px;
+      border-radius: 12px;
+    }
 
-        .flashcard ul, .flashcard dl {
-            list-style: none;
-            padding-left: 0;
-            margin-bottom: 15px;
-        }
-        
-        .flashcard li, .flashcard dt, .flashcard dd {
-            margin-bottom: 8px;
-        }
+    /* Status & Message */
+    .status {
+      text-align: center;
+      margin: 20px 0;
+      color: var(--primary);
+    }
 
-        .flashcard dt {
-             font-weight: 500;
-             color: var(--text);
-             margin-right: 5px;
-        }
+    .message {
+      text-align: center;
+      grid-column: 1 / -1;
+      padding: 20px;
+      color: var(--text);
+    }
 
-        .flashcard dd {
-            margin-left: 0; /* Remove default dd margin */
-        }
+    /* Theme Toggle */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: var(--card-bg);
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 100;
+      box-shadow: 0 2px 5px var(--shadow);
+    }
 
-        .flashcard .reading-item,
-        .flashcard .meaning-item,
-        .flashcard .example-item {
-            background: var(--bg); /* Subtle background for items */
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        
-        .flashcard .reading-item span,
-        .flashcard .meaning-item span,
-        .flashcard .example-item span {
-            display: block; /* Ensure each part is on new line */
-        }
+    .theme-toggle i {
+      font-size: 1.2rem;
+      color: var(--text);
+    }
 
-        .flashcard .reading {
-            font-weight: 600;
-            color: var(--primary);
-        }
-        
-         .flashcard .reading .romaji {
-            font-style: italic;
-            color: #64748b;
-            font-weight: 400;
-            font-size: 0.9em;
-        }
-
-        .flashcard .reading .example-word {
-            font-size: 0.9em;
-            color: var(--text);
-            margin-left: 10px;
-        }
-         .flashcard .reading .example-word .romaji {
-             font-size: 1em; /* Reset font-size within example */
-         }
-
-        .flashcard .meaning-form {
-            font-weight: 600;
-            color: var(--primary);
-        }
-        .flashcard .meaning-form .romaji {
-             font-style: italic;
-            color: #64748b;
-            font-weight: 400;
-            font-size: 0.9em;
-        }
-
-        .flashcard .meaning-text {
-            color: var(--secondary);
-            font-weight: 500;
-        }
-        
-        .flashcard .example-japanese {
-            font-weight: 600;
-             color: var(--primary);
-        }
-         .flashcard .example-japanese ruby rt {
-             font-size: 0.7em; /* Smaller furigana */
-             font-weight: 400;
-         }
-        
-        .flashcard .example-romaji {
-            font-style: italic;
-            color: #64748b;
-             font-size: 0.9em;
-        }
-        
-        .flashcard .example-meaning {
-            color: var(--secondary);
-            font-weight: 500;
-            font-size: 0.9em;
-        }
-
-
-        .flashcard .metadata span {
-            display: inline-block; /* Display metadata items inline */
-            margin-right: 15px;
-            font-size: 0.9em;
-            color: #64748b;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .controls {
-                flex-direction: column;
-                align-items: stretch; /* Stretch items */
-            }
-            
-            .level-selector {
-                justify-content: center; /* Center level buttons */
-            }
-
-            #searchInput {
-                width: 100%;
-            }
-
-            .pagination-controls {
-                width: 100%; /* Full width controls */
-                justify-content: space-between; /* Space out items */
-            }
-
-            .kanji-grid {
-                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); /* Smaller cards on mobile */
-                gap: 10px;
-            }
-            
-            .kanji-card {
-                 padding: 10px; /* Reduced padding */
-            }
-
-             .kanji-card .kanji {
-                font-size: 2rem;
-             }
-             
-             .flashcard {
-                 padding: 20px; /* Reduced modal padding */
-             }
-             
-             .flashcard h2 {
-                 font-size: 3rem;
-             }
-        }
-         @media (max-width: 480px) {
-             .kanji-grid {
-                 grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); /* Even smaller cards */
-             }
-             
-             .kanji-card {
-                  padding: 8px;
-             }
-              .kanji-card .kanji {
-                 font-size: 1.8rem;
-              }
-              .kanji-card .romaji-basic {
-                  font-size: 0.7rem;
-              }
-         }
-    </style>
+    @media (max-width: 768px) {
+      .controls {
+        flex-direction: column;
+      }
+      
+      #searchInput {
+        width: 100%;
+      }
+      
+      .kanji-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      }
+      
+      .flip-card {
+        height: 180px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="theme-toggle" id="themeToggle">
-        <i class="fas fa-moon"></i>
+  <div class="theme-toggle" id="themeToggle">
+    <i class="fas fa-moon"></i>
+  </div>
+
+  <header>
+    <h1>Belajar Kanji JLPT</h1>
+    <div class="level-selector" id="levelSelector">
+      <button class="level-btn active" data-level="n5">N5</button>
+      <button class="level-btn" data-level="n4">N4</button>
+      <button class="level-btn" data-level="n3">N3</button>
+      <button class="level-btn" data-level="n2">N2</button>
+      <button class="level-btn" data-level="n1">N1</button>
     </div>
-
-    <header>
-        <h1>Belajar Kanji JLPT</h1>
-        <div class="level-selector" id="levelSelector">
-            <button class="level-btn active" data-level="n5">N5</button>
-            <button class="level-btn" data-level="n4">N4</button>
-            <button class="level-btn" data-level="n3">N3</button>
-            <button class="level-btn" data-level="n2">N2</button>
-            <button class="level-btn" data-level="n1">N1</button>
-        </div>
-    </header>
-
-    <div class="controls">
-        <input
-            type="text"
-            id="searchInput"
-            placeholder="Cari kanji (contoh: 見, mi, melihat...)"
-            autocomplete="off"
-        >
-
-        <div class="pagination-controls">
-            <select id="perPage">
-                <option value="10">10 per halaman</option>
-                <option value="20">20 per halaman</option>
-                <option value="50">50 per halaman</option>
-                <option value="100">100 per halaman</option>
-                <option value="0">Tampilkan Semua</option>
-            </select>
-
-            <button id="prevBtn"><i class="fas fa-chevron-left"></i></button>
-            <span id="pageInfo">Halaman 1</span>
-            <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
-        </div>
+  </header>
+  
+  <div class="controls">
+    <input 
+      type="text" 
+      id="searchInput" 
+      placeholder="Cari kanji (contoh: 見, miru, melihat...)" 
+      autocomplete="off"
+    >
+    
+    <div class="pagination-controls">
+      <select id="perPage">
+        <option value="10">10 per halaman</option>
+        <option value="20">20 per halaman</option>
+        <option value="50">50 per halaman</option>
+        <option value="0">Tampilkan Semua</option>
+      </select>
+      
+      <button id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+      <span id="pageInfo">Halaman 1</span>
+      <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
     </div>
+  </div>
+  
+  <div class="status" id="statusInfo">Memuat data N5...</div>
+  
+  <div class="kanji-grid" id="kanjiContainer">
+    <div class="message">Memuat data kanji...</div>
+  </div>
 
-    <div class="status" id="statusInfo">Memuat data N5...</div>
-
-    <div class="kanji-grid" id="kanjiContainer">
-        <div class="message">Memuat data kanji...</div>
-    </div>
-
-    <div class="modal-overlay" id="flashcardModalOverlay">
-        <div class="flashcard" id="flashcardContent">
-            <button class="flashcard-close" id="flashcardCloseBtn">&times;</button>
-            </div>
-    </div>
-
-
-    <script>
-        // Config
-        let currentLevel = 'n5';
-        let kanjiData = [];
-        let filteredData = [];
-        let currentPage = 1;
-        let perPage = 50; // Default to 50 per page
-        let activeKanjiData = null; // To store data for the currently open flashcard
-
-        // DOM Elements
-        const levelButtons = document.querySelectorAll('.level-btn');
-        const searchInput = document.getElementById('searchInput');
-        const perPageSelect = document.getElementById('perPage');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        const pageInfo = document.getElementById('pageInfo');
-        const statusInfo = document.getElementById('statusInfo');
-        const kanjiContainer = document.getElementById('kanjiContainer');
-
-        // Modal Elements
-        const flashcardModalOverlay = document.getElementById('flashcardModalOverlay');
-        const flashcardContent = document.getElementById('flashcardContent');
-        const flashcardCloseBtn = document.getElementById('flashcardCloseBtn');
-
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            // Set initial perPage value on the select element
-            perPageSelect.value = perPage;
-            loadLevelData(currentLevel);
-            setupEventListeners();
-            loadTheme();
+  <script>
+    // Config
+    let currentLevel = 'n5';
+    let kanjiData = [];
+    let filteredData = [];
+    let currentPage = 1;
+    let perPage = 10;
+    
+    // DOM Elements
+    const levelButtons = document.querySelectorAll('.level-btn');
+    const searchInput = document.getElementById('searchInput');
+    const perPageSelect = document.getElementById('perPage');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageInfo = document.getElementById('pageInfo');
+    const statusInfo = document.getElementById('statusInfo');
+    const kanjiContainer = document.getElementById('kanjiContainer');
+    const themeToggle = document.getElementById('themeToggle');
+    
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      loadLevelData(currentLevel);
+      setupEventListeners();
+      loadTheme();
+    });
+    
+    // Load JSON Data for Selected Level
+    async function loadLevelData(level) {
+      try {
+        statusInfo.textContent = `Memuat data ${level.toUpperCase()}...`;
+        kanjiContainer.innerHTML = '<div class="message">Memuat data kanji...</div>';
+        
+        // Using sample data directly since we don't have actual JSON files
+        kanjiData = getSampleData(level);
+        filteredData = [...kanjiData];
+        
+        renderKanji();
+        updateStatus();
+        
+        // Update active level button
+        levelButtons.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.level === level);
         });
-
-        // Load JSON Data for Selected Level
-        async function loadLevelData(level) {
-            try {
-                statusInfo.textContent = `Memuat data ${level.toUpperCase()}...`;
-                kanjiContainer.innerHTML = '<div class="message">Memuat data kanji...</div>';
-
-                // Use a unique timestamp or version query parameter to bust cache during development
-                // In production, rely on server-side caching headers or file versioning
-                const response = await fetch(`data/${level}.json?v=${new Date().getTime()}`);
-                if (!response.ok) throw new Error(`File data/${level}.json tidak ditemukan atau ada masalah jaringan.`);
-
-                kanjiData = await response.json();
-                filteredData = [...kanjiData];
-
-                currentPage = 1; // Reset page when loading new data
-                renderKanji();
-                updateStatus();
-
-                // Update active level button
-                levelButtons.forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.level === level);
-                });
-
-            } catch (error) {
-                kanjiContainer.innerHTML = `
-                    <div class="message error">
-                        Gagal memuat data ${level.toUpperCase()}.
-                        <br>Pastikan file <strong>data/${level}.json</strong> ada dan formatnya benar.
-                        <br>Detail error: ${error.message}
-                    </div>
-                `;
-                console.error("Error loading kanji data:", error);
-                statusInfo.textContent = ''; // Clear status on error
-                 updateStatus(); // Update pagination state to show no data
+        
+      } catch (error) {
+        kanjiContainer.innerHTML = `
+          <div class="message error">
+            Gagal memuat data ${level.toUpperCase()}. 
+            <br>${error.message}
+          </div>
+        `;
+        console.error("Error:", error);
+      }
+    }
+    
+    // Sample data function
+    function getSampleData(level) {
+      const sampleData = {
+        n5: [
+          {
+            "kanji": "見",
+            "romaji_basic": "mi",
+            "readings": {
+              "kunyomi": [
+                {"reading": "みる", "romaji": "miru"},
+                {"reading": "みえる", "romaji": "mieru"},
+                {"reading": "みせる", "romaji": "miseru"}
+              ],
+              "onyomi": [
+                {"reading": "ケン", "romaji": "ken", "example": {"word": "見学", "romaji": "kengaku", "meaning": "studi tur"}}
+              ]
+            },
+            "meanings": [
+              {"form": "見る", "romaji": "miru", "meaning": "melihat"},
+              {"form": "見える", "romaji": "mieru", "meaning": "terlihat"},
+              {"form": "見せる", "romaji": "miseru", "meaning": "memperlihatkan"}
+            ],
+            "examples": [
+              {
+                "japanese": "テレビを見る",
+                "furigana": "てれびをみる",
+                "romaji": "terebi o miru",
+                "meaning": "Menonton TV"
+              },
+              {
+                "japanese": "富士山が見える",
+                "furigana": "ふじさんがみえる",
+                "romaji": "fujisan ga mieru",
+                "meaning": "Gunung Fuji terlihat"
+              },
+              {
+                "japanese": "写真を見せる",
+                "furigana": "しゃしんをみせる",
+                "romaji": "shashin o miseru",
+                "meaning": "Memperlihatkan foto"
+              }
+            ],
+            "metadata": {
+              "jlpt_level": "N5",
+              "frequency_rank": 107,
+              "stroke_count": 7
             }
-        }
-
-        // Event Listeners
-        function setupEventListeners() {
-            // Level selector
-            levelButtons.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    if (btn.dataset.level !== currentLevel) {
-                         currentLevel = btn.dataset.level;
-                         searchInput.value = ''; // Clear search on level change
-                         handleSearch(); // Trigger search to reset filtered data
-                         // loadLevelData will reset currentPage
-                    }
-                });
-            });
-
-            // Search with debounce
-            searchInput.addEventListener('input', debounce(handleSearch, 300));
-
-            // Pagination controls
-            perPageSelect.addEventListener('change', () => {
-                perPage = parseInt(perPageSelect.value);
-                currentPage = 1;
-                renderKanji();
-                updateStatus();
-            });
-
-            prevBtn.addEventListener('click', () => {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderKanji();
-                    updateStatus();
-                    scrollToTop(); // Optional: scroll to top on page change
-                }
-            });
-
-            nextBtn.addEventListener('click', () => {
-                 const totalPages = perPage === 0 ? 1 : Math.ceil(filteredData.length / perPage);
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderKanji();
-                    updateStatus();
-                     scrollToTop(); // Optional: scroll to top on page change
-                }
-            });
-
-            // Theme toggle
-            document.getElementById("themeToggle").addEventListener('click', toggleTheme);
-
-            // Modal close listeners
-            flashcardCloseBtn.addEventListener('click', closeFlashcard);
-            flashcardModalOverlay.addEventListener('click', (e) => {
-                // Close modal if clicking outside the flashcard content
-                if (e.target === flashcardModalOverlay) {
-                    closeFlashcard();
-                }
-            });
-
-             // Close modal with ESC key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && flashcardModalOverlay.classList.contains('visible')) {
-                    closeFlashcard();
-                }
-            });
-        }
-
-        // Search Function
-        function handleSearch() {
-            const keyword = searchInput.value.toLowerCase().trim();
-
-            if (!keyword) {
-                filteredData = [...kanjiData];
-            } else {
-                filteredData = kanjiData.filter(item =>
-                    item.kanji.includes(keyword) ||
-                    (item.romaji_basic && item.romaji_basic.toLowerCase().includes(keyword)) ||
-                    (item.readings && item.readings.kunyomi && item.readings.kunyomi.some(r => r.reading.toLowerCase().includes(keyword) || r.romaji.toLowerCase().includes(keyword))) ||
-                    (item.readings && item.readings.onyomi && item.readings.onyomi.some(r => r.reading.toLowerCase().includes(keyword) || r.romaji.toLowerCase().includes(keyword) || (r.example && (r.example.word.toLowerCase().includes(keyword) || r.example.romaji.toLowerCase().includes(keyword) || r.example.meaning.toLowerCase().includes(keyword))))) ||
-                    (item.meanings && item.meanings.some(m => m.meaning.toLowerCase().includes(keyword) || m.form.toLowerCase().includes(keyword) || m.romaji.toLowerCase().includes(keyword))) ||
-                    (item.examples && item.examples.some(e => e.japanese.includes(keyword) || e.furigana.includes(keyword) || e.romaji.toLowerCase().includes(keyword) || e.meaning.toLowerCase().includes(keyword)))
-                );
+          },
+          {
+            "kanji": "行",
+            "romaji_basic": "i/ko",
+            "readings": {
+              "kunyomi": [
+                {"reading": "いく", "romaji": "iku"},
+                {"reading": "おこなう", "romaji": "okonau"}
+              ],
+              "onyomi": [
+                {"reading": "コウ", "romaji": "kou"},
+                {"reading": "ギョウ", "romaji": "gyou"}
+              ]
+            },
+            "meanings": [
+              {"form": "行く", "romaji": "iku", "meaning": "pergi"},
+              {"form": "行う", "romaji": "okonau", "meaning": "melakukan"}
+            ],
+            "examples": [
+              {
+                "japanese": "学校に行く",
+                "furigana": "がっこうにいく",
+                "romaji": "gakkou ni iku",
+                "meaning": "Pergi ke sekolah"
+              },
+              {
+                "japanese": "会議を行う",
+                "furigana": "かいぎをおこなう",
+                "romaji": "kaigi o okonau",
+                "meaning": "Mengadakan rapat"
+              }
+            ],
+            "metadata": {
+              "jlpt_level": "N5",
+              "frequency_rank": 45,
+              "stroke_count": 6
             }
-
-            currentPage = 1;
-            renderKanji();
-            updateStatus();
-        }
-
-        // Render Kanji Cards
-        function renderKanji() {
-            kanjiContainer.innerHTML = ''; // Clear current grid
-
-            if (filteredData.length === 0) {
-                kanjiContainer.innerHTML = `
-                    <div class="message">
-                        Tidak ditemukan kanji yang cocok.
-                    </div>
-                `;
-                return;
+          }
+        ],
+        n4: [
+          {
+            "kanji": "食",
+            "romaji_basic": "shoku/ta",
+            "readings": {
+              "kunyomi": [
+                {"reading": "たべる", "romaji": "taberu"}
+              ],
+              "onyomi": [
+                {"reading": "ショク", "romaji": "shoku"},
+                {"reading": "ジキ", "romaji": "jiki"}
+              ]
+            },
+            "meanings": [
+              {"form": "食べる", "romaji": "taberu", "meaning": "makan"},
+              {"meaning": "makanan"}
+            ],
+            "examples": [
+              {
+                "japanese": "朝食を食べる",
+                "furigana": "ちょうしょくをたべる",
+                "romaji": "choushoku o taberu",
+                "meaning": "Makan sarapan"
+              }
+            ],
+            "metadata": {
+              "jlpt_level": "N4",
+              "stroke_count": 9
             }
-
-            // Pagination logic
-            let dataToRender;
-            if (perPage === 0) { // Show All
-                dataToRender = filteredData;
-            } else {
-                const start = (currentPage - 1) * perPage;
-                const end = start + perPage;
-                dataToRender = filteredData.slice(start, end);
-            }
-
-            dataToRender.forEach((item, index) => {
-                 const card = document.createElement('div');
-                 card.classList.add('kanji-card');
-                 card.innerHTML = `
-                    <div class="kanji">${item.kanji}</div>
-                    ${item.romaji_basic ? `<div class="romaji-basic">${item.romaji_basic}</div>` : ''}
-                 `;
-                 // Add click listener to open flashcard
-                 card.addEventListener('click', () => openFlashcard(item));
-                 kanjiContainer.appendChild(card);
-            });
+          }
+        ]
+      };
+      
+      return sampleData[level] || [];
+    }
+    
+    // Event Listeners
+    function setupEventListeners() {
+      // Level selector
+      levelButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentLevel = btn.dataset.level;
+          currentPage = 1;
+          loadLevelData(currentLevel);
+        });
+      });
+      
+      // Search with debounce
+      searchInput.addEventListener('input', debounce(handleSearch, 300));
+      
+      // Pagination controls
+      perPageSelect.addEventListener('change', () => {
+        perPage = parseInt(perPageSelect.value);
+        currentPage = 1;
+        renderKanji();
+        updateStatus();
+      });
+      
+      prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderKanji();
+          updateStatus();
         }
-
-        // Open Flashcard Modal
-        function openFlashcard(data) {
-            activeKanjiData = data; // Store data for potential future use (if needed)
-
-            // Populate flashcard content
-            let contentHTML = `<h2>${data.kanji}</h2>`;
-            if (data.romaji_basic) {
-                contentHTML += `<div class="romaji-basic-modal">${data.romaji_basic}</div>`;
-            }
-
-            // Readings (Kunyomi & Onyomi)
-            if (data.readings) {
-                contentHTML += `<h3>Bacaan</h3>`;
-                if (data.readings.kunyomi && data.readings.kunyomi.length > 0) {
-                    contentHTML += `<h4>Kunyomi:</h4><ul>`;
-                    data.readings.kunyomi.forEach(r => {
-                         contentHTML += `<li class="reading-item">
-                                <span><span class="reading">${r.reading}</span> <span class="romaji">(${r.romaji})</span></span>
-                             </li>`;
-                    });
-                    contentHTML += `</ul>`;
-                }
-                 if (data.readings.onyomi && data.readings.onyomi.length > 0) {
-                    contentHTML += `<h4>Onyomi:</h4><ul>`;
-                     data.readings.onyomi.forEach(r => {
-                         contentHTML += `<li class="reading-item">
-                                <span><span class="reading">${r.reading}</span> <span class="romaji">(${r.romaji})</span></span>
-                                ${r.example ? `<span class="example-word">Contoh: ${r.example.word} <span class="romaji">(${r.example.romaji})</span> - ${r.example.meaning}</span>` : ''}
-                             </li>`;
-                    });
-                    contentHTML += `</ul>`;
-                }
-            }
-
-             // Meanings (Verb/Adjective forms)
-            if (data.meanings && data.meanings.length > 0) {
-                contentHTML += `<h3>Makna (Bentuk Kata Kerja/Sifat)</h3><ul>`;
-                data.meanings.forEach(m => {
-                    contentHTML += `<li class="meaning-item">
-                         <span><span class="meaning-form">${m.form}</span> <span class="romaji">(${m.romaji})</span></span>
-                         <span class="meaning-text">${m.meaning}</span>
-                    </li>`;
-                });
-                contentHTML += `</ul>`;
-            }
-
-
-            // Examples (Sentences)
-            if (data.examples && data.examples.length > 0) {
-                contentHTML += `<h3>Contoh Kalimat</h3><ul>`;
-                data.examples.forEach(e => {
-                    // Using <ruby> for furigana if available
-                    const japaneseWithFurigana = e.furigana ?
-                        `<ruby>${e.japanese}<rt>${e.furigana}</rt></ruby>` :
-                        e.japanese;
-
-                    contentHTML += `<li class="example-item">
-                         <span class="example-japanese">${japaneseWithFurigana}</span>
-                         <span class="example-romaji">${e.romaji}</span>
-                         <span class="example-meaning">${e.meaning}</span>
-                    </li>`;
-                });
-                contentHTML += `</ul>`;
-            }
-
-            // Metadata
-            if (data.metadata) {
-                contentHTML += `<h3>Metadata</h3><div class="metadata">`;
-                if (data.metadata.jlpt_level) contentHTML += `<span>Level JLPT: ${data.metadata.jlpt_level}</span>`;
-                 if (data.metadata.frequency_rank) contentHTML += `<span>Rangking Frekuensi: ${data.metadata.frequency_rank}</span>`;
-                if (data.metadata.stroke_count) contentHTML += `<span>Jumlah Goresan: ${data.metadata.stroke_count}</span>`;
-                contentHTML += `</div>`;
-            }
-
-
-            flashcardContent.innerHTML = contentHTML; // Set the generated content
-
-            // Add close button back after clearing innerHTML
-             const closeBtnClone = flashcardCloseBtn.cloneNode(true); // Clone the original button
-             flashcardContent.prepend(closeBtnClone); // Add it to the beginning of the content
-             closeBtnClone.addEventListener('click', closeFlashcard); // Add listener to the clone
-
-
-            // Show modal with slight delay to allow content to be rendered before animation
-            flashcardModalOverlay.classList.add('visible');
-            // The CSS transition on .flashcard handles the rotation and opacity fade-in
+      });
+      
+      nextBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredData.length / perPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderKanji();
+          updateStatus();
         }
-
-        // Close Flashcard Modal
-        function closeFlashcard() {
-            // Add a class to trigger reverse animation (optional, but good)
-            // flashcardContent.classList.remove('flipped'); // If using front/back flip
-
-            // Hide modal after animation completes (matching the transition duration)
-            setTimeout(() => {
-                flashcardModalOverlay.classList.remove('visible');
-                flashcardContent.innerHTML = ''; // Clear content when hidden
-                activeKanjiData = null; // Clear active data
-            }, 300); // Match this timeout to the CSS transition duration (0.3s + 0.3s in this case)
-        }
-
-
-        // Update Status
-        function updateStatus() {
-            const totalItems = filteredData.length;
-            let statusText = '';
-
-            // Hide pagination if showing all or no data
-            const paginationVisible = perPage !== 0 && totalItems > perPage;
-            document.querySelector('.pagination-controls').style.visibility = paginationVisible ? 'visible' : 'hidden';
-
-
-            if (totalItems === 0) {
-                 statusText = `Tidak ada kanji ditemukan di level ${currentLevel.toUpperCase()}.`;
-                 if(searchInput.value) statusText += ` (untuk pencarian "${searchInput.value}")`;
-                 pageInfo.textContent = `Halaman 0/0`;
-                 prevBtn.disabled = true;
-                 nextBtn.disabled = true;
-
-            } else if (perPage === 0) { // Show All
-                statusText = `Menampilkan semua ${totalItems} kanji ${currentLevel.toUpperCase()}`;
-                 if(searchInput.value) statusText += ` (hasil pencarian "${searchInput.value}")`;
-                 pageInfo.textContent = `Halaman 1/1`; // Still show 1/1
-                 prevBtn.disabled = true;
-                 nextBtn.disabled = true;
-
-            } else {
-                const totalPages = Math.ceil(totalItems / perPage);
-                const start = (currentPage - 1) * perPage + 1;
-                const end = Math.min(currentPage * perPage, totalItems);
-
-                statusText = `Menampilkan ${start}-${end} dari ${totalItems} kanji ${currentLevel.toUpperCase()}`;
-                 if(searchInput.value) statusText += ` (hasil pencarian "${searchInput.value}")`;
-                pageInfo.textContent = `Halaman ${currentPage}/${totalPages}`;
-
-                prevBtn.disabled = currentPage === 1;
-                nextBtn.disabled = currentPage === totalPages || totalPages === 0;
-            }
-
-            statusInfo.textContent = statusText;
-        }
-
-         // Scroll to top of grid container
-         function scrollToTop() {
-             kanjiContainer.scrollTo({
-                 top: 0,
-                 behavior: 'smooth'
-             });
-         }
-
-
-        // Debounce Function
-        function debounce(func, timeout = 300) {
-            let timer;
-            return (...args) => {
-                clearTimeout(timer);
-                timer = setTimeout(() => { func.apply(this, args); }, timeout);
-            };
-        }
-
-        // Theme Functions
-        function loadTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            setTheme(savedTheme);
-        }
-
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            setTheme(newTheme);
-            localStorage.setItem('theme', newTheme);
-        }
-
-        function setTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            const icon = document.querySelector('.theme-toggle i');
-
-            if (theme === 'dark') {
-                icon.classList.replace('fa-moon', 'fa-sun');
-            } else {
-                icon.classList.replace('fa-sun', 'fa-moon');
-            }
-        }
-    </script>
+      });
+      
+      // Theme toggle
+      themeToggle.addEventListener('click', toggleTheme);
+    }
+    
+    // Search Function
+    function handleSearch() {
+      const keyword = searchInput.value.toLowerCase().trim();
+      
+      if (!keyword) {
+        filteredData = [...kanjiData];
+      } else {
+        filteredData = kanjiData.filter(item => 
+          item.kanji.includes(keyword) || 
+          (item.romaji_basic && item.romaji_basic.toLowerCase().includes(keyword)) ||
+          (item.meanings && item.meanings.some(m => 
+            (m.meaning && m.meaning.toLowerCase().includes(keyword)) ||
+            (m.form && m.form.toLowerCase().includes(keyword)) ||
+            (m.romaji && m.romaji.toLowerCase().includes(keyword))
+          )) ||
+          (item.readings && (
+            (item.readings.kunyomi && item.readings.kunyomi.some(r => 
+              (r.reading && r.reading.toLowerCase().includes(keyword)) ||
+              (r.romaji && r.romaji.toLowerCase().includes(keyword))
+            )) ||
+            (item.readings.onyomi && item.readings.onyomi.some(r => 
+              (r.reading && r.reading.toLowerCase().includes(keyword)) ||
+              (r.romaji && r.romaji.toLowerCase().includes(keyword))
+            )
+          )) ||
+          (item.examples && item.examples.some(e => 
+            (e.japanese && e.japanese.toLowerCase().includes(keyword)) ||
+            (e.romaji && e.romaji.toLowerCase().includes(keyword)) ||
+            (e.meaning && e.meaning.toLowerCase().includes(keyword))
+          )
+        );
+      }
+      
+      currentPage = 1;
+      renderKanji();
+      updateStatus();
+    }
+    
+    // Render Kanji Cards
+    function renderKanji() {
+      if (filteredData.length === 0) {
+        kanjiContainer.innerHTML = `
+          <div class="message">
+            Tidak ditemukan kanji yang cocok.
+          </div>
+        `;
+        return;
+      }
+      
+      // Pagination logic
+      let dataToRender;
+      if (perPage === 0) { // Show All
+        dataToRender = filteredData;
+      } else {
+        const start = (currentPage - 1) * perPage;
+        const end = start + perPage;
+        dataToRender = filteredData.slice(start, end);
+      }
+      
+      kanjiContainer.innerHTML = dataToRender.map(item => `
+        <div class="flip-card" onclick="this.classList.toggle('flipped')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="kanji">${item.kanji}</div>
+              <div class="romaji-basic">${item.romaji_basic || ''}</div>
+            </div>
+            <div class="flip-card-back">
+              <div class="kanji-back">${item.kanji}</div>
+              
+              ${item.readings ? `
+                <div class="section-title">Bacaan</div>
+                ${item.readings.kunyomi && item.readings.kunyomi.length ? `
+                  <div class="reading-item">
+                    <span class="reading-type">Kunyomi:</span> 
+                    ${item.readings.kunyomi.map(r => `${r.reading} (${r.romaji})`).join(', ')}
+                  </div>
+                ` : ''}
+                ${item.readings.onyomi && item.readings.onyomi.length ? `
+                  <div class="reading-item">
+                    <span class="reading-type">Onyomi:</span> 
+                    ${item.readings.onyomi.map(r => `${r.reading} (${r.romaji})`).join(', ')}
+                  </div>
+                ` : ''}
+              ` : ''}
+              
+              ${item.meanings && item.meanings.length ? `
+                <div class="section-title">Arti</div>
+                ${item.meanings.map(m => `
+                  <div class="meaning-item">
+                    ${m.form ? `<strong>${m.form}</strong>${m.romaji ? ` (${m.romaji})` : ''}: ` : ''}
+                    ${m.meaning}
+                  </div>
+                `).join('')}
+              ` : ''}
+              
+              ${item.examples && item.examples.length ? `
+                <div class="section-title">Contoh Kalimat</div>
+                ${item.examples.map(e => `
+                  <div class="example-item">
+                    <div class="example-japanese">${e.japanese}</div>
+                    ${e.furigana ? `<div class="example-furigana">${e.furigana}</div>` : ''}
+                    <div class="example-meaning">${e.meaning}</div>
+                  </div>
+                `).join('')}
+              ` : ''}
+              
+              ${item.metadata ? `
+                <div class="metadata">
+                  ${item.metadata.jlpt_level ? `<div class="metadata-item">JLPT ${item.metadata.jlpt_level}</div>` : ''}
+                  ${item.metadata.stroke_count ? `<div class="metadata-item">${item.metadata.stroke_count} stroke</div>` : ''}
+                  ${item.metadata.frequency_rank ? `<div class="metadata-item">#${item.metadata.frequency_rank}</div>` : ''}
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    // Update Status
+    function updateStatus() {
+      const totalItems = filteredData.length;
+      let statusText = '';
+      
+      if (perPage === 0) {
+        statusText = `Menampilkan semua ${totalItems} kanji ${currentLevel.toUpperCase()}`;
+      } else {
+        const totalPages = Math.ceil(totalItems / perPage);
+        const start = (currentPage - 1) * perPage + 1;
+        const end = Math.min(currentPage * perPage, totalItems);
+        
+        statusText = `Menampilkan ${start}-${end} dari ${totalItems} kanji ${currentLevel.toUpperCase()}`;
+        pageInfo.textContent = `Halaman ${currentPage}/${totalPages || 1}`;
+        
+        prevBtn.disabled = currentPage === 1;
+        nextBtn.disabled = currentPage === totalPages || totalPages === 0;
+      }
+      
+      statusInfo.textContent = statusText;
+    }
+    
+    // Debounce Function
+    function debounce(func, timeout = 300) {
+      let timer;
+      return (...args) => {
+        clearTimeout(timer);
+        timer = setTimeout(() => { func.apply(this, args); }, timeout);
+      };
+    }
+    
+    // Theme Functions
+    function loadTheme() {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      setTheme(savedTheme);
+    }
+    
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+      localStorage.setItem('theme', newTheme);
+    }
+    
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      const icon = themeToggle.querySelector('i');
+      
+      if (theme === 'dark') {
+        icon.classList.replace('fa-moon', 'fa-sun');
+      } else {
+        icon.classList.replace('fa-sun', 'fa-moon');
+      }
+    }
+  </script>
 </body>
 </html>
