@@ -151,122 +151,35 @@
       margin-bottom: 8px;
     }
 
-    .romaji {
-      font-size: 1rem;
-      color: var(--primary);
-      font-style: italic;
-    }
-
-    /* Popup Card */
-    .popup-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.7);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
+    .furigana, .meaning {
       opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s, visibility 0.3s;
-    }
-
-    .popup-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .popup-card {
-      background: var(--card-bg);
-      border-radius: 12px;
-      padding: 25px;
-      width: 90%;
-      max-width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-      position: relative;
-    }
-
-    .popup-close {
-      position: absolute;
-      top: 15px;
-      right: 15px;
-      background: transparent;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: var(--text);
-    }
-
-    .popup-kanji {
-      font-size: 3rem;
-      text-align: center;
-      margin-bottom: 15px;
-    }
-
-    .popup-romaji {
-      text-align: center;
-      font-size: 1.2rem;
-      color: var(--primary);
-      margin-bottom: 20px;
-      font-style: italic;
-    }
-
-    .popup-section {
-      margin-bottom: 20px;
-    }
-
-    .popup-section-title {
-      font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 10px;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 5px;
-    }
-
-    .reading-type {
-      font-weight: 500;
-      margin: 10px 0 5px;
-    }
-
-    .reading-item {
-      margin-left: 20px;
-      margin-bottom: 8px;
-    }
-
-    .example-item {
-      background: rgba(79, 70, 229, 0.1);
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-    }
-
-    .example-japanese {
-      font-size: 1.1rem;
-    }
-
-    .example-furigana {
+      transition: opacity 0.2s ease;
       font-size: 0.9rem;
+    }
+
+    .furigana {
       color: var(--primary);
-    }
-
-    .example-meaning {
-      margin-top: 5px;
-      font-style: italic;
-    }
-
-    .metadata-item {
-      display: flex;
       margin-bottom: 5px;
     }
 
-    .metadata-label {
+    .meaning {
+      color: var(--secondary);
       font-weight: 500;
-      min-width: 120px;
+    }
+
+    .romaji {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      font-size: 1rem;
+      color: #cbcbcb;
+      font-style: italic;
+      margin-bottom: 5px;
+    }
+
+    .kanji-card:hover .furigana,
+    .kanji-card:hover .meaning,
+    .kanji-card:hover .romaji{
+      opacity: 1;
     }
 
     /* Status & Message */
@@ -341,7 +254,7 @@
     <input 
       type="text" 
       id="searchInput" 
-      placeholder="Cari kanji (contoh: 見, mi, melihat...)" 
+      placeholder="Cari kanji (contoh: 水, mizu, air...)" 
       autocomplete="off"
     >
     
@@ -365,35 +278,6 @@
     <div class="message">Memuat data kanji...</div>
   </div>
 
-  <!-- Popup Card -->
-  <div class="popup-overlay" id="popupOverlay">
-    <div class="popup-card">
-      <button class="popup-close" id="popupClose">&times;</button>
-      <div class="popup-kanji" id="popupKanji"></div>
-      <div class="popup-romaji" id="popupRomaji"></div>
-      
-      <div class="popup-section">
-        <div class="popup-section-title">Bacaan</div>
-        <div id="popupReadings"></div>
-      </div>
-      
-      <div class="popup-section">
-        <div class="popup-section-title">Makna</div>
-        <div id="popupMeanings"></div>
-      </div>
-      
-      <div class="popup-section">
-        <div class="popup-section-title">Contoh Kalimat</div>
-        <div id="popupExamples"></div>
-      </div>
-      
-      <div class="popup-section">
-        <div class="popup-section-title">Informasi Tambahan</div>
-        <div id="popupMetadata"></div>
-      </div>
-    </div>
-  </div>
-
   <script>
     // Config
     let currentLevel = 'n5';
@@ -402,8 +286,16 @@
     let currentPage = 1;
     let perPage = 10;
     
-    // [Deklarasi DOM elements tetap sama]
-
+    // DOM Elements
+    const levelButtons = document.querySelectorAll('.level-btn');
+    const searchInput = document.getElementById('searchInput');
+    const perPageSelect = document.getElementById('perPage');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const pageInfo = document.getElementById('pageInfo');
+    const statusInfo = document.getElementById('statusInfo');
+    const kanjiContainer = document.getElementById('kanjiContainer');
+    
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
       loadLevelData(currentLevel);
@@ -417,31 +309,11 @@
         statusInfo.textContent = `Memuat data ${level.toUpperCase()}...`;
         kanjiContainer.innerHTML = '<div class="message">Memuat data kanji...</div>';
         
-        // Menggunakan path data/n5.json
         const response = await fetch(`data/${level}.json`);
-        
-        if (!response.ok) {
-          throw new Error(`File data/${level}.json tidak ditemukan`);
-        }
+        if (!response.ok) throw new Error(`File ${level}.json tidak ditemukan`);
         
         kanjiData = await response.json();
-        
-        // Validasi data
-        if (!Array.isArray(kanjiData)) {
-          throw new Error(`Format data tidak valid. Harus berupa array`);
-        }
-        
         filteredData = [...kanjiData];
-        
-        if (kanjiData.length === 0) {
-          kanjiContainer.innerHTML = `
-            <div class="message">
-              Data kanji ${level.toUpperCase()} kosong. Silakan periksa file JSON.
-            </div>
-          `;
-          statusInfo.textContent = `Data ${level.toUpperCase()} kosong`;
-          return;
-        }
         
         renderKanji();
         updateStatus();
@@ -452,34 +324,123 @@
         });
         
       } catch (error) {
-        console.error("Error:", error);
         kanjiContainer.innerHTML = `
           <div class="message error">
-            Gagal memuat data ${level.toUpperCase()}.<br>
-            Error: ${error.message}<br>
-            Pastikan file <strong>data/${level}.json</strong> ada dan formatnya benar.
+            Gagal memuat data ${level.toUpperCase()}. 
+            <br>Pastikan file <strong>data/${level}.json</strong> ada.
           </div>
         `;
-        statusInfo.textContent = `Error memuat data ${level.toUpperCase()}`;
+        console.error("Error:", error);
       }
     }
     
-    // [Fungsi lainnya tetap sama seperti sebelumnya]
-    // ... (setupEventListeners, handleSearch, renderKanji, showPopup, dll) ...
+    // Event Listeners
+    function setupEventListeners() {
+      // Level selector
+      levelButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          currentLevel = btn.dataset.level;
+          currentPage = 1;
+          loadLevelData(currentLevel);
+        });
+      });
+      
+      // Search with debounce
+      searchInput.addEventListener('input', debounce(handleSearch, 300));
+      
+      // Pagination controls
+      perPageSelect.addEventListener('change', () => {
+        perPage = parseInt(perPageSelect.value);
+        currentPage = 1;
+        renderKanji();
+        updateStatus();
+      });
+      
+      prevBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderKanji();
+          updateStatus();
+        }
+      });
+      
+      nextBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(filteredData.length / perPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          renderKanji();
+          updateStatus();
+        }
+      });
+      
+      // Theme toggle
+      document.getElementById("themeToggle").addEventListener('click', toggleTheme);
+    }
     
-    // Update Status (disesuaikan dengan bahasa Indonesia)
+    // Search Function
+    function handleSearch() {
+      const keyword = searchInput.value.toLowerCase().trim();
+      
+      if (!keyword) {
+        filteredData = [...kanjiData];
+      } else {
+        filteredData = kanjiData.filter(item => 
+          item.kanji.includes(keyword) || 
+          item.furigana.toLowerCase().includes(keyword) ||
+          item.romaji.toLowerCase().includes(keyword) || 
+          item.meaning.toLowerCase().includes(keyword)
+        );
+      }
+      
+      currentPage = 1;
+      renderKanji();
+      updateStatus();
+    }
+    
+    // Render Kanji Cards
+    function renderKanji() {
+      if (filteredData.length === 0) {
+        kanjiContainer.innerHTML = `
+          <div class="message">
+            Tidak ditemukan kanji yang cocok.
+          </div>
+        `;
+        return;
+      }
+      
+      // Pagination logic
+      let dataToRender;
+      if (perPage === 0) { // Show All
+        dataToRender = filteredData;
+      } else {
+        const start = (currentPage - 1) * perPage;
+        const end = start + perPage;
+        dataToRender = filteredData.slice(start, end);
+      }
+      
+      kanjiContainer.innerHTML = dataToRender.map(item => `
+        <div class="kanji-card">
+          <div class="kanji">${item.kanji}</div>
+          <div class="furigana">${item.furigana}</div>
+          <div class="romaji">${item.romaji}</div>
+          <div class="meaning">${item.meaning}</div>
+        </div>
+      `).join('');
+    }
+    
+    // Update Status
     function updateStatus() {
       const totalItems = filteredData.length;
       let statusText = '';
       
       if (perPage === 0) {
-        statusText = `Menampilkan semua ${totalItems} kanji level ${currentLevel.toUpperCase()}`;
+        statusText = `Menampilkan semua ${totalItems} kanji ${currentLevel.toUpperCase()}`;
       } else {
         const totalPages = Math.ceil(totalItems / perPage);
         const start = (currentPage - 1) * perPage + 1;
         const end = Math.min(currentPage * perPage, totalItems);
         
-        statusText = `Menampilkan ${start}-${end} dari ${totalItems} kanji level ${currentLevel.toUpperCase()}`;
+        statusText = `Menampilkan ${start}-${end} dari ${totalItems} kanji ${currentLevel.toUpperCase()}`;
         pageInfo.textContent = `Halaman ${currentPage}/${totalPages}`;
         
         prevBtn.disabled = currentPage === 1;
