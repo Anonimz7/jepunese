@@ -404,18 +404,10 @@ button:disabled {
   margin: 16px 0 12px;
 }
 
-.kanji-card.minimal .furigana,
-.kanji-card.minimal .romaji,
-.kanji-card.minimal .meaning {
-  opacity: 0;
-  height: 0;
-  overflow: hidden;
-}
-
 .kanji-card.minimal:hover .furigana,
 .kanji-card.minimal:hover .romaji,
 .kanji-card.minimal:hover .meaning {
-  opacity: 1;
+  opacity: 0;
   height: auto;
   overflow: visible;
 }
