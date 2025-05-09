@@ -404,9 +404,9 @@ button:disabled {
   margin: 16px 0 12px;
 }
 
-.kanji-card.minimal:hover .furigana,
-.kanji-card.minimal:hover .romaji,
-.kanji-card.minimal:hover .meaning {
+.kanji-card.minimal .furigana,
+.kanji-card.minimal .romaji,
+.kanji-card.minimal .meaning {
   opacity: 0;
   height: auto;
   overflow: visible;
