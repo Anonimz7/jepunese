@@ -409,7 +409,7 @@ button:disabled {
 .kanji-card.minimal .meaning {
   opacity: 0;
   height: auto;
-  overflow: visible;
+  overflow: hidden;
 }
 
 /* Pengaturan untuk mode lengkap */
