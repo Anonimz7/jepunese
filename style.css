@@ -1,4 +1,4 @@
-/* Menggunakan font lokal Poppins */
+/* Font Imports */
 @font-face {
   font-family: 'Poppins';
   src: url('fonts/poppins/Poppins-Regular.ttf') format('truetype'),
@@ -26,7 +26,7 @@
   font-style: normal;
 }
 
-/* Root Variables */
+/* Color Variables */
 :root {
   --primary: #4f46e5;
   --secondary: #fbbf24;
@@ -45,7 +45,7 @@
   --border: #475569;
 }
 
-/* Global Styles */
+/* Base Styles */
 * {
   margin: 0;
   padding: 0;
@@ -61,7 +61,7 @@ body {
   min-height: 100vh;
 }
 
-/* Header */
+/* Header Styles */
 header {
   text-align: center;
   margin-bottom: 30px;
@@ -74,7 +74,7 @@ h1 {
   margin-bottom: 10px;
 }
 
-/* Controls */
+/* Control Panel */
 .controls {
   max-width: 1000px;
   margin: 0 auto 20px;
@@ -141,7 +141,7 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Kanji Grid */
+/* Kanji Grid Layout */
 .kanji-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
@@ -151,39 +151,34 @@ button:disabled {
   align-items: stretch;
 }
 
-/* Kanji Card Styles */
+/* Kanji Card - Unified Style */
 .kanji-card {
   background: var(--card-bg);
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  text-align: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
   border: 1px solid var(--border);
   position: relative;
   overflow: hidden;
-  height: 160px;
+  min-height: 180px;
   display: flex;
   flex-direction: column;
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
-/* Karakter Kanji */
+/* Kanji Character */
 .kanji {
   font-size: 2.6rem;
   font-weight: 600;
   color: var(--primary);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
+  margin: auto 0; /* Center vertically with margin */
   text-align: center;
-  margin: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1;
 }
 
-/* Konten Sekunder */
+/* Secondary Content */
 .furigana {
   font-size: 0.85rem;
   color: var(--primary);
@@ -191,6 +186,7 @@ button:disabled {
   opacity: 0;
   height: 0;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .romaji {
@@ -200,6 +196,7 @@ button:disabled {
   opacity: 0;
   height: 0;
   overflow: hidden;
+  transition: all 0.3s ease 0.05s;
   font-style: italic;
 }
 
@@ -210,6 +207,7 @@ button:disabled {
   opacity: 0;
   height: 0;
   overflow: hidden;
+  transition: all 0.3s ease 0.1s;
   line-height: 1.5;
 }
 
@@ -225,41 +223,37 @@ button:disabled {
   margin-top: 2px;
 }
 
-/* Hover Effects */
-.kanji-card:hover {
+/* Minimal Mode (Default) */
+.kanji-card:not(.show-all) {
+  justify-content: center;
+}
+
+/* Hover Effects for Minimal Mode */
+.kanji-card:not(.show-all):hover {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
   border-color: rgba(79, 70, 229, 0.2);
   transform: translateY(-4px);
 }
 
-.kanji-card:hover .kanji {
-  position: static;
-  transform: none;
+.kanji-card:not(.show-all):hover .kanji {
   margin: 16px 0 12px 0;
-  top: auto;
-  left: auto;
 }
 
-.kanji-card:hover .furigana,
-.kanji-card:hover .romaji,
-.kanji-card:hover .meaning {
+.kanji-card:not(.show-all):hover .furigana,
+.kanji-card:not(.show-all):hover .romaji,
+.kanji-card:not(.show-all):hover .meaning {
   opacity: 1;
   height: auto;
   overflow: visible;
 }
 
-/* Mode Lengkap */
+/* Full Display Mode */
 .kanji-grid.show-all .kanji-card {
   justify-content: flex-start;
-  height: auto;
 }
 
 .kanji-grid.show-all .kanji {
-  position: static;
-  transform: none;
   margin: 0 0 12px 0;
-  top: auto;
-  left: auto;
 }
 
 .kanji-grid.show-all .furigana,
@@ -270,7 +264,7 @@ button:disabled {
   overflow: visible;
 }
 
-/* Toggle Button Style */
+/* Display Toggle */
 .display-toggle {
   display: flex;
   align-items: center;
@@ -298,7 +292,7 @@ button:disabled {
   color: white;
 }
 
-/* Status & Message */
+/* Status Messages */
 .status {
   text-align: center;
   margin: 20px 0;
@@ -335,38 +329,7 @@ button:disabled {
   color: var(--text);
 }
 
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .controls {
-    flex-direction: column;
-  }
-
-  #searchInput {
-    width: 100%;
-  }
-
-  .kanji-grid {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  }
-
-  .kanji-card {
-    padding: 15px;
-    height: 140px;
-  }
-
-  .kanji {
-    font-size: 2rem;
-  }
-
-  .kanji-card:hover .kanji {
-    margin: 12px 0 8px 0;
-  }
-
-  .furigana, .romaji, .meaning {
-    font-size: 0.8rem;
-  }
-}
-
+/* Category Filter */
 #categoryFilter {
   min-width: 180px;
   background: var(--card-bg);
@@ -385,11 +348,42 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Dropdown arrow */
 #categoryFilter {
   background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D'14'%20height%3D'10'%20viewBox%3D'0%200%2014%2010'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M1%201l6%206%206-6'%20stroke%3D'%23666'%20stroke-width%3D'2'%20fill%3D'none'%20fill-rule%3D'evenodd'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
   background-size: 12px;
   padding-right: 35px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+  }
+
+  #searchInput {
+    width: 100%;
+  }
+
+  .kanji-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+
+  .kanji-card {
+    padding: 15px;
+    min-height: 160px;
+  }
+
+  .kanji {
+    font-size: 2rem;
+  }
+
+  .kanji-card:not(.show-all):hover .kanji {
+    margin: 12px 0 8px 0;
+  }
+
+  .furigana, .romaji, .meaning {
+    font-size: 0.8rem;
+  }
 }
