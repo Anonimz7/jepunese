@@ -274,7 +274,7 @@ button:disabled {
   margin: 0 auto;
 }
 
-/* Kanji Card Styles */
+/* Kanji Card Styles (ukuran original) */
 .kanji-card {
   background: var(--card-bg);
   border-radius: 12px;
@@ -290,49 +290,48 @@ button:disabled {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  height: 220px; /* Tetapkan tinggi tetap agar tidak berubah saat hover */
+  min-height: 160px;
 }
 
-/* Kanji Utama */
+/* Posisi Kanji (centered in minimal mode) */
 .kanji-card .kanji {
   font-size: 2.6rem;
   font-weight: 600;
   color: var(--primary);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   line-height: 1;
+  margin: auto 0; /* Pusatkan vertikal */
 }
 
-/* Info Tambahan (disembunyikan dalam mode minimal) */
+/* Secondary info (hidden in minimal mode) */
 .kanji-card .furigana,
 .kanji-card .romaji,
 .kanji-card .meaning {
   opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  left: 0;
-  right: 0;
-  text-align: center;
-  transition: opacity 0.3s ease;
+  height: 0;
+  overflow: hidden;
+  transform: translateY(5px);
+  transition: all 0.3s ease;
 }
 
 .kanji-card .furigana {
-  bottom: 50px;
   font-size: 0.85rem;
   color: var(--primary);
+  margin-bottom: 4px;
   font-weight: 500;
 }
 
 .kanji-card .romaji {
-  bottom: 30px;
   font-size: 0.75rem;
   color: #888;
+  margin-bottom: 8px;
+  transition-delay: 0.05s;
 }
 
 .kanji-card .meaning {
-  bottom: 10px;
   font-size: 0.85rem;
   color: var(--text);
+  transition-delay: 0.1s;
 }
 
 /* Hover Effects */
@@ -343,19 +342,20 @@ button:disabled {
 
 .kanji-card:hover .kanji {
   transform: scale(1.05);
+  margin: 16px 0;
 }
 
 .kanji-card:hover .furigana,
 .kanji-card:hover .romaji,
 .kanji-card:hover .meaning {
   opacity: 1;
+  height: auto;
+  transform: translateY(0);
 }
 
 /* Full Display Mode */
 .kanji-grid.show-all .kanji-card {
   justify-content: flex-start;
-  align-items: flex-start;
-  padding-top: 16px;
 }
 
 .kanji-grid.show-all .kanji {
@@ -365,18 +365,17 @@ button:disabled {
 .kanji-grid.show-all .furigana,
 .kanji-grid.show-all .romaji,
 .kanji-grid.show-all .meaning {
-  position: static;
   opacity: 1;
-  pointer-events: auto;
+  height: auto;
+  transform: translateY(0);
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .kanji-card {
+    height: 160px;
     padding: 18px 12px;
-    height: 200px;
   }
-
+  
   .kanji {
     font-size: 2.2rem;
   }
