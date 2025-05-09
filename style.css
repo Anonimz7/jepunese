@@ -365,7 +365,7 @@ button:disabled {
 }
 
 .furigana, .romaji, .meaning {
-  opacity: 0;
+  opacity: 1;
   transform: translateY(5px);
 }
 
