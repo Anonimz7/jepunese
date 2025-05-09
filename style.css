@@ -290,7 +290,8 @@ button:disabled {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-height: 160px;
+  min-height: 160px; /* Tetapkan tinggi minimal yang konsisten */
+  height: 160px; /* Tambahkan tinggi tetap */
 }
 
 /* Posisi Kanji (centered in minimal mode) */
@@ -301,7 +302,6 @@ button:disabled {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   line-height: 1;
   margin: auto 0; /* Pusatkan vertikal */
-  height: auto;
 }
 
 /* Secondary info (hidden in minimal mode) */
@@ -309,10 +309,11 @@ button:disabled {
 .kanji-card .romaji,
 .kanji-card .meaning {
   opacity: 0;
-  height: 0;
+  height: auto; /* Ubah dari 0 ke auto */
   overflow: hidden;
   transform: translateY(5px);
   transition: all 0.3s ease;
+  visibility: hidden; /* Tambahkan ini untuk menyembunyikan tanpa mempengaruhi layout */
 }
 
 .kanji-card .furigana {
@@ -350,8 +351,8 @@ button:disabled {
 .kanji-card:hover .romaji,
 .kanji-card:hover .meaning {
   opacity: 1;
-  height: auto;
   transform: translateY(0);
+  visibility: visible; /* Tambahkan ini untuk menampilkan */
 }
 
 /* Full Display Mode */
@@ -367,8 +368,8 @@ button:disabled {
 .kanji-grid.show-all .romaji,
 .kanji-grid.show-all .meaning {
   opacity: 1;
-  height: auto;
   transform: translateY(0);
+  visibility: visible;
 }
 
 @media (max-width: 768px) {
