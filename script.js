@@ -266,33 +266,59 @@ function setDisplayMode(mode) {
 
 
 function handleSearch() {
- const keyword = searchInput.value.toLowerCase().trim();
- const selectedCategory = categoryFilter.value;
-
- filteredData = loadedData.filter(item => {
-  const matchesKeyword = !keyword || (
-    item.karakter.includes(keyword) ||
-    item.romaji.toLowerCase().includes(keyword) ||
-    // Tambahkan pencarian untuk field kanji jika data type adalah kanji
-    (currentDataType === 'kanji' && (
-        item.kanji.includes(keyword) ||
-        item.furigana.toLowerCase().includes(keyword) ||
-        item.indo.toLowerCase().includes(keyword) ||
-        item.inggris.toLowerCase().includes(keyword) ||
-        (item.onyomi && item.onyomi.some(onyomi => onyomi.kana.toLowerCase().includes(keyword) || onyomi.romaji.toLowerCase().includes(keyword))) ||
-        (item.kunyomi && item.kunyomi.some(kunyomi => kunyomi.kana.toLowerCase().includes(keyword) || kunyomi.romaji.toLowerCase().includes(keyword)))
-    ))
-  );
-
-  const matchesCategory = !selectedCategory || item.kategori === selectedCategory;
-
-  return matchesKeyword && matchesCategory;
- });
-
- currentPage = 1;
- renderCharacters(filteredData, currentDataType); // Panggil render dengan data yang sudah difilter
- updateStatus();
-}
+    const keyword = searchInput.value.toLowerCase().trim();
+    const selectedCategory = categoryFilter.value;
+   
+    filteredData = loadedData.filter(item => {
+     let matchesKeyword = false; // Default ke false jika ada keyword dan belum cocok
+   
+     if (!keyword) {
+      matchesKeyword = true; // Jika tidak ada keyword, semua item cocok
+     } else {
+      // Jika ada keyword, cek berdasarkan tipe data
+      if (currentDataType === 'kanji') {
+       // Cek field khusus Kanji
+       // Pastikan properti ada sebelum mengaksesnya, meskipun seharusnya ada jika data valid
+       const kanji = item.kanji || '';
+       const furigana = item.furigana ? item.furigana.toLowerCase() : '';
+       const romaji = item.romaji ? item.romaji.toLowerCase() : ''; // Romaji juga ada di data Kanji
+       const indo = item.indo ? item.indo.toLowerCase() : '';
+       const inggris = item.inggris ? item.inggris.toLowerCase() : '';
+       const onyomiMatch = (item.onyomi && item.onyomi.some(o => (o.kana || '').toLowerCase().includes(keyword) || (o.romaji || '').toLowerCase().includes(keyword)));
+       const kunyomiMatch = (item.kunyomi && item.kunyomi.some(k => (k.kana || '').toLowerCase().includes(keyword) || (k.romaji || '').toLowerCase().includes(keyword)));
+   
+       matchesKeyword =
+        kanji.includes(keyword) ||
+        furigana.includes(keyword) ||
+        romaji.includes(keyword) ||
+        indo.includes(keyword) ||
+        inggris.includes(keyword) ||
+        onyomiMatch ||
+        kunyomiMatch;
+   
+      } else if (currentDataType === 'hiragana' || currentDataType === 'katakana') {
+       // Cek field khusus Hiragana/Katakana
+       const karakter = item.karakter || '';
+       const romaji = item.romaji ? item.romaji.toLowerCase() : '';
+   
+       matchesKeyword =
+        karakter.includes(keyword) ||
+        romaji.includes(keyword);
+      }
+       // Jika currentDataType tidak diketahui, matchesKeyword tetap false
+     }
+   
+   
+     const matchesCategory = !selectedCategory || (item.kategori && item.kategori === selectedCategory); // Tambahkan cek item.kategori
+   
+   
+     return matchesKeyword && matchesCategory;
+    });
+   
+    currentPage = 1;
+    renderCharacters(filteredData, currentDataType); // Panggil renderCharacters
+    updateStatus();
+   }
 
   // --- Fungsi Rendering Karakter (diganti dari renderKanji) ---
 function renderCharacters(dataToRender, dataType) {
