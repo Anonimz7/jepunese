@@ -364,10 +364,6 @@ button:disabled {
   transform: scale(1.05);
 }
 
-.furigana, .romaji, .meaning {
-  opacity: 1;
-  transform: translateY(5px);
-}
 
 /* Responsive */
 @media (max-width: 768px) {
