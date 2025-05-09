@@ -152,64 +152,137 @@ button:disabled {
 
 .kanji-card {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
   text-align: center;
-  transition: transform 0.3s ease;
+  transition: all 0.3s ease;
   cursor: pointer;
   border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.kanji-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--primary), var(--secondary));
+  opacity: 0.8;
 }
 
 .kanji-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+  border-color: var(--primary);
 }
 
 .kanji {
-  font-size: 2.5rem;
-  font-weight: 500;
-  margin-bottom: 8px;
-}
-
-.furigana, .meaning {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  font-size: 0.9rem;
+  font-size: 2.8rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--primary);
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
 .furigana {
   color: var(--primary);
   margin-bottom: 5px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.romaji {
+  color: #888;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+  font-style: italic;
 }
 
 .meaning {
-  color: var(--secondary);
+  color: var(--text);
   font-weight: 500;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .meaning .indo {
-  color: #ff5733; /* Misalnya warna oranye untuk Indo */
+  display: block;
+  color: #ff5733;
+  margin-top: 3px;
 }
 
 .meaning .inggris {
-  color: #33aaff; /* Misalnya warna biru untuk Inggris */
+  display: block;
+  color: #33aaff;
+  margin-top: 3px;
 }
 
-
-.romaji {
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  font-size: 1rem;
-  color: #cbcbcb;
-  font-style: italic;
-  margin-bottom: 5px;
-}
-
+/* Animasi hover yang lebih halus */
 .kanji-card:hover .furigana,
-.kanji-card:hover .meaning,
-.kanji-card:hover .romaji {
+.kanji-card:hover .romaji,
+.kanji-card:hover .meaning {
   opacity: 1;
+  transition: opacity 0.3s ease 0.1s;
+}
+
+/* Efek glow subtle pada hover */
+.kanji-card:hover .kanji {
+  text-shadow: 0 0 8px rgba(79, 70, 229, 0.3);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .kanji-card {
+    padding: 15px;
+    border-radius: 12px;
+  }
+  
+  .kanji {
+    font-size: 2.2rem;
+  }
+  
+  .furigana, .meaning {
+    font-size: 0.8rem;
+  }
+}
+
+/* Tambahkan efek subtle pada card */
+.kanji-card {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* Gradient border alternative */
+.kanji-card-alt {
+  position: relative;
+  background: var(--card-bg);
+  background-clip: padding-box;
+  border: solid 1px transparent;
+  border-radius: 16px;
+}
+
+.kanji-card-alt::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  margin: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.kanji-card-alt:hover::before {
+  opacity: 0.3;
 }
 
 /* Status & Message */
