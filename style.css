@@ -392,22 +392,21 @@ button:disabled {
 .kanji-card.minimal {
   height: 160px;
   position: relative;
+  display: flex; /* Tambahkan ini */
+  align-items: center; /* Tambahkan ini */
+  justify-content: center; /* Tambahkan ini */
 }
 
 .kanji-card.minimal .kanji {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 100%;
-  margin: 0;
-  text-align: center;
+  position: static; /* Ubah dari absolute ke static */
+  transform: none; /* Hapus transform */
+  margin: 0; /* Pastikan margin 0 */
+  width: auto; /* Ubah width */
 }
 
 .kanji-card.minimal:hover .kanji {
-  position: static;
-  transform: none;
   margin: 16px 0 12px;
+  transform: scale(1.05);
 }
 
 .kanji-card.minimal .furigana,
