@@ -30,25 +30,7 @@
       placeholder="Cari kanji (contoh: 水, mizu, air...)"
       autocomplete="off"
     >
-  
-    <!-- Filter Ikon -->
-    <button id="filterBtn" class="filter-btn">
-      <i class="fas fa-filter"></i>
-    </button>
-  
-    <!-- Dropdown Filter -->
-    <select id="categoryFilter" class="category-filter" disabled>
-      <option value="">Pilih Kategori</option>
-      <option value="Tindakan">Tindakan</option>
-      <option value="Benda / Objek">Benda / Objek</option>
-      <option value="Kualitas / Keadaan">Kualitas / Keadaan</option>
-      <option value="Konsep Abstrak">Konsep Abstrak</option>
-      <option value="Emosi / Perasaan">Emosi / Perasaan</option>
-      <option value="Lokasi / Arah">Lokasi / Arah</option>
-    </select>
-    
-  
-    <!-- Kontrol Pagination -->
+
     <div class="pagination-controls">
       <select id="perPage">
         <option value="10">10 per halaman</option>
@@ -56,13 +38,12 @@
         <option value="50">50 per halaman</option>
         <option value="0">Tampilkan Semua</option>
       </select>
-  
+
       <button id="prevBtn"><i class="fas fa-chevron-left"></i></button>
       <span id="pageInfo">Halaman 1</span>
       <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
     </div>
   </div>
-  
 
   <div class="status" id="statusInfo">Memuat data N5...</div>
 
