@@ -273,39 +273,55 @@ button:disabled {
   margin: 0 auto;
 }
 
-/* Card Style */
+/* 1. Base Card Style - Tetap sama untuk kedua mode */
 .kanji-card {
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 24px 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-  text-align: center;
   cursor: pointer;
   overflow: hidden;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   will-change: transform;
+  /* Tambahkan ini untuk konsistensi */
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
 }
 
-.kanji-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  border-color: rgba(79, 70, 229, 0.2);
+/* 2. Mode Minimal - Override yang diperlukan */
+.kanji-grid.minimal-mode .kanji-card {
+  justify-content: center; /* Pusatkan vertikal */
+  align-items: center; /* Pusatkan horizontal */
 }
 
-.kanji-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 20% 80%, rgba(79, 70, 229, 0.03), transparent 60%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
+.kanji-grid.minimal-mode .kanji {
+  margin-bottom: 0; /* Hilangkan margin bawah */
+  transform: none !important; /* Reset transform */
 }
 
-.kanji-card:hover::after {
-  opacity: 1;
+.kanji-grid.minimal-mode .furigana,
+.kanji-grid.minimal-mode .romaji,
+.kanji-grid.minimal-mode .meaning {
+  display: none; /* Sembunyikan elemen */
+}
+
+/* 3. Hover State untuk Minimal Mode */
+.kanji-grid.minimal-mode .kanji-card:hover {
+  justify-content: flex-start; /* Kembali ke layout default */
+}
+
+.kanji-grid.minimal-mode .kanji-card:hover .kanji {
+  margin-bottom: 16px; /* Kembalikan margin */
+  transform: scale(1.05) !important;
+}
+
+.kanji-grid.minimal-mode .kanji-card:hover .furigana,
+.kanji-grid.minimal-mode .kanji-card:hover .romaji,
+.kanji-grid.minimal-mode .kanji-card:hover .meaning {
+  display: block; /* Tampilkan elemen */
 }
 
 /* Kanji Content */
