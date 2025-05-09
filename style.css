@@ -288,6 +288,7 @@ button:disabled {
   will-change: transform;
 }
 
+/*
 .kanji-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
@@ -307,6 +308,7 @@ button:disabled {
 .kanji-card:hover::after {
   opacity: 1;
 }
+
 
 /* Kanji Content */
 .kanji, .furigana, .romaji, .meaning {
