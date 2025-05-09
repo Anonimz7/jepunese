@@ -319,6 +319,8 @@ button:disabled {
   margin-bottom: 16px;
   color: var(--primary);
   line-height: 1;
+  top: 50%;
+  left: 50%;
 }
 
 .furigana, .romaji, .meaning {
