@@ -287,9 +287,10 @@ button:disabled {
   position: relative;
   overflow: hidden;
   will-change: transform;
-  height: 180px; /* Tinggi tetap */
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  min-height: 160px;
 }
 
 /* Posisi Kanji (centered in minimal mode) */
