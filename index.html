@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Belajar Kanji JLPT</title>
-  <link rel="stylesheet" href="style.css"> 
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
   <div class="theme-toggle" id="themeToggle">
@@ -23,13 +23,7 @@
   </header>
 
   <div class="controls">
-    <input
-      type="text"
-      id="searchInput"
-      placeholder="Cari kanji (contoh: 水, mizu, air...)"
-      autocomplete="off"
-    >
-
+    <input type="text" id="searchInput" placeholder="Cari kanji (contoh: 水, mizu, air...)" autocomplete="off">
     <div class="pagination-controls">
       <select id="perPage">
         <option value="10">10 per halaman</option>
@@ -37,7 +31,6 @@
         <option value="50">50 per halaman</option>
         <option value="0">Tampilkan Semua</option>
       </select>
-
       <button id="prevBtn"><i class="fas fa-chevron-left"></i></button>
       <span id="pageInfo">Halaman 1</span>
       <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
@@ -50,6 +43,6 @@
     <div class="message">Memuat data kanji...</div>
   </div>
 
-  <script src="script.js"></script> 
+  <script src="script.js"></script>
 </body>
 </html>
