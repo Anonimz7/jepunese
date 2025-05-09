@@ -359,21 +359,14 @@ button:disabled {
   margin-top: 2px;
 }
 
-.furigana, .romaji, .meaning {
-  opacity: 0;
-  transform: translateY(5px);
-}
 
 .kanji-card:hover .kanji {
   transform: scale(1.05);
 }
 
-/*
-.kanji-card:hover .furigana,
-.kanji-card:hover .romaji,
-.kanji-card:hover .meaning {
-  opacity: 1;
-  transform: translateY(0);
+.furigana, .romaji, .meaning {
+  opacity: 0;
+  transform: translateY(5px);
 }
 
 /* Responsive */
