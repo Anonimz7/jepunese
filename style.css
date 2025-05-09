@@ -365,3 +365,70 @@ button:disabled {
   background-size: 12px;
   padding-right: 35px;
 }
+
+/* Toggle Button Style */
+.display-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card-bg);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin-left: auto;
+}
+
+.display-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.display-toggle-btn.active {
+  background: var(--primary);
+  color: white;
+}
+
+/* Mode Minimal (default) */
+.kanji-card.minimal .kanji {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin-bottom: 0;
+  transition: all 0.3s ease;
+}
+
+.kanji-card.minimal:hover .kanji {
+  position: static;
+  transform: none;
+  margin-bottom: 16px;
+}
+
+/* Mode Lengkap */
+.kanji-grid.show-all .kanji-card {
+  padding: 20px 16px;
+}
+
+.kanji-grid.show-all .kanji {
+  position: static;
+  transform: none;
+  margin-bottom: 12px;
+}
+
+.kanji-grid.show-all .furigana,
+.kanji-grid.show-all .romaji,
+.kanji-grid.show-all .meaning {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Efek hover saat mode lengkap aktif */
+.kanji-grid.show-all .kanji-card:hover .kanji {
+  transform: scale(1.05);
+}

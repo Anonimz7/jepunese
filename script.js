@@ -79,6 +79,19 @@ function setupEventListeners() {
     });
   });
 
+  // Toggle display mode
+  document.getElementById('minimalBtn').addEventListener('click', () => {
+    kanjiContainer.classList.remove('show-all');
+    document.getElementById('minimalBtn').classList.add('active');
+    document.getElementById('fullBtn').classList.remove('active');
+  });
+
+  document.getElementById('fullBtn').addEventListener('click', () => {
+    kanjiContainer.classList.add('show-all');
+    document.getElementById('fullBtn').classList.add('active');
+    document.getElementById('minimalBtn').classList.remove('active');
+  });
+
   searchInput.addEventListener('input', debounce(handleSearch, 300));
 
   categoryFilter.addEventListener('change', () => {
