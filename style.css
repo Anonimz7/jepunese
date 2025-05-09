@@ -1,3 +1,32 @@
+/* Menggunakan font lokal Poppins */
+@font-face {
+  font-family: 'Poppins';
+  src: url('fonts/poppins/Poppins-Regular.ttf') format('truetype'),
+       url('fonts/poppins/Poppins-Regular.woff2') format('woff2'),
+       url('fonts/poppins/Poppins-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('fonts/poppins/Poppins-Bold.ttf') format('truetype'),
+       url('fonts/poppins/Poppins-Bold.woff2') format('woff2'),
+       url('fonts/poppins/Poppins-Bold.woff') format('woff');
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  src: url('fonts/poppins/Poppins-SemiBold.ttf') format('truetype'),
+       url('fonts/poppins/Poppins-SemiBold.woff2') format('woff2'),
+       url('fonts/poppins/Poppins-SemiBold.woff') format('woff');
+  font-weight: 600;
+  font-style: normal;
+}
+
+/* Root Variables */
 :root {
   --primary: #4f46e5;
   --secondary: #fbbf24;
@@ -16,6 +45,7 @@
   --border: #475569;
 }
 
+/* Global Styles */
 * {
   margin: 0;
   padding: 0;
@@ -169,7 +199,7 @@ button:disabled {
 
 .kanji-card:hover .furigana,
 .kanji-card:hover .meaning,
-.kanji-card:hover .romaji{
+.kanji-card:hover .romaji {
   opacity: 1;
 }
 
@@ -210,6 +240,7 @@ button:disabled {
   color: var(--text);
 }
 
+/* Responsive Styles */
 @media (max-width: 768px) {
   .controls {
     flex-direction: column;
@@ -221,5 +252,17 @@ button:disabled {
 
   .kanji-grid {
     grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+
+  .kanji-card {
+    padding: 15px;
+  }
+
+  .kanji {
+    font-size: 2rem;
+  }
+
+  .furigana, .romaji, .meaning {
+    font-size: 0.8rem;
   }
 }

@@ -29,10 +29,10 @@ async function loadLevelData(level) {
     kanjiContainer.innerHTML = '<div class="message">Memuat data kanji...</div>';
 
     // Pastikan path ke file JSON benar relatif terhadap file HTML
-    const response = await fetch(`data/${level}.json`);
+    const response = await fetch(`data/jlpt_${level}.json`);
     if (!response.ok) {
         if (response.status === 404) {
-             throw new Error(`File data/${level}.json tidak ditemukan.`);
+             throw new Error(`File data/jlpt_${level}.json tidak ditemukan.`);
         } else {
              throw new Error(`Gagal memuat data ${level.toUpperCase()}: ${response.status}`);
         }
@@ -54,7 +54,7 @@ async function loadLevelData(level) {
       <div class="message error" style="color: red;">
         Gagal memuat data ${level.toUpperCase()}.
         <br><strong>Error:</strong> ${error.message}
-        <br>Pastikan file <strong>data/${level}.json</strong> ada di folder yang benar.
+        <br>Pastikan file <strong>data/jlpt_${level}.json</strong> ada di folder yang benar.
       </div>
     `;
     console.error("Error:", error);
@@ -128,7 +128,8 @@ function handleSearch() {
       item.kanji.includes(keyword) ||
       item.furigana.toLowerCase().includes(keyword) ||
       item.romaji.toLowerCase().includes(keyword) ||
-      item.meaning.toLowerCase().includes(keyword)
+      item.indo.toLowerCase().includes(keyword) ||
+      item.inggris.toLowerCase().includes(keyword)
     );
   }
 
@@ -156,7 +157,7 @@ function renderKanji() {
   let dataToRender;
   if (perPage === 0) { // Show All
     dataToRender = filteredData;
-     // Disable pagination controls when showing all
+    // Disable pagination controls when showing all
     prevBtn.disabled = true;
     nextBtn.disabled = true;
     pageInfo.textContent = '';
@@ -164,20 +165,22 @@ function renderKanji() {
     const start = (currentPage - 1) * perPage;
     const end = start + perPage;
     dataToRender = filteredData.slice(start, end);
-     // Enable/disable pagination controls based on pages
+    // Enable/disable pagination controls based on pages
     const totalPages = Math.ceil(filteredData.length / perPage);
     prevBtn.disabled = currentPage === 1;
     nextBtn.disabled = currentPage === totalPages;
     pageInfo.textContent = `Halaman ${currentPage}/${totalPages}`;
   }
 
-
   kanjiContainer.innerHTML = dataToRender.map(item => `
     <div class="kanji-card">
       <div class="kanji">${item.kanji}</div>
       <div class="furigana">${item.furigana}</div>
       <div class="romaji">${item.romaji}</div>
-      <div class="meaning">${item.meaning}</div>
+      <div class="meaning">
+        <div class="indo">${item.indo}</div>
+        <div class="inggris">${item.inggris}</div>
+      </div>
     </div>
   `).join('');
 }
