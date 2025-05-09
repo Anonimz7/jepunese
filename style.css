@@ -388,71 +388,46 @@ button:disabled {
   }
 }
 
-/* ================== */
-/* Fixed Minimal Mode */
-/* ================== */
+/* ======================== */
+/* Fixed Size for Both Modes */
+/* ======================== */
+.kanji-card {
+  min-height: 200px; /* Tinggi minimum yang sama untuk kedua mode */
+}
+
+/* Minimal Mode - Updated */
 .kanji-grid.minimal-mode .kanji-card {
-  height: 160px;
+  height: auto; /* Tidak perlu height fixed */
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 24px 16px;
-  transition: all 0.3s ease;
+  padding: 24px 16px; /* Sama dengan mode lengkap */
 }
 
 .kanji-grid.minimal-mode .kanji {
-  font-size: 2.6rem;
   margin: 0;
-  transition: all 0.3s ease;
   transform: none !important;
-}
-
-.kanji-grid.minimal-mode .furigana,
-.kanji-grid.minimal-mode .romaji,
-.kanji-grid.minimal-mode .meaning {
-  display: none;
-  opacity: 0;
-  height: 0;
-  margin: 0;
-  transition: all 0.3s ease;
 }
 
 /* Hover State */
 .kanji-grid.minimal-mode .kanji-card:hover {
-  justify-content: flex-start;
-  padding: 24px 16px;
+  justify-content: flex-start; /* Kembali ke layout normal saat hover */
 }
 
-.kanji-grid.minimal-mode .kanji-card:hover .kanji {
-  margin-bottom: 16px;
-  transform: scale(1.05) !important;
-}
-
-.kanji-grid.minimal-mode .kanji-card:hover .furigana,
-.kanji-grid.minimal-mode .kanji-card:hover .romaji,
-.kanji-grid.minimal-mode .kanji-card:hover .meaning {
-  display: block;
-  opacity: 1;
-  height: auto;
-}
-
-/* Ensure consistent card size */
-.kanji-grid.minimal-mode .kanji-card,
-.kanji-grid.show-all .kanji-card {
-  min-height: 160px;
+/* Pastikan ukuran font konsisten */
+.kanji-grid.minimal-mode .kanji,
+.kanji-grid.show-all .kanji {
+  font-size: 2.6rem;
 }
 
 @media (max-width: 768px) {
-  .kanji-grid.minimal-mode .kanji-card {
-    height: 140px;
-    padding: 15px;
+  .kanji-card {
+    min-height: 180px; /* Sedikit lebih kecil di mobile */
+    padding: 18px 12px;
   }
   
-  .kanji-grid.minimal-mode .kanji {
-    font-size: 2rem;
+  .kanji-grid.minimal-mode .kanji,
+  .kanji-grid.show-all .kanji {
+    font-size: 2.2rem;
   }
-}
-
-.kanji-grid {
-  transition: grid-template-columns 0.3s ease;
 }
