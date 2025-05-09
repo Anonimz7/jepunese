@@ -3,7 +3,7 @@ let kanjiData = [];
 let filteredData = [];
 let currentPage = 1;
 let perPage = 10;
-
+// --- PERUBAHAN: Tambah variabel untuk melacak mode tampilan ---
 let currentDisplayMode = 'minimal'; // Default mode saat startup
 
 const levelButtons = document.querySelectorAll('.level-btn');
@@ -15,11 +15,14 @@ const nextBtn = document.getElementById('nextBtn');
 const pageInfo = document.getElementById('pageInfo');
 const statusInfo = document.getElementById('statusInfo');
 const kanjiContainer = document.getElementById('kanjiContainer');
+const minimalBtn = document.getElementById('minimalBtn'); // Ambil referensi tombol
+const fullBtn = document.getElementById('fullBtn'); // Ambil referensi tombol
+
 
 document.addEventListener('DOMContentLoaded', () => {
-  loadLevelData(currentLevel);
-  setupEventListeners();
-  loadTheme();
+  setupEventListeners(); // Setup event listeners termasuk logic toggle
+  loadLevelData(currentLevel); // Memuat data pertama kali
+  loadTheme(); // Memuat tema
 });
 
 async function loadLevelData(level) {
@@ -38,7 +41,8 @@ async function loadLevelData(level) {
     categoryFilter.disabled = false;
     categoryFilter.value = "";
 
-    renderKanji();
+    renderKanji(); // Render kartu ke DOM
+    updateCardClasses(); // --- PERUBAHAN: Panggil setelah render ---
     updateStatus();
 
     levelButtons.forEach(btn => {
@@ -77,50 +81,63 @@ function setupEventListeners() {
       perPageSelect.disabled = false;
       perPageSelect.value = 10;
       perPage = 10;
-      loadLevelData(currentLevel);
+      loadLevelData(currentLevel); // loadLevelData akan memanggil render dan updateCardClasses
     });
   });
 
+  // --- PERUBAHAN: Inisialisasi mode tampilan saat setup ---
+  currentDisplayMode = minimalBtn.classList.contains('active') ? 'minimal' : 'full';
+
   // Toggle display mode
-  document.getElementById('minimalBtn').addEventListener('click', () => {
-    kanjiContainer.classList.remove('show-all');
-    document.getElementById('minimalBtn').classList.add('active');
-    document.getElementById('fullBtn').classList.remove('active');
+  minimalBtn.addEventListener('click', () => {
+    currentDisplayMode = 'minimal'; // Set mode
+    // --- PERUBAHAN: Hapus kanjiContainer.classList.remove('show-all') di sini ---
+    // kanjiContainer.classList.remove('show-all'); // Dikelola oleh updateCardClasses sekarang
+    minimalBtn.classList.add('active');
+    fullBtn.classList.remove('active');
+    updateCardClasses(); // --- PERUBAHAN: Panggil untuk update kelas kartu ---
   });
 
-  document.getElementById('fullBtn').addEventListener('click', () => {
-    kanjiContainer.classList.add('show-all');
-    document.getElementById('fullBtn').classList.add('active');
-    document.getElementById('minimalBtn').classList.remove('active');
+  fullBtn.addEventListener('click', () => {
+    currentDisplayMode = 'full'; // Set mode
+    // --- PERUBAHAN: Hapus kanjiContainer.classList.add('show-all') di sini ---
+    // kanjiContainer.classList.add('show-all'); // Dikelola oleh updateCardClasses sekarang
+    fullBtn.classList.add('active');
+    minimalBtn.classList.remove('active');
+    updateCardClasses(); // --- PERUBAHAN: Panggil untuk update kelas kartu ---
   });
 
   searchInput.addEventListener('input', debounce(handleSearch, 300));
 
   categoryFilter.addEventListener('change', () => {
     currentPage = 1;
-    handleSearch();
+    handleSearch(); // handleSearch akan memanggil render dan updateCardClasses
   });
 
   perPageSelect.addEventListener('change', () => {
     perPage = parseInt(perPageSelect.value);
     currentPage = 1;
-    renderKanji();
+    renderKanji(); // Render kartu baru
+    updateCardClasses(); // --- PERUBAHAN: Panggil setelah render ---
     updateStatus();
   });
 
   prevBtn.addEventListener('click', () => {
     if (currentPage > 1) {
       currentPage--;
-      renderKanji();
+      renderKanji(); // Render kartu baru
+      updateCardClasses(); // --- PERUBAHAN: Panggil setelah render ---
       updateStatus();
     }
   });
 
   nextBtn.addEventListener('click', () => {
     const totalPages = Math.ceil(filteredData.length / perPage);
+    // --- PERBAIKAN LOGIKA NEXTBTN ---
     if (currentPage < totalPages) {
       currentPage++;
-      renderKanji();
+      renderKanji(); // Render kartu baru
+      updateCardClasses(); // --- PERUBAHAN: Panggil setelah render ---
       updateStatus();
     }
   });
@@ -147,7 +164,8 @@ function handleSearch() {
   });
 
   currentPage = 1;
-  renderKanji();
+  renderKanji(); // Render hasil search
+  updateCardClasses(); // --- PERUBAHAN: Panggil setelah render ---
   updateStatus();
 }
 
@@ -176,6 +194,8 @@ function renderKanji() {
     pageInfo.textContent = `Halaman ${currentPage}/${totalPages}`;
   }
 
+  // --- PERUBAHAN: Render kartu TANPA menambahkan kelas 'minimal' di sini ---
+  // Kelas 'minimal' akan ditambahkan oleh updateCardClasses
   kanjiContainer.innerHTML = dataToRender.map(item => `
     <div class="kanji-card">
       <div class="kanji">${item.kanji}</div>
@@ -184,10 +204,11 @@ function renderKanji() {
       <div class="meaning">
         <div class="indo">${item.indo}</div>
         <div class="inggris">${item.inggris}</div>
-        <!-- <div class="kategori"><small>${item.kategori}</small></div> -->
-      </div>
+        </div>
     </div>
   `).join('');
+
+  // updateCardClasses() dipanggil setelah ini di loadLevelData/handleSearch/pagination handlers
 }
 
 function updateStatus() {
@@ -204,6 +225,27 @@ function updateStatus() {
 
   statusInfo.textContent = statusText;
 }
+
+// --- PERUBAHAN: Tambah fungsi baru untuk update kelas pada kartu ---
+function updateCardClasses() {
+    const cards = kanjiContainer.querySelectorAll('.kanji-card');
+    cards.forEach(card => {
+        if (currentDisplayMode === 'minimal') {
+            card.classList.add('minimal');
+        } else {
+            card.classList.remove('minimal');
+        }
+    });
+
+    // --- PERUBAHAN: Tetap atur kelas show-all pada kontainer grid ---
+    // Ini mungkin masih digunakan oleh CSS lain untuk layout grid itu sendiri
+    if (currentDisplayMode === 'full') {
+         kanjiContainer.classList.add('show-all');
+    } else {
+         kanjiContainer.classList.remove('show-all');
+    }
+}
+
 
 function debounce(func, timeout = 300) {
   let timer;
