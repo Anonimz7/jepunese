@@ -390,8 +390,8 @@ button:disabled {
 
 /* Mode Minimal - Solusi Fixed */
 .kanji-card.minimal {
-  height: 160px;
-  display: flex;
+  height: 160px !important;
+  display: flex !important;
   flex-direction: column;
   justify-content: center; /* Pusatkan vertikal */
   align-items: center; /* Pusatkan horizontal */
