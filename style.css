@@ -388,46 +388,27 @@ button:disabled {
   }
 }
 
-/* ======================== */
-/* Fixed Size for Both Modes */
-/* ======================== */
-.kanji-card {
-  min-height: 200px; /* Tinggi minimum yang sama untuk kedua mode */
+/* Show-All Mode */
+.kanji-grid.show-all .kanji-card {
+  min-height: auto;
+  padding: 24px 16px;
 }
 
-/* Minimal Mode - Updated */
-.kanji-grid.minimal-mode .kanji-card {
-  height: auto; /* Tidak perlu height fixed */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 24px 16px; /* Sama dengan mode lengkap */
-}
-
-.kanji-grid.minimal-mode .kanji {
-  margin: 0;
-  transform: none !important;
-}
-
-/* Hover State */
-.kanji-grid.minimal-mode .kanji-card:hover {
-  justify-content: flex-start; /* Kembali ke layout normal saat hover */
-}
-
-/* Pastikan ukuran font konsisten */
-.kanji-grid.minimal-mode .kanji,
 .kanji-grid.show-all .kanji {
-  font-size: 2.6rem;
+  margin-bottom: 16px;
+  position: static;
+  transform: none;
 }
 
-@media (max-width: 768px) {
-  .kanji-card {
-    min-height: 180px; /* Sedikit lebih kecil di mobile */
-    padding: 18px 12px;
-  }
-  
-  .kanji-grid.minimal-mode .kanji,
-  .kanji-grid.show-all .kanji {
-    font-size: 2.2rem;
-  }
+.kanji-grid.show-all .furigana,
+.kanji-grid.show-all .romaji,
+.kanji-grid.show-all .meaning {
+  opacity: 1;
+  transform: translateY(0);
+  height: auto;
+  overflow: visible;
+}
+
+.kanji-grid.show-all .kanji-card:hover .kanji {
+  transform: scale(1.05);
 }
