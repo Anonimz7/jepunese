@@ -141,130 +141,6 @@ button:disabled {
   cursor: not-allowed;
 }
 
-/* Status & Pesan */
-.status {
-  text-align: center;
-  margin: 20px 0;
-  color: var(--primary);
-}
-
-.message {
-  text-align: center;
-  grid-column: 1 / -1;
-  padding: 20px;
-  color: var(--text);
-}
-
-/* Theme Toggle */
-.theme-toggle {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: var(--card-bg);
-  border: 2px solid var(--border);
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 100;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.theme-toggle i {
-  font-size: 1.2rem;
-  color: var(--text);
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .controls {
-    flex-direction: column;
-  }
-
-  #searchInput {
-    width: 100%;
-  }
-
-  .kanji-grid {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  }
-
-  .kanji-card {
-    padding: 15px;
-  }
-
-  .kanji {
-    font-size: 2rem;
-  }
-
-  .furigana, .romaji, .meaning {
-    font-size: 0.8rem;
-  }
-}
-
-#categoryFilter {
-  min-width: 180px;
-  background: var(--card-bg);
-  color: var(--text);
-  border: 2px solid var(--border);
-  border-radius: 8px;
-  font-size: 1rem;
-  outline: none;
-  appearance: none;
-  cursor: pointer;
-  padding: 10px 15px;
-}
-
-#categoryFilter:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* Tambahan untuk memberi panah custom di dropdown */
-#categoryFilter {
-  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D'14'%20height%3D'10'%20viewBox%3D'0%200%2014%2010'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M1%201l6%206%206-6'%20stroke%3D'%23666'%20stroke-width%3D'2'%20fill%3D'none'%20fill-rule%3D'evenodd'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  background-size: 12px;
-  padding-right: 35px;
-}
-
-/* Toggle Button Style */
-.display-toggle {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  background: var(--card-bg);
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  margin-left: auto;
-}
-
-.display-toggle-btn {
-  background: transparent;
-  border: none;
-  color: var(--text);
-  cursor: pointer;
-  font-weight: 500;
-  padding: 6px 10px;
-  border-radius: 4px;
-  transition: all 0.2s;
-}
-
-.display-toggle-btn.active {
-  background: var(--primary);
-  color: white;
-}
-
-
-
-
-
-
 /* Kanji Grid */
 .kanji-grid {
   display: grid;
@@ -397,6 +273,125 @@ button:disabled {
   .furigana, .meaning {
     font-size: 0.8rem;
   }
+}
+
+/* Status & Message */
+.status {
+  text-align: center;
+  margin: 20px 0;
+  color: var(--primary);
+}
+
+.message {
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 20px;
+  color: var(--text);
+}
+
+/* Theme Toggle */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.theme-toggle i {
+  font-size: 1.2rem;
+  color: var(--text);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+  }
+
+  #searchInput {
+    width: 100%;
+  }
+
+  .kanji-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+
+  .kanji-card {
+    padding: 15px;
+  }
+
+  .kanji {
+    font-size: 2rem;
+  }
+
+  .furigana, .romaji, .meaning {
+    font-size: 0.8rem;
+  }
+}
+
+#categoryFilter {
+  min-width: 180px;
+  background: var(--card-bg);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  outline: none;
+  appearance: none;
+  cursor: pointer;
+  padding: 10px 15px;
+}
+
+#categoryFilter:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Tambahan untuk memberi panah custom di dropdown */
+#categoryFilter {
+  background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20width%3D'14'%20height%3D'10'%20viewBox%3D'0%200%2014%2010'%20xmlns%3D'http%3A//www.w3.org/2000/svg'%3E%3Cpath%20d%3D'M1%201l6%206%206-6'%20stroke%3D'%23666'%20stroke-width%3D'2'%20fill%3D'none'%20fill-rule%3D'evenodd'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 35px;
+}
+
+/* Toggle Button Style */
+.display-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card-bg);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin-left: auto;
+}
+
+.display-toggle-btn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  cursor: pointer;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.display-toggle-btn.active {
+  background: var(--primary);
+  color: white;
 }
 
 /* Perbaikan Centering Kanji */
