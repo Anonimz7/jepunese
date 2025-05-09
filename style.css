@@ -281,7 +281,6 @@ button:disabled {
   padding: 24px 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   cursor: pointer;
-  overflow: hidden;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   will-change: transform;
@@ -391,6 +390,44 @@ button:disabled {
   .furigana, .meaning {
     font-size: 0.8rem;
   }
+}
+
+/* Minimal Mode */
+.kanji-card.minimal {
+  height: 160px;
+  position: relative;
+}
+
+.kanji-card.minimal .kanji {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  margin: 0;
+  text-align: center;
+}
+
+.kanji-card.minimal:hover .kanji {
+  position: static;
+  transform: none;
+  margin: 16px 0 12px;
+}
+
+.kanji-card.minimal .furigana,
+.kanji-card.minimal .romaji,
+.kanji-card.minimal .meaning {
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.kanji-card.minimal:hover .furigana,
+.kanji-card.minimal:hover .romaji,
+.kanji-card.minimal:hover .meaning {
+  opacity: 1;
+  height: auto;
+  overflow: visible;
 }
 
 /* Show-All Mode */
