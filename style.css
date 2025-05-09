@@ -275,69 +275,6 @@ button:disabled {
   }
 }
 
-/* Animasi hover yang lebih halus */
-.kanji-card:hover .furigana,
-.kanji-card:hover .romaji,
-.kanji-card:hover .meaning {
-  opacity: 1;
-  transition: opacity 0.3s ease 0.1s;
-}
-
-/* Efek glow subtle pada hover */
-.kanji-card:hover .kanji {
-  text-shadow: 0 0 8px rgba(79, 70, 229, 0.3);
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .kanji-card {
-    padding: 15px;
-    border-radius: 12px;
-  }
-  
-  .kanji {
-    font-size: 2.2rem;
-  }
-  
-  .furigana, .meaning {
-    font-size: 0.8rem;
-  }
-}
-
-/* Tambahkan efek subtle pada card */
-.kanji-card {
-  will-change: transform;
-  backface-visibility: hidden;
-}
-
-/* Gradient border alternative */
-.kanji-card-alt {
-  position: relative;
-  background: var(--card-bg);
-  background-clip: padding-box;
-  border: solid 1px transparent;
-  border-radius: 16px;
-}
-
-.kanji-card-alt::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: -1;
-  margin: -1px;
-  border-radius: inherit;
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.kanji-card-alt:hover::before {
-  opacity: 0.3;
-}
-
 /* Status & Message */
 .status {
   text-align: center;
