@@ -260,6 +260,11 @@ button:disabled {
   color: white;
 }
 
+
+
+
+
+
 /* Kanji Grid */
 .kanji-grid {
   display: grid;
@@ -269,11 +274,11 @@ button:disabled {
   margin: 0 auto;
 }
 
-/* Kanji Card Minimalist Modern */
+/* Kanji Card Base Styles */
 .kanji-card {
   background: var(--card-bg);
   border-radius: 12px;
-  padding: 24px 16px;
+  padding: 16px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
   text-align: center;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -284,55 +289,52 @@ button:disabled {
   will-change: transform;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: 160px;
+  height: 160px; /* Fixed height */
 }
 
-/* Karakter Kanji */
+/* Kanji Character */
 .kanji {
   font-size: 2.6rem;
   font-weight: 600;
-  margin-bottom: 16px;
   color: var(--primary);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   line-height: 1;
+  margin: auto 0; /* Centers kanji vertically in minimal mode */
 }
 
-/* Furigana (reading) */
+/* Secondary Information (hidden in minimal mode) */
+.furigana,
+.romaji,
+.meaning {
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  transform: translateY(5px);
+  transition: all 0.3s ease;
+}
+
 .furigana {
   font-size: 0.85rem;
   color: var(--primary);
   margin-bottom: 4px;
-  opacity: 0;
-  height: 0;
-  transform: translateY(5px);
-  transition: all 0.3s ease;
   font-weight: 500;
   letter-spacing: 0.5px;
 }
 
-/* Romaji */
 .romaji {
   font-size: 0.75rem;
   color: #888;
   margin-bottom: 8px;
-  opacity: 0;
-  height: 0;
-  transform: translateY(5px);
-  transition: all 0.3s ease 0.05s;
   font-style: italic;
+  transition-delay: 0.05s;
 }
 
-/* Meaning */
 .meaning {
   font-size: 0.85rem;
   color: var(--text);
   font-weight: 400;
-  opacity: 0;
-  height: 0;
-  transform: translateY(5px);
-  transition: all 0.3s ease 0.1s;
   line-height: 1.5;
+  transition-delay: 0.1s;
 }
 
 /* Meaning Languages */
@@ -357,7 +359,7 @@ button:disabled {
 
 .kanji-card:hover .kanji {
   transform: scale(1.05);
-  margin-bottom: 16px;
+  margin: 16px 0;
 }
 
 .kanji-card:hover .furigana,
@@ -366,6 +368,7 @@ button:disabled {
   opacity: 1;
   height: auto;
   transform: translateY(0);
+  overflow: visible;
 }
 
 /* Subtle Background Pattern */
@@ -386,35 +389,12 @@ button:disabled {
   opacity: 1;
 }
 
-/* Minimal Mode Styles */
-.kanji-card.minimal {
-  justify-content: center;
-  align-items: center;
-  padding: 16px;
-}
-
-.kanji-card.minimal .kanji {
-  margin-bottom: 0;
-  position: relative;
-  top: auto;
-  left: auto;
-  transform: none;
-}
-
-.kanji-card.minimal:hover {
-  justify-content: flex-start;
-}
-
-.kanji-card.minimal:hover .kanji {
-  margin-bottom: 16px;
-}
-
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .kanji-card {
-    padding: 18px 12px;
+    height: 140px;
+    padding: 12px;
     border-radius: 10px;
-    min-height: 140px;
   }
   
   .kanji {
@@ -432,7 +412,7 @@ button:disabled {
 }
 
 .kanji-grid.show-all .kanji {
-  margin-bottom: 12px;
+  margin: 16px 0;
 }
 
 .kanji-grid.show-all .furigana,
@@ -441,6 +421,7 @@ button:disabled {
   opacity: 1;
   height: auto;
   transform: translateY(0);
+  overflow: visible;
 }
 
 .kanji-grid.show-all .kanji-card:hover .kanji {
