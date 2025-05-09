@@ -1,73 +1,97 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Belajar Kanji JLPT</title>
-  <link rel="stylesheet" href="style.css"> 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Belajar Kanji JLPT</title>
+    <link rel="stylesheet" href="style.css"> 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
-  <div class="theme-toggle" id="themeToggle">
-    <i class="fas fa-moon"></i>
+ <div class="theme-toggle" id="themeToggle">
+  <i class="fas fa-moon"></i>
+ </div>
+
+ <header>
+  <h1>Belajar Kanji JLPT</h1>
+  <div class="level-selector" id="levelSelector">
+   <button class="level-btn active" data-level="n5">N5</button>
+   <button class="level-btn" data-level="n4">N4</button>
+   <button class="level-btn" data-level="n3">N3</button>
+   <button class="level-btn" data-level="n2">N2</button>
+   <button class="level-btn" data-level="n1">N1</button>
   </div>
+ </header>
 
-  <header>
-    <h1>Belajar Kanji JLPT</h1>
-    <div class="level-selector" id="levelSelector">
-      <button class="level-btn active" data-level="n5">N5</button>
-      <button class="level-btn" data-level="n4">N4</button>
-      <button class="level-btn" data-level="n3">N3</button>
-      <button class="level-btn" data-level="n2">N2</button>
-      <button class="level-btn" data-level="n1">N1</button>
-    </div>
-  </header>
+ <div class="controls">
+  <input
+   type="text"
+   id="searchInput"
+   placeholder="Cari kanji (contoh: 水, mizu, air...)"
+   autocomplete="off"
+  >
 
-  <div class="controls">
-    <input
-      type="text"
-      id="searchInput"
-      placeholder="Cari kanji (contoh: 水, mizu, air...)"
-      autocomplete="off"
-    >
-
-    <!-- ✅ Dropdown Kategori -->
     <select id="categoryFilter" class="category-filter" disabled>
-      <option value="">Pilih Kategori</option>
-      <option value="Tindakan">Tindakan</option>
-      <option value="Benda / Objek">Benda / Objek</option>
-      <option value="Kualitas / Keadaan">Kualitas / Keadaan</option>
-      <option value="Konsep Abstrak">Konsep Abstrak</option>
-      <option value="Emosi / Perasaan">Emosi / Perasaan</option>
-      <option value="Lokasi / Arah">Lokasi / Arah</option>
-    </select>
-
-    <div class="pagination-controls">
-      <select id="perPage">
-        <option value="10">10 per halaman</option>
-        <option value="20">20 per halaman</option>
-        <option value="50">50 per halaman</option>
-        <option value="0">Tampilkan Semua</option>
-      </select>
-
-      <button id="prevBtn"><i class="fas fa-chevron-left"></i></button>
-      <span id="pageInfo">Halaman 1</span>
-      <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
-    </div>
-  </div>
+        <option value="">Pilih Kategori</option>
+        <option value="Tindakan">Tindakan</option>
+        <option value="Benda / Objek">Benda / Objek</option>
+        <option value="Kualitas / Keadaan">Kualitas / Keadaan</option>
+        <option value="Konsep Abstrak">Konsep Abstrak</option>
+        <option value="Emosi / Perasaan">Emosi / Perasaan</option>
+        <option value="Lokasi / Arah">Lokasi / Arah</option>
+        <option value="Waktu / Durasi">Waktu / Durasi</option>
+        <option value="Angka / Kuantitas">Angka / Kuantitas</option>
+        <option value="Tubuh / Bagian Tubuh">Tubuh / Bagian Tubuh</option>
+        <option value="Alam / Lingkungan">Alam / Lingkungan</option>
+  </select>
 
   <div class="display-toggle">
     <span>Tampilan:</span>
     <button id="minimalBtn" class="display-toggle-btn active">Minimal</button>
     <button id="fullBtn" class="display-toggle-btn">Lengkap</button>
-  </div>
-  
-  <div class="status" id="statusInfo">Memuat data N5...</div>
+   </div>
+ </div> <div class="status" id="statusInfo">Memuat data N5...</div>
 
-  <div class="kanji-grid" id="kanjiContainer">
-    <div class="message">Memuat data kanji...</div>
-  </div>
+ <div class="kanji-grid" id="kanjiContainer">
+  <div class="message">Memuat data kanji...</div>
+ </div>
 
-  <script src="script.js"></script> 
+ <div class="pagination-controls">
+    <select id="perPage">
+     <option value="10">10 per halaman</option>
+     <option value="20">20 per halaman</option>
+     <option value="50">50 per halaman</option>
+     <option value="0">Tampilkan Semua</option>
+    </select>
+
+    <button id="prevBtn"><i class="fas fa-chevron-left"></i></button>
+    <span id="pageInfo">Halaman 1</span>
+    <button id="nextBtn"><i class="fas fa-chevron-right"></i></button>
+ </div>
+ <div id="kanjiModal" class="kanji-modal">
+  <div class="modal-content">
+   <span class="close-button">&times;</span>
+   <div class="modal-kanji"></div>
+   <div class="modal-furigana"></div>
+   <div class="modal-romaji"></div>
+   <div class="modal-meaning">
+    <div class="modal-indo"></div>
+    <div class="modal-inggris"></div>
+   </div>
+   <div class="modal-readings">
+    <div class="modal-onyomi">
+     <strong>Onyomi:</strong> <ul class="onyomi-list"></ul>
+    </div>
+    <div class="modal-kunyomi">
+     <strong>Kunyomi:</strong> <ul class="kunyomi-list"></ul>
+    </div>
+   </div>
+   <div class="modal-info">
+    <div class="modal-kategori"></div>
+    <div class="modal-jlpt"></div>
+   </div>
+  </div>
+ </div>
+ <script src="script.js"></script> 
 </body>
 </html>
