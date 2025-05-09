@@ -389,41 +389,7 @@ button:disabled {
 }
 
 /* Minimal Mode */
-.kanji-card.minimal {
-  height: 160px;
-  position: relative;
-  display: flex; /* Tambahkan ini */
-  align-items: center; /* Tambahkan ini */
-  justify-content: center; /* Tambahkan ini */
-}
 
-.kanji-card.minimal .kanji {
-  position: static; /* Ubah dari absolute ke static */
-  transform: none; /* Hapus transform */
-  margin: 0; /* Pastikan margin 0 */
-  width: auto; /* Ubah width */
-}
-
-.kanji-card.minimal:hover .kanji {
-  margin: 16px 0 12px;
-  transform: scale(1.05);
-}
-
-.kanji-card.minimal .furigana,
-.kanji-card.minimal .romaji,
-.kanji-card.minimal .meaning {
-  opacity: 0;
-  height: 0;
-  overflow: hidden;
-}
-
-.kanji-card.minimal:hover .furigana,
-.kanji-card.minimal:hover .romaji,
-.kanji-card.minimal:hover .meaning {
-  opacity: 1;
-  height: auto;
-  overflow: visible;
-}
 
 /* Show-All Mode */
 .kanji-grid.show-all .kanji-card {
