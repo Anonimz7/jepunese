@@ -394,31 +394,66 @@ button:disabled {
   color: white;
 }
 
-/* Mode Minimal (default) */
+/* Kanji Card Minimalist - Centered Kanji */
+.kanji-card.minimal {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 140px; /* Memberikan tinggi yang cukup */
+}
+
 .kanji-card.minimal .kanji {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  margin-bottom: 0;
+  position: relative;
+  top: auto;
+  left: auto;
+  transform: none;
+  margin: 0;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.kanji-card.minimal .furigana,
+.kanji-card.minimal .romaji,
+.kanji-card.minimal .meaning {
+  height: 0;
+  overflow: hidden;
+  margin: 0;
   transition: all 0.3s ease;
 }
 
-.kanji-card.minimal:hover .kanji {
-  position: static;
-  transform: none;
-  margin-bottom: 16px;
+/* Hover State */
+.kanji-card.minimal:hover {
+  justify-content: flex-start;
 }
 
-/* Mode Lengkap */
+.kanji-card.minimal:hover .kanji {
+  margin-bottom: 16px;
+  flex-grow: 0;
+  transform: scale(1.05);
+}
+
+.kanji-card.minimal:hover .furigana,
+.kanji-card.minimal:hover .romaji,
+.kanji-card.minimal:hover .meaning {
+  height: auto;
+  opacity: 1;
+  transform: translateY(0);
+  margin-bottom: 4px;
+}
+
+/* Penyesuaian untuk mode lengkap */
 .kanji-grid.show-all .kanji-card {
-  padding: 20px 16px;
+  justify-content: flex-start;
+  min-height: auto;
 }
 
 .kanji-grid.show-all .kanji {
-  position: static;
-  transform: none;
   margin-bottom: 12px;
+  flex-grow: 0;
 }
 
 .kanji-grid.show-all .furigana,
