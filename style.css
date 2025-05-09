@@ -442,6 +442,21 @@ button:disabled {
   min-height: 160px;
 }
 
+@media (max-width: 768px) {
+  .kanji-grid.minimal-mode .kanji-card {
+    height: 140px;
+    padding: 15px;
+  }
+  
+  .kanji-grid.minimal-mode .kanji {
+    font-size: 2rem;
+  }
+}
+
+.kanji-grid {
+  transition: grid-template-columns 0.3s ease;
+}
+
 /* Show-All Mode */
 .kanji-grid.show-all .kanji-card {
   min-height: auto;
