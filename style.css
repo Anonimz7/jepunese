@@ -389,12 +389,12 @@ button:disabled {
 }
 
 /* Minimal Mode */
-.kanji-card {
+.kanji-card.minimal {
   height: 160px;
   position: relative;
 }
 
-.kanji-card .kanji {
+.kanji-card.minimal .kanji {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -404,23 +404,23 @@ button:disabled {
   text-align: center;
 }
 
-.kanji-card:hover .kanji {
+.kanji-card.minimal:hover .kanji {
   position: static;
   transform: none;
   margin: 16px 0 12px;
 }
 
-.kanji-card .furigana,
-.kanji-card .romaji,
-.kanji-card .meaning {
+.kanji-card.minimal .furigana,
+.kanji-card.minimal .romaji,
+.kanji-card.minimal .meaning {
   opacity: 0;
   height: 0;
   overflow: hidden;
 }
 
-.kanji-card:hover .furigana,
-.kanji-card:hover .romaji,
-.kanji-card:hover .meaning {
+.kanji-card.minimal:hover .furigana,
+.kanji-card.minimal:hover .romaji,
+.kanji-card.minimal:hover .meaning {
   opacity: 1;
   height: auto;
   overflow: visible;
