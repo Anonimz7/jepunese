@@ -264,479 +264,75 @@ button:disabled {
 
 
 
-/* Variabel CSS (jika digunakan, pastikan didefinisikan di tempat lain atau tambahkan di sini jika belum ada) */
-/* Contoh:
-:root {
-    --card-bg: #ffffff;
-    --border: #e0e0e0;
-    --primary: #333;
-    --text: #555;
-}
-[data-theme="dark"] {
-    --card-bg: #333;
-    --border: #444;
-    --primary: #eee;
-    --text: #bbb;
-}
-*/
-
-
 /* Kanji Grid */
 .kanji-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 15px;
-  max-width: 1000px;
-  margin: 20px auto; /* Added some top margin for spacing below controls */
-  padding: 0 15px; /* Add horizontal padding for smaller screens */
-}
-
-/* Kanji Card Minimalist Modern - Gaya dasar yang berlaku untuk kedua mode */
-.kanji-card {
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 24px 16px; /* Padding default */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-  text-align: center;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  border: 1px solid var(--border);
-  position: relative; /* Diperlukan untuk pseudo-element dan kanji absolute */
-  overflow: hidden; /* Penting untuk menyembunyikan konten di mode minimal */
-  will-change: transform, box-shadow, border-color; /* Optimasi performa */
-  display: flex; /* Gunakan flexbox untuk tata letak konten di mode lengkap/hover */
-  flex-direction: column;
-  justify-content: flex-start; /* Konten mulai dari atas */
-  align-items: center; /* Pusatkan item secara horizontal dalam flex container */
-  min-height: 120px; /* Tinggi minimum agar card tidak terlalu kecil */
-}
-
-/* Karakter Kanji - Gaya dasar */
-.kanji {
-  font-size: 2.6rem;
-  font-weight: 600;
-  margin-bottom: 16px; /* Margin bawah default untuk mode lengkap */
-  color: var(--primary);
-  display: block;
-  transition: all 0.3s ease;
-  line-height: 1;
-  /* Di mode minimal (tidak di-hover), style di bawah akan ditimpa oleh rule spesifik */
-  /* Di mode lengkap, style ini yang berlaku */
-  position: static; /* Default: normal flow */
-  transform: none; /* Default: no transform */
-  width: auto; /* Default: auto width */
-  text-align: center; /* Default: center text */
-}
-
-/* Furigana (reading) */
-.furigana {
-  font-size: 0.85rem;
-  color: var(--primary);
-  margin-bottom: 4px;
-  opacity: 1; /* Default: visible in full mode */
-  transform: translateY(0); /* Default: normal position */
-  transition: all 0.3s ease;
-  font-weight: 500;
-  letter-spacing: 0.5px;
-  height: auto; /* Default: auto height */
-  overflow: visible; /* Default: visible content */
-}
-
-/* Romaji */
-.romaji {
-  font-size: 0.75rem;
-  color: #888;
-  margin-bottom: 8px;
-  opacity: 1; /* Default: visible in full mode */
-  transform: translateY(0); /* Default: normal position */
-  transition: all 0.3s ease 0.05s;
-  font-style: italic;
-   height: auto; /* Default: auto height */
-  overflow: visible; /* Default: visible content */
-}
-
-/* Meaning */
-.meaning {
-  font-size: 0.85rem;
-  color: var(--text);
-  font-weight: 400;
-  opacity: 1; /* Default: visible in full mode */
-  transform: translateY(0); /* Default: normal position */
-  transition: all 0.3s ease 0.1s;
-  line-height: 1.5;
-   height: auto; /* Default: auto height */
-  overflow: visible; /* Default: visible content */
-  text-align: center;
-}
-
-/* Meaning Languages */
-.meaning .indo {
-  display: block;
-  color: #ff6b6b; /* Reddish color for Indonesian */
-  margin-top: 2px;
-}
-
-.meaning .inggris {
-  display: block;
-  color: #4d96ff; /* Bluish color for English */
-  margin-top: 2px;
-}
-
-/* Hover Effects (Berlaku di kedua mode kecuali ditimpa) */
-.kanji-card:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-  border-color: rgba(79, 70, 229, 0.2);
-  transform: translateY(-4px);
-}
-
-/* Subtle Background Pattern */
-.kanji-card::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 20% 80%, rgba(79, 70, 229, 0.03) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.kanji-card:hover::after {
-  opacity: 1;
-}
-
-/* Responsive Adjustments */
-@media (max-width: 768px) {
+   display: grid;
+   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+   gap: 15px;
+   max-width: 1000px;
+   margin: 0 auto;
+  }
+  
+  /* Kanji Card Minimalist Modern */
   .kanji-card {
-      padding: 18px 12px;
-      border-radius: 10px;
+   background: var(--card-bg);
+   border-radius: 12px;
+   padding: 24px 16px;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+   text-align: center;
+   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+   cursor: pointer;
+   border: 1px solid var(--border);
+   position: relative;
+   overflow: hidden;
+   will-change: transform;
   }
-
+  
+  /* Karakter Kanji */
   .kanji {
-      font-size: 2.2rem;
-      /* margin-bottom dikelola oleh mode tampilan */
-  }
-
-  .furigana, .meaning {
-      font-size: 0.8rem;
-  }
-
-   .kanji-grid {
-      gap: 10px;
-       padding: 0 10px;
-  }
-}
-
-/* ======================================== */
-/* Centering & Minimal Mode Logic (Diperbaiki) */
-/* Berlaku saat kontainer grid TIDAK memiliki kelas 'show-all' */
-/* ======================================== */
-
-/* Gaya untuk kartu itu sendiri saat dalam Mode Minimal */
-.kanji-grid:not(.show-all) .kanji-card {
-  /* position: relative sudah ada di .kanji-card base */
-  height: 160px; /* Tinggi tetap untuk tampilan minimal agar grid konsisten */
-  justify-content: center; /* Pusatkan konten (meskipun kanji di-absolute) */
-  padding: 24px 16px; /* Padding default */
-}
-
-/* Karakter Kanji dalam mode minimal (tidak di-hover) */
-.kanji-grid:not(.show-all) .kanji-card .kanji {
-  position: absolute; /* Posisikan secara absolut */
-  top: 50%; /* Pindahkan 50% dari atas kontainer kartu */
-  left: 50%; /* Pindahkan 50% dari kiri kontainer kartu */
-  transform: translate(-50%, -50%); /* Geser kembali setengah ukuran elemen sendiri untuk centering penuh */
-  margin: 0; /* Pastikan margin tidak mengganggu centering */
-  width: 100%; /* Beri lebar penuh agar text-align center berfungsi */
-  text-align: center; /* Pusatkan teks kanji di dalam elemen kanji */
-  /* transition property inherited from base .kanji rule */
-  font-size: 2.6rem; /* Pastikan ukuran font sesuai */
-  margin-bottom: 0; /* Hapus margin bawah saat di tengah */
-}
-
-/* Hover State untuk Kanji dalam mode minimal */
-.kanji-grid:not(.show-all) .kanji-card:hover .kanji {
-  position: static; /* Kembalikan ke posisi normal */
-  transform: none; /* Hapus transformasi */
-  margin: 16px 0 12px 0; /* Beri margin agar kembali ke atas kartu */
-  top: auto; /* Reset properti absolute positioning */
-  left: auto; /* Reset properti absolute positioning */
-  font-size: 2.6rem; /* Pertahankan ukuran font */
-}
-
-/* Konten sekunder (furigana, romaji, meaning) dalam mode minimal (tidak di-hover) */
-/* Aturan ini menyembunyikan konten sekunder */
-.kanji-grid:not(.show-all) .kanji-card .furigana,
-.kanji-grid:not(.show-all) .kanji-card .romaji,
-.kanji-grid:not(.show-all) .kanji-card .meaning {
-  opacity: 0; /* Sembunyikan */
-  height: 0; /* Beri tinggi nol */
-  overflow: hidden; /* Pastikan tidak terlihat atau mempengaruhi layout */
-  transition: all 0.3s ease; /* Transisi saat muncul/sembunyi */
-  margin: 0 !important; /* Paksa margin menjadi nol saat tersembunyi */
-  padding: 0 !important; /* Paksa padding menjadi nol saat tersembunyi */
-  pointer-events: none; /* Tidak bisa di-klik saat tersembunyi */
-}
-
-/* Konten sekunder muncul saat mode minimal di-hover */
-.kanji-grid:not(.show-all) .kanji-card:hover .furigana,
-.kanji-grid:not(.show-all) .kanji-card:hover .romaji,
-.kanji-grid:not(.show-all) .kanji-card:hover .meaning {
-  opacity: 1; /* Munculkan */
-  height: auto; /* Tinggi sesuai konten */
-  overflow: visible; /* Konten terlihat */
-  transition: all 0.3s ease; /* Transisi saat muncul */
-  pointer-events: auto; /* Bisa di-klik saat muncul */
-  /* Kembalikan margin/padding yang sesuai saat terlihat */
-  /* Margin spesifik furigana/romaji/meaning akan ditangani oleh aturan mereka sendiri atau struktur dalamnya */
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 0;
-}
-
-/* Penyesuaian margin untuk elemen-elemen spesifik saat muncul di mode minimal hover */
-.kanji-grid:not(.show-all) .kanji-card:hover .furigana { margin-bottom: 4px; }
-.kanji-grid:not(.show-all) .kanji-card:hover .romaji { margin-bottom: 8px; }
-/* .meaning tidak butuh margin-bottom tambahan, children-nya (indo/inggris) punya margin-top */
-
-
-/* ======================================== */
-/* Gaya untuk Mode Lengkap */
-/* Berlaku saat kontainer grid memiliki kelas 'show-all' */
-/* ======================================== */
-
-.kanji-grid.show-all .kanji-card {
-  /* position: relative; -- sudah di set di .kanji-card base */
-  min-height: auto; /* Biarkan tinggi menyesuaikan konten */
-  height: auto; /* Pastikan tinggi auto di mode full */
-  justify-content: flex-start; /* Konten mulai dari atas */
-  padding: 24px 16px; /* Padding default */
-  overflow: visible; /* Pastikan konten terlihat */
-}
-
-.kanji-grid.show-all .kanji {
-  /* position: static; -- sudah di set di .kanji base */
-  /* transform: none; -- sudah di set di .kanji base */
-  margin-bottom: 16px; /* Margin bawah default */
-  /* top/left: auto; -- sudah di set di .kanji base */
-  /* width: auto; -- sudah di set di .kanji base */
-}
-
-/* Hover efek khusus kanji di mode lengkap */
-.kanji-grid.show-all .kanji-card:hover .kanji {
-  transform: scale(1.05); /* Hanya efek scaling */
-  /* position, margin, top, left tetap seperti default full mode */
-}
-
-/* Konten sekunder (furigana, romaji, meaning) dalam mode lengkap */
-/* Aturan ini memastikan konten selalu terlihat di mode lengkap */
-.kanji-grid.show-all .kanji-card .furigana,
-.kanji-grid.show-all .kanji-card .romaji,
-.kanji-grid.show-all .kanji-card .meaning {
-  opacity: 1; /* Selalu terlihat */
-  transform: translateY(0); /* Posisi normal */
-  height: auto; /* Tinggi sesuai konten */
-  overflow: visible; /* Konten terlihat */
-  pointer-events: auto; /* Bisa di-klik */
-  /* Kembalikan margin/padding sesuai aturan default */
-  margin-top: auto;
-  margin-bottom: auto;
-  padding: auto;
-}
-
-/* Aturan margin spesifik di mode lengkap (dari default style Anda) */
-.kanji-grid.show-all .kanji-card .furigana { margin-bottom: 4px; }
-.kanji-grid.show-all .kanji-card .romaji { margin-bottom: 8px; }
-/* .kanji-grid.show-all .kanji-card .meaning tidak butuh margin bottom tambahan */
-
-
-/* --- Gaya Tambahan dari HTML Anda --- */
-/* Pastikan gaya untuk elemen kontrol, header, theme toggle, dll. juga disertakan */
-/* ... (Salin gaya lain dari file CSS Anda yang tidak terkait langsung dengan kartu kanji) ... */
-/* Misalnya: */
-
-body {
-  font-family: 'Arial', sans-serif; /* Ganti dengan font yang Anda pakai */
-  line-height: 1.6;
-  margin: 0;
-  padding: 0;
-  background-color: var(--bg); /* Ganti dengan variabel background Anda */
-  color: var(--text); /* Ganti dengan variabel teks Anda */
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-header {
-  text-align: center;
-  margin-bottom: 20px;
-  padding: 20px 15px;
-  background-color: var(--card-bg); /* Contoh: background header */
-  border-bottom: 1px solid var(--border); /* Contoh: border header */
-}
-
-header h1 {
-  color: var(--primary);
-  margin-top: 0;
-  margin-bottom: 10px;
-  font-size: 1.8rem;
-}
-
-.level-selector {
-  margin-top: 10px;
-}
-
-.level-btn {
-  padding: 8px 15px;
-  margin: 0 5px;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  background-color: var(--card-bg);
-  color: var(--text);
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.level-btn.active {
-  background-color: var(--primary);
-  color: var(--card-bg); /* Warna teks kontras */
-  border-color: var(--primary);
-}
-
-.level-btn:hover:not(.active) {
-  background-color: var(--hover-bg); /* Jika ada variabel hover */
-  border-color: var(--primary);
-}
-
-
-.controls {
-  max-width: 1000px;
-  margin: 0 auto 20px auto;
-  padding: 0 15px;
-  display: flex;
-  flex-wrap: wrap; /* Agar elemen ke bawah di layar kecil */
-  gap: 10px; /* Jarak antar elemen kontrol */
-  align-items: center;
-  justify-content: center; /* Pusatkan kontrol */
-}
-
-.controls input[type="text"],
-.controls select {
-  padding: 10px;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  background-color: var(--card-bg);
-  color: var(--text);
-  font-size: 1rem;
-}
-
-.controls input[type="text"]::placeholder {
-   color: var(--text); /* Sesuaikan warna placeholder */
-   opacity: 0.8;
-}
-
-.pagination-controls {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.pagination-controls button {
-   padding: 8px 12px;
-   border: 1px solid var(--border);
-   border-radius: 5px;
-   background-color: var(--card-bg);
+   font-size: 2.6rem;
+   font-weight: 600;
+   margin-bottom: 16px;
    color: var(--primary);
-   cursor: pointer;
-   transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.pagination-controls button:disabled {
-   opacity: 0.5;
-   cursor: not-allowed;
-}
-
-.pagination-controls button:hover:not(:disabled) {
-   background-color: var(--hover-bg);
-   border-color: var(--primary);
-}
-
-#pageInfo {
-  padding: 0 10px;
-  font-size: 0.9rem;
-  color: var(--text);
-}
-
-.display-toggle {
-   max-width: 1000px;
-   margin: 0 auto 20px auto;
-   padding: 0 15px;
-   text-align: center;
+   display: block;
+   transition: all 0.3s ease;
+   line-height: 1;
+  }
+  
+  /* Furigana (reading) */
+  .furigana {
+   font-size: 0.85rem;
+   color: var(--primary);
+   margin-bottom: 4px;
+   opacity: 0;
+   transform: translateY(5px);
+   transition: all 0.3s ease;
+   font-weight: 500;
+   letter-spacing: 0.5px;
+  }
+  
+  /* Romaji */
+  .romaji {
+   font-size: 0.75rem;
+   color: #888;
+   margin-bottom: 8px;
+   opacity: 0;
+   transform: translateY(5px);
+   transition: all 0.3s ease 0.05s;
+   font-style: italic;
+  }
+  
+  /* Meaning */
+  .meaning {
+   font-size: 0.85rem;
    color: var(--text);
-   display: flex;
-   align-items: center;
-   justify-content: center;
-   gap: 10px;
-}
-
-.display-toggle-btn {
-   padding: 8px 15px;
-   border: 1px solid var(--border);
-   border-radius: 5px;
-   background-color: var(--card-bg);
-   color: var(--text);
-   cursor: pointer;
-   transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-.display-toggle-btn.active {
-  background-color: var(--primary);
-  color: var(--card-bg);
-  border-color: var(--primary);
-}
-
-.display-toggle-btn:hover:not(.active) {
-  background-color: var(--hover-bg);
-   border-color: var(--primary);
-}
-
-
-.status {
-   max-width: 1000px;
-   margin: 0 auto 15px auto;
-   padding: 0 15px;
-   text-align: center;
-   font-size: 0.9rem;
-   color: var(--text);
-}
-
-.status.error {
-   color: red; /* Contoh gaya error */
-}
-
-
-.message {
-   text-align: center;
-   padding: 20px;
-   grid-column: 1 / -1; /* Agar pesan menempati seluruh lebar grid */
-   color: var(--text);
-}
-
-/* Theme Toggle */
-.theme-toggle {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: var(--primary); /* Warna ikon */
-  z-index: 1000;
-  transition: color 0.3s ease;
-}
-
-.theme-toggle:hover {
-  color: var(--text); /* Warna saat hover */
-}
+   font-weight: 400;
+   opacity: 0;
+   transform: translateY(5px);
+   transition: all 0.3s ease 0.1s;
+   line-height: 1.5;
+  }
+  
   /* Meaning Languages */
   .meaning .indo {
    display: block;
@@ -803,84 +399,79 @@ header h1 {
    }
   }
   
-  /* =============================== */
-  /* Centering & Minimal Mode Logic */
-  /* =============================== */
-  
-  /* Container untuk mode minimal */
-  .kanji-card.minimal {
-   position: relative; /* Penting untuk absolute positioning anak */
-   height: 160px; /* Tinggi tetap untuk tampilan minimal */
-   /* display: flex; /* Flexbox ini ada tapi tidak secara langsung mengatur kanji saat absolute */
-   /* flex-direction: column; */
-  }
-  
-  /* Karakter Kanji dalam mode minimal (tidak di-hover) */
-  .kanji-card.minimal .kanji {
-   position: absolute; /* Posisikan secara absolut */
-   top: 50%; /* Pindahkan 50% dari atas kontainer */
-   left: 50%; /* Pindahkan 50% dari kiri kontainer */
-   transform: translate(-50%, -50%); /* Geser kembali setengah ukuran elemen sendiri untuk centering penuh */
-   margin: 0; /* Pastikan margin tidak mengganggu centering */
-   width: 100%; /* Beri lebar penuh agar text-align center berfungsi */
-   text-align: center; /* Pusatkan teks kanji di dalam elemen kanji */
-   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transisi saat perubahan posisi/transformasi */
-  }
-  
-  /* Hover State untuk Kanji dalam mode minimal */
-  .kanji-card.minimal:hover .kanji {
-   position: static; /* Kembalikan ke posisi normal */
-   transform: none; /* Hapus transformasi */
-   margin: 16px 0 12px 0; /* Beri margin agar kembali ke atas */
-   top: auto; /* Reset properti absolute positioning */
-   left: auto; /* Reset properti absolute positioning */
-  }
-  
-  /* Konten sekunder (furigana, romaji, meaning) dalam mode minimal */
-  .kanji-card.minimal .furigana,
-  .kanji-card.minimal .romaji,
-  .kanji-card.minimal .meaning {
-   opacity: 0; /* Sembunyikan */
-   height: 0; /* Beri tinggi nol */
-   overflow: hidden; /* Pastikan tidak terlihat atau mempengaruhi layout */
-   transition: all 0.3s ease; /* Transisi saat muncul */
-  }
-  
-  /* Konten sekunder muncul saat mode minimal di-hover */
-  .kanji-card.minimal:hover .furigana,
-  .kanji-card.minimal:hover .romaji,
-  .kanji-card.minimal:hover .meaning {
-   opacity: 1; /* Munculkan */
-   height: auto; /* Tinggi sesuai konten */
-   overflow: visible; /* Konten terlihat */
-  }
-  
-  /* Penyesuaian untuk mode lengkap (jika ada) */
-  /* Kelas ini (show-all) tampaknya mengontrol tampilan default card */
-  .kanji-grid.show-all .kanji-card {
-   min-height: auto; /* Biarkan tinggi menyesuaikan konten */
-   padding: 24px 16px; /* Pastikan padding default diterapkan */
-  }
-  
-  .kanji-grid.show-all .kanji {
-   margin-bottom: 16px; /* Margin bawah default */
-   position: static; /* Pastikan static */
-   transform: none; /* Pastikan none */
-   top: auto;
-   left: auto;
-   /* flex-grow: 0; */
-  }
-  
-  .kanji-grid.show-all .furigana,
-  .kanji-grid.show-all .romaji,
-  .kanji-grid.show-all .meaning {
-   opacity: 1; /* Selalu terlihat */
-   transform: translateY(0); /* Posisi normal */
-   height: auto; /* Tinggi sesuai konten */
-   overflow: visible; /* Konten terlihat */
-  }
-  
-  /* Efek hover saat mode lengkap aktif */
-  .kanji-grid.show-all .kanji-card:hover .kanji {
-   transform: scale(1.05); /* Efek scaling saat hover */
-  }
+/* ======================================== */
+/* Centering & Minimal Mode Logic (Diperbaiki) */
+/* ======================================== */
+
+/* Gaya untuk kartu itu sendiri saat dalam Mode Minimal (kontainer grid TIDAK memiliki show-all) */
+/* Ini menggantikan rule .kanji-card.minimal yang lama */
+.kanji-grid:not(.show-all) .kanji-card {
+  position: relative; /* Penting untuk absolute positioning anak */
+  height: 160px; /* Tinggi tetap untuk tampilan minimal agar grid konsisten */
+  padding: 24px 16px; /* Pertahankan padding kartu default */
+  /* display: flex; /* Flexbox di sini tidak memengaruhi kanji saat diposisikan absolute */ */
+  /* flex-direction: column; */
+}
+
+/* Karakter Kanji dalam mode minimal (tidak di-hover) */
+/* Ini menggantikan rule .kanji-card.minimal .kanji yang lama */
+.kanji-grid:not(.show-all) .kanji-card .kanji {
+  position: absolute; /* Posisikan secara absolut */
+  top: 50%; /* Pindahkan 50% dari atas kontainer kartu */
+  left: 50%; /* Pindahkan 50% dari kiri kontainer kartu */
+  transform: translate(-50%, -50%); /* Geser kembali setengah ukuran elemen sendiri untuk centering penuh */
+  margin: 0; /* Pastikan margin tidak mengganggu centering */
+  width: 100%; /* Beri lebar penuh agar text-align center berfungsi */
+  text-align: center; /* Pusatkan teks kanji di dalam elemen kanji */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Transisi saat perubahan posisi/transformasi */
+  font-size: 2.6rem; /* Pastikan ukuran font sesuai */
+  margin-bottom: 0; /* Hapus margin bawah saat di tengah */
+}
+
+/* Hover State untuk Kanji dalam mode minimal */
+/* Ini menggantikan rule .kanji-card.minimal:hover .kanji yang lama */
+.kanji-grid:not(.show-all) .kanji-card:hover .kanji {
+  position: static; /* Kembalikan ke posisi normal */
+  transform: none; /* Hapus transformasi */
+  margin: 16px 0 12px 0; /* Beri margin agar kembali ke atas kartu */
+  top: auto; /* Reset properti absolute positioning */
+  left: auto; /* Reset properti absolute positioning */
+  font-size: 2.6rem; /* Pertahankan ukuran font */
+}
+
+/* Konten sekunder (furigana, romaji, meaning) dalam mode minimal (tidak di-hover) */
+/* Ini menggantikan rule .kanji-card.minimal .furigana, .romaji, .meaning yang lama */
+.kanji-grid:not(.show-all) .kanji-card .furigana,
+.kanji-grid:not(.show-all) .kanji-card .romaji,
+.kanji-grid:not(.show-all) .kanji-card .meaning {
+  opacity: 0; /* Sembunyikan */
+  height: 0; /* Beri tinggi nol */
+  overflow: hidden; /* Pastikan tidak terlihat atau mempengaruhi layout */
+  transition: all 0.3s ease; /* Transisi saat muncul/sembunyi */
+  margin: 0 !important; /* Paksa margin menjadi nol saat tersembunyi */
+  padding: 0 !important; /* Paksa padding menjadi nol saat tersembunyi */
+}
+
+/* Konten sekunder muncul saat mode minimal di-hover */
+/* Ini menggantikan rule .kanji-card.minimal:hover .furigana, .romaji, .meaning yang lama */
+.kanji-grid:not(.show-all) .kanji-card:hover .furigana,
+.kanji-grid:not(.show-all) .kanji-card:hover .romaji,
+.kanji-grid:not(.show-all) .kanji-card:hover .meaning {
+  opacity: 1; /* Munculkan */
+  height: auto; /* Tinggi sesuai konten */
+  overflow: visible; /* Konten terlihat */
+  /* Kembalikan margin/padding yang sesuai saat terlihat */
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0;
+  /* Margin spesifik furigana/romaji/meaning akan ditangani oleh aturan mereka sendiri atau struktur dalamnya */
+}
+
+/* Pastikan gaya mode lengkap tetap berfungsi saat grid memiliki kelas show-all */
+/* Aturan ini sudah ada dan seharusnya tidak perlu diubah */
+/*
+.kanji-grid.show-all .kanji-card { ... }
+.kanji-grid.show-all .kanji { ... }
+.kanji-grid.show-all .furigana, ... { ... }
+.kanji-grid.show-all .kanji-card:hover .kanji { ... }
+*/
