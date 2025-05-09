@@ -264,80 +264,89 @@ button:disabled {
 
 
 
-/* Kanji Grid */
+/* Kanji Grid Container */
 .kanji-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 15px;
   max-width: 1000px;
   margin: 0 auto;
+  padding: 10px;
 }
 
-/* Kanji Card Minimalist Modern */
+/* Base Kanji Card Style */
 .kanji-card {
-  background: var(--card-bg);
-  border-radius: 12px;
-  padding: 24px 16px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-  text-align: center;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
-  border: 1px solid var(--border);
-  position: relative;
-  overflow: hidden;
-  will-change: transform;
-  min-height: 160px; /* Tambahkan tinggi minimum yang konsisten */
+  /* Layout */
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Pusatkan konten secara vertikal */
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  
+  /* Sizing */
+  min-height: 160px;
+  padding: 20px 16px;
+  aspect-ratio: 1/1; /* Maintain square shape */
+  
+  /* Styling */
+  background: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  
+  /* Animation */
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  cursor: pointer;
 }
 
-/* Karakter Kanji */
+/* Kanji Character */
 .kanji {
   font-size: 2.6rem;
   font-weight: 600;
-  margin-bottom: 16px;
   color: var(--primary);
-  display: block;
-  transition: all 0.3s ease;
   line-height: 1;
+  margin: 0;
+  transition: all 0.3s ease;
+  transform-origin: center;
 }
 
-/* Furigana (reading) */
+/* Secondary Content (initially hidden) */
+.furigana,
+.romaji,
+.meaning {
+  width: 100%;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  margin: 0;
+  transition: all 0.3s ease;
+  transform: translateY(5px);
+}
+
 .furigana {
   font-size: 0.85rem;
   color: var(--primary);
-  margin-bottom: 4px;
-  opacity: 0;
-  transform: translateY(5px);
-  transition: all 0.3s ease;
   font-weight: 500;
   letter-spacing: 0.5px;
 }
 
-/* Romaji */
 .romaji {
   font-size: 0.75rem;
   color: #888;
-  margin-bottom: 8px;
-  opacity: 0;
-  transform: translateY(5px);
-  transition: all 0.3s ease 0.05s;
   font-style: italic;
+  transition-delay: 0.05s;
 }
 
-/* Meaning */
 .meaning {
   font-size: 0.85rem;
   color: var(--text);
   font-weight: 400;
-  opacity: 0;
-  transform: translateY(5px);
-  transition: all 0.3s ease 0.1s;
   line-height: 1.5;
+  transition-delay: 0.1s;
 }
 
-/* Meaning Languages */
 .meaning .indo {
   display: block;
   color: #ff6b6b;
@@ -359,16 +368,39 @@ button:disabled {
 
 .kanji-card:hover .kanji {
   transform: scale(1.05);
+  margin-bottom: 12px;
 }
 
 .kanji-card:hover .furigana,
 .kanji-card:hover .romaji,
 .kanji-card:hover .meaning {
+  max-height: 50px;
   opacity: 1;
   transform: translateY(0);
+  margin: 2px 0;
 }
 
-/* Subtle Background Pattern */
+/* Show All Mode */
+.kanji-grid.show-all .kanji-card {
+  justify-content: flex-start;
+  padding: 16px;
+}
+
+.kanji-grid.show-all .kanji {
+  transform: scale(1) !important;
+  margin-bottom: 8px !important;
+}
+
+.kanji-grid.show-all .furigana,
+.kanji-grid.show-all .romaji,
+.kanji-grid.show-all .meaning {
+  max-height: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  margin: 2px 0 !important;
+}
+
+/* Background Pattern Effect */
 .kanji-card::after {
   content: "";
   position: absolute;
@@ -388,46 +420,41 @@ button:disabled {
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
+  .kanji-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+  }
+  
   .kanji-card {
-    padding: 18px 12px;
-    border-radius: 10px;
-    min-height: 140px; /* Sesuaikan untuk mobile */
+    min-height: 140px;
+    padding: 16px 12px;
   }
   
   .kanji {
     font-size: 2.2rem;
-    margin-bottom: 12px;
   }
   
   .furigana, .meaning {
     font-size: 0.8rem;
   }
+  
+  .romaji {
+    font-size: 0.7rem;
+  }
 }
 
-/* Penyesuaian untuk mode show-all */
-.kanji-grid.show-all .kanji-card {
-  /* Hapus properti yang mengubah layout */
-  justify-content: center;
-  min-height: 160px;
+@media (max-width: 480px) {
+  .kanji-grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 10px;
+  }
+  
+  .kanji-card {
+    min-height: 120px;
+    padding: 12px 8px;
+  }
+  
+  .kanji {
+    font-size: 2rem;
+  }
 }
-
-.kanji-grid.show-all .kanji {
-  margin-bottom: 12px;
-  flex-grow: 0;
-}
-
-.kanji-grid.show-all .furigana,
-.kanji-grid.show-all .romaji,
-.kanji-grid.show-all .meaning {
-  opacity: 1;
-  transform: translateY(0);
-  height: auto;
-  overflow: visible;
-}
-
-/* Efek hover saat mode show-all aktif */
-.kanji-grid.show-all .kanji-card:hover .kanji {
-  transform: scale(1.05);
-}
-
-/* Hapus class .minimal yang tidak perlu karena sekarang semua kartu memiliki style yang sama */
