@@ -313,11 +313,8 @@ button:disabled {
   left: 0;
   right: 0;
   text-align: center;
-  transition:
-    opacity 0.3s ease,
-    bottom 0.3s ease; /* tambahkan transisi pada posisi */
+  transition: opacity 0.3s ease;
 }
-
 
 .kanji-card .furigana {
   bottom: 50px;
