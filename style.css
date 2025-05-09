@@ -263,239 +263,119 @@ button:disabled {
 
 
 
-/* Kanji Grid Container */
+
+/* Kanji Grid */
 .kanji-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 20px;
-  max-width: 1200px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 15px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 20px;
 }
 
-/* Base Kanji Card Style */
+/* Kanji Card Styles (ukuran original) */
 .kanji-card {
-  /* Layout */
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 24px 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  text-align: center;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-  position: relative;
-  overflow: hidden;
-  
-  /* Sizing */
-  min-height: 180px;
-  padding: 24px 16px;
-  aspect-ratio: 1/1;
-  
-  /* Styling */
-  background: linear-gradient(135deg, var(--card-bg) 0%, #f9f9f9 100%);
-  border-radius: 16px;
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  
-  /* Animation */
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-  will-change: transform;
-  cursor: pointer;
+  min-height: 160px;
 }
 
-/* Kanji Character */
-.kanji {
-  font-size: 3rem;
-  font-weight: 700;
-  color: var(--primary);
-  line-height: 1;
-  margin: 0;
-  transition: all 0.3s ease;
-  transform-origin: center;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-/* Secondary Content (initially hidden) */
-.furigana,
-.romaji,
-.meaning {
-  width: 100%;
-  max-height: 0;
-  opacity: 0;
-  overflow: hidden;
-  margin: 0;
-  transition: all 0.3s ease;
-  transform: translateY(8px);
-  text-align: center;
-}
-
-.furigana {
-  font-size: 0.95rem;
-  color: var(--primary);
+/* Posisi Kanji (centered in minimal mode) */
+.kanji-card .kanji {
+  font-size: 2.6rem;
   font-weight: 600;
-  letter-spacing: 0.5px;
-  margin-bottom: 4px;
+  color: var(--primary);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  line-height: 1;
+  margin: auto 0; /* Pusatkan vertikal */
 }
 
-.romaji {
+/* Secondary info (hidden in minimal mode) */
+.kanji-card .furigana,
+.kanji-card .romaji,
+.kanji-card .meaning {
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  transform: translateY(5px);
+  transition: all 0.3s ease;
+}
+
+.kanji-card .furigana {
   font-size: 0.85rem;
-  color: #777;
-  font-style: italic;
-  transition-delay: 0.05s;
+  color: var(--primary);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.kanji-card .romaji {
+  font-size: 0.75rem;
+  color: #888;
   margin-bottom: 8px;
+  transition-delay: 0.05s;
 }
 
-.meaning {
-  font-size: 0.95rem;
+.kanji-card .meaning {
+  font-size: 0.85rem;
   color: var(--text);
-  font-weight: 500;
-  line-height: 1.4;
   transition-delay: 0.1s;
-  padding-top: 8px;
-  border-top: 1px dashed rgba(0, 0, 0, 0.1);
-}
-
-.meaning .indo {
-  display: block;
-  color: #ff6b6b;
-  margin-top: 4px;
-  font-weight: 500;
-}
-
-.meaning .inggris {
-  display: block;
-  color: #4d96ff;
-  margin-top: 4px;
-  font-weight: 500;
 }
 
 /* Hover Effects */
 .kanji-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-  border-color: rgba(79, 70, 229, 0.3);
-  transform: translateY(-6px);
-  background: linear-gradient(135deg, var(--card-bg) 0%, #f5f5f5 100%);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  transform: translateY(-4px);
 }
 
 .kanji-card:hover .kanji {
-  transform: scale(1.08);
-  margin-bottom: 16px;
+  transform: scale(1.05);
+  margin: 16px 0;
 }
 
 .kanji-card:hover .furigana,
 .kanji-card:hover .romaji,
 .kanji-card:hover .meaning {
-  max-height: 60px;
   opacity: 1;
+  height: auto;
   transform: translateY(0);
-  margin: 4px 0;
 }
 
-/* Show All Mode */
+/* Full Display Mode */
 .kanji-grid.show-all .kanji-card {
   justify-content: flex-start;
-  padding: 20px;
-  background: var(--card-bg);
 }
 
 .kanji-grid.show-all .kanji {
-  transform: scale(1) !important;
-  margin-bottom: 12px !important;
+  margin: 16px 0;
 }
 
 .kanji-grid.show-all .furigana,
 .kanji-grid.show-all .romaji,
 .kanji-grid.show-all .meaning {
-  max-height: none !important;
-  opacity: 1 !important;
-  transform: none !important;
-  margin: 4px 0 !important;
-}
-
-/* Background Pattern Effect */
-.kanji-card::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: radial-gradient(circle at 20% 80%, rgba(79, 70, 229, 0.05) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.kanji-card:hover::after {
   opacity: 1;
-}
-
-/* Active/Pressed State */
-.kanji-card:active {
-  transform: translateY(-2px) scale(0.98);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-/* Responsive Adjustments */
-@media (max-width: 992px) {
-  .kanji-grid {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 16px;
-  }
-  
-  .kanji-card {
-    min-height: 160px;
-  }
-  
-  .kanji {
-    font-size: 2.8rem;
-  }
+  height: auto;
+  transform: translateY(0);
 }
 
 @media (max-width: 768px) {
-  .kanji-grid {
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: 14px;
-    padding: 16px;
-  }
-  
   .kanji-card {
-    min-height: 150px;
-    padding: 20px 12px;
-  }
-  
-  .kanji {
-    font-size: 2.5rem;
-  }
-  
-  .furigana, .meaning {
-    font-size: 0.9rem;
-  }
-  
-  .romaji {
-    font-size: 0.8rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .kanji-grid {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    gap: 12px;
-    padding: 12px;
-  }
-  
-  .kanji-card {
-    min-height: 130px;
-    padding: 16px 10px;
-    border-radius: 14px;
+    height: 160px;
+    padding: 18px 12px;
   }
   
   .kanji {
     font-size: 2.2rem;
-  }
-  
-  .furigana, .meaning {
-    font-size: 0.85rem;
-  }
-  
-  .romaji {
-    font-size: 0.75rem;
   }
 }
