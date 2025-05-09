@@ -178,33 +178,6 @@ button:disabled {
   color: var(--text);
 }
 
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .controls {
-    flex-direction: column;
-  }
-
-  #searchInput {
-    width: 100%;
-  }
-
-  .kanji-grid {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  }
-
-  .kanji-card {
-    padding: 15px;
-  }
-
-  .kanji {
-    font-size: 2rem;
-  }
-
-  .furigana, .romaji, .meaning {
-    font-size: 0.8rem;
-  }
-}
-
 #categoryFilter {
   min-width: 180px;
   background: var(--card-bg);
@@ -260,6 +233,33 @@ button:disabled {
   color: white;
 }
 
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .controls {
+    flex-direction: column;
+  }
+
+  #searchInput {
+    width: 100%;
+  }
+
+  .kanji-grid {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+
+  .kanji-card {
+    padding: 15px;
+  }
+
+  .kanji {
+    font-size: 2rem;
+  }
+
+  .furigana, .romaji, .meaning {
+    font-size: 0.8rem;
+  }
+}
+
 
 
 
@@ -272,6 +272,7 @@ button:disabled {
   max-width: 1000px;
   margin: 0 auto;
 }
+
 /* Kanji Card Minimalist Modern */
 .kanji-card {
   background: var(--card-bg);
@@ -285,6 +286,10 @@ button:disabled {
   position: relative;
   overflow: hidden;
   will-change: transform;
+  min-height: 160px; /* Tambahkan tinggi minimum yang konsisten */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Pusatkan konten secara vertikal */
 }
 
 /* Karakter Kanji */
@@ -386,6 +391,7 @@ button:disabled {
   .kanji-card {
     padding: 18px 12px;
     border-radius: 10px;
+    min-height: 140px; /* Sesuaikan untuk mobile */
   }
   
   .kanji {
@@ -398,56 +404,11 @@ button:disabled {
   }
 }
 
-/* Perbaikan Centering Kanji */
-.kanji-card.minimal {
-  position: relative; /* Container relatif */
-  height: 160px; /* Fixed height untuk konsistensi */
-  display: flex;
-  flex-direction: column;
-}
-
-.kanji-card.minimal .kanji {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  margin: 0;
-  width: 100%;
-  text-align: center;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* Hover State */
-.kanji-card.minimal:hover .kanji {
-  position: static;
-  transform: none;
-  margin: 16px 0 12px 0;
-  top: auto;
-  left: auto;
-}
-
-/* Konten sekunder */
-.kanji-card.minimal .furigana,
-.kanji-card.minimal .romaji,
-.kanji-card.minimal .meaning {
-  opacity: 0;
-  height: 0;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.kanji-card.minimal:hover .furigana,
-.kanji-card.minimal:hover .romaji,
-.kanji-card.minimal:hover .meaning {
-  opacity: 1;
-  height: auto;
-  overflow: visible;
-}
-
-/* Penyesuaian untuk mode lengkap */
+/* Penyesuaian untuk mode show-all */
 .kanji-grid.show-all .kanji-card {
-  justify-content: flex-start;
-  min-height: auto;
+  /* Hapus properti yang mengubah layout */
+  justify-content: center;
+  min-height: 160px;
 }
 
 .kanji-grid.show-all .kanji {
@@ -460,9 +421,13 @@ button:disabled {
 .kanji-grid.show-all .meaning {
   opacity: 1;
   transform: translateY(0);
+  height: auto;
+  overflow: visible;
 }
 
-/* Efek hover saat mode lengkap aktif */
+/* Efek hover saat mode show-all aktif */
 .kanji-grid.show-all .kanji-card:hover .kanji {
   transform: scale(1.05);
 }
+
+/* Hapus class .minimal yang tidak perlu karena sekarang semua kartu memiliki style yang sama */
