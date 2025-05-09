@@ -188,6 +188,15 @@ button:disabled {
   font-weight: 500;
 }
 
+.meaning .indo {
+  color: #ff5733; /* Misalnya warna oranye untuk Indo */
+}
+
+.meaning .inggris {
+  color: #33aaff; /* Misalnya warna biru untuk Inggris */
+}
+
+
 .romaji {
   opacity: 0;
   transition: opacity 0.2s ease;
