@@ -308,7 +308,7 @@ button:disabled {
   opacity: 1;
 }
 
-/* Kanji  ontent*/
+/* Kanji ontent*/
 .kanji, .furigana, .romaji, .meaning {
   transition: all 0.3s ease;
 }
