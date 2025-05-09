@@ -169,7 +169,7 @@ function renderKanji() {
       <div class="meaning">
         <div class="indo">${item.indo}</div>
         <div class="inggris">${item.inggris}</div>
-        <div class="kategori"><small>${item.kategori}</small></div>
+        <!-- <div class="kategori"><small>${item.kategori}</small></div> -->
       </div>
     </div>
   `).join('');
