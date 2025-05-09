@@ -390,24 +390,27 @@ button:disabled {
 
 /* Minimal Mode */
 .kanji-card.minimal {
-  height: 160px;
   position: relative;
+  height: 160px;
 }
 
 .kanji-card.minimal .kanji {
-  position: absolute;
+  position: absolute !important;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 100%;
   margin: 0;
+  width: 100%;
   text-align: center;
+  transition: all 0.3s ease;
 }
 
 .kanji-card.minimal:hover .kanji {
-  position: static;
+  position: static !important;
+  top: auto;
+  left: auto;
   transform: none;
-  margin: 16px 0 12px;
+  margin: 16px 0 12px 0;
 }
 
 .kanji-card.minimal .furigana,
@@ -416,6 +419,7 @@ button:disabled {
   opacity: 0;
   height: 0;
   overflow: hidden;
+  transition: all 0.3s ease;
 }
 
 .kanji-card.minimal:hover .furigana,
@@ -425,6 +429,7 @@ button:disabled {
   height: auto;
   overflow: visible;
 }
+
 
 /* Show-All Mode */
 .kanji-grid.show-all .kanji-card {
