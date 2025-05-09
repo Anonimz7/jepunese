@@ -368,6 +368,7 @@ button:disabled {
   transform: scale(1.05);
 }
 
+/*
 .kanji-card:hover .furigana,
 .kanji-card:hover .romaji,
 .kanji-card:hover .meaning {
@@ -392,7 +393,7 @@ button:disabled {
   }
 }
 
-/* Minimal Mode 
+/* Pengaturan untuk mode minimal
 .kanji-card.minimal {
   height: 160px;
   position: relative;
@@ -430,7 +431,7 @@ button:disabled {
   overflow: visible;
 }
 
-/* Show-All Mode */
+/* Pengaturan untuk mode lengkap */
 .kanji-grid.show-all .kanji-card {
   min-height: auto;
   padding: 24px 16px;
