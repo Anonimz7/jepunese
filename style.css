@@ -383,12 +383,12 @@ button:disabled {
 }
 
 /* Pengaturan untuk mode minimal */
-.kanji-card.minimal {
+.kanji-grid.minimal {
   height: 160px;
   position: relative;
 }
 
-.kanji-card.minimal .kanji {
+.kanji-grid.minimal .kanji {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -398,15 +398,9 @@ button:disabled {
   text-align: center;
 }
 
-.kanji-card.minimal:hover .kanji {
-  position: static;
-  transform: none;
-  margin: 16px 0 12px;
-}
-
-.kanji-card.minimal .furigana,
-.kanji-card.minimal .romaji,
-.kanji-card.minimal .meaning {
+ .kanji-grid.minimal .furigana,
+ .kanji-grid.minimal .romaji,
+ .kanji-grid.minimal .meaning {
   opacity: 0;
   height: auto;
   overflow: hidden;
