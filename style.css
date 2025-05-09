@@ -264,14 +264,6 @@ button:disabled {
 
 
 
-/* Grid Layout */
-.kanji-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 15px;
-  max-width: 1000px;
-  margin: 0 auto;
-}
 
 /* Card Style */
 .kanji-card {
