@@ -82,23 +82,17 @@ function setupEventListeners() {
   // Toggle display mode
   document.getElementById('minimalBtn').addEventListener('click', () => {
     kanjiContainer.classList.remove('show-all');
-    // Tambahkan class minimal ke setiap card
-    document.querySelectorAll('.kanji-card').forEach(card => {
-        card.classList.add('minimal');
-    });
+    kanjiContainer.classList.add('minimal-mode'); // Tambah class ke container
     document.getElementById('minimalBtn').classList.add('active');
     document.getElementById('fullBtn').classList.remove('active');
-});
+  });
 
-document.getElementById('fullBtn').addEventListener('click', () => {
+  document.getElementById('fullBtn').addEventListener('click', () => {
     kanjiContainer.classList.add('show-all');
-    // Hapus class minimal dari setiap card
-    document.querySelectorAll('.kanji-card').forEach(card => {
-        card.classList.remove('minimal');
-    });
+    kanjiContainer.classList.remove('minimal-mode'); // Hapus class
     document.getElementById('fullBtn').classList.add('active');
     document.getElementById('minimalBtn').classList.remove('active');
-});
+  });
 
   searchInput.addEventListener('input', debounce(handleSearch, 300));
 

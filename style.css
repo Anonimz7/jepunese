@@ -388,8 +388,58 @@ button:disabled {
   }
 }
 
-/* Minimal Mode */
+/* Mode Minimal - Container Level */
+.kanji-grid.minimal-mode .kanji-card {
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
+.kanji-grid.minimal-mode .kanji {
+  margin: 0;
+}
+
+.kanji-grid:not(.minimal-mode) .kanji {
+  margin-bottom: 16px; /* Style default */
+}
+
+/* Minimal Mode */
+.kanji-card.minimal {
+  height: 160px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px; /* Sama seperti mode lengkap */
+}
+
+.kanji-card.minimal .kanji {
+  font-size: 2.6rem; /* Sama seperti mode lengkap */
+  margin: 0;
+  transition: all 0.3s ease;
+  transform: scale(1); /* Reset transform */
+}
+
+.kanji-card.minimal:hover .kanji {
+  font-size: 2.6rem; /* Pertahankan ukuran */
+  margin-bottom: 16px; /* Sama seperti mode lengkap */
+  transform: scale(1.05); /* Efek hover sama */
+}
+
+/* Pastikan elemen lain tetap tersembunyi saat minimal */
+.kanji-card.minimal .furigana,
+.kanji-card.minimal .romaji,
+.kanji-card.minimal .meaning {
+  display: none; /* Lebih efektif daripada opacity/height */
+}
+
+.kanji-card.minimal:hover .furigana,
+.kanji-card.minimal:hover .romaji,
+.kanji-card.minimal:hover .meaning {
+  display: block; /* Munculkan saat hover */
+  opacity: 1;
+  height: auto;
+}
 
 /* Show-All Mode */
 .kanji-grid.show-all .kanji-card {
