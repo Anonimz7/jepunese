@@ -456,28 +456,3 @@ button:disabled {
 .kanji-grid {
   transition: grid-template-columns 0.3s ease;
 }
-
-/* Show-All Mode */
-.kanji-grid.show-all .kanji-card {
-  min-height: auto;
-  padding: 24px 16px;
-}
-
-.kanji-grid.show-all .kanji {
-  margin-bottom: 16px;
-  position: static;
-  transform: none;
-}
-
-.kanji-grid.show-all .furigana,
-.kanji-grid.show-all .romaji,
-.kanji-grid.show-all .meaning {
-  opacity: 1;
-  transform: translateY(0);
-  height: auto;
-  overflow: visible;
-}
-
-.kanji-grid.show-all .kanji-card:hover .kanji {
-  transform: scale(1.05);
-}
