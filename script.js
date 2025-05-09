@@ -82,16 +82,22 @@ function setupEventListeners() {
   // Toggle display mode
   document.getElementById('minimalBtn').addEventListener('click', () => {
     kanjiContainer.classList.remove('show-all');
-    kanjiContainer.classList.add('minimal-mode'); // Tambah class ke container
+    kanjiContainer.classList.add('minimal-mode');
     document.getElementById('minimalBtn').classList.add('active');
     document.getElementById('fullBtn').classList.remove('active');
+    
+    // Force re-render to apply styles
+    renderKanji();
   });
 
   document.getElementById('fullBtn').addEventListener('click', () => {
     kanjiContainer.classList.add('show-all');
-    kanjiContainer.classList.remove('minimal-mode'); // Hapus class
+    kanjiContainer.classList.remove('minimal-mode');
     document.getElementById('fullBtn').classList.add('active');
     document.getElementById('minimalBtn').classList.remove('active');
+    
+    // Force re-render to apply styles
+    renderKanji();
   });
 
   searchInput.addEventListener('input', debounce(handleSearch, 300));

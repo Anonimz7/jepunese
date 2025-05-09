@@ -388,27 +388,28 @@ button:disabled {
   }
 }
 
-/* Mode Minimal - Solusi Fixed */
-.kanji-card.minimal {
-  height: 160px !important;
-  display: flex !important;
+/* ================== */
+/* Fixed Minimal Mode */
+/* ================== */
+.kanji-grid.minimal-mode .kanji-card {
+  height: 160px;
+  display: flex;
   flex-direction: column;
-  justify-content: center; /* Pusatkan vertikal */
-  align-items: center; /* Pusatkan horizontal */
-  padding: 24px 16px; /* Sama dengan mode lengkap */
+  justify-content: center;
+  padding: 24px 16px;
+  transition: all 0.3s ease;
 }
 
-.kanji-card.minimal .kanji {
+.kanji-grid.minimal-mode .kanji {
   font-size: 2.6rem;
   margin: 0;
-  transform: none;
   transition: all 0.3s ease;
-  position: static; /* Hapus position absolute */
+  transform: none !important;
 }
 
-.kanji-card.minimal .furigana,
-.kanji-card.minimal .romaji,
-.kanji-card.minimal .meaning {
+.kanji-grid.minimal-mode .furigana,
+.kanji-grid.minimal-mode .romaji,
+.kanji-grid.minimal-mode .meaning {
   display: none;
   opacity: 0;
   height: 0;
@@ -417,21 +418,28 @@ button:disabled {
 }
 
 /* Hover State */
-.kanji-card.minimal:hover {
-  justify-content: flex-start; /* Kembali ke layout normal */
+.kanji-grid.minimal-mode .kanji-card:hover {
+  justify-content: flex-start;
+  padding: 24px 16px;
 }
 
-.kanji-card.minimal:hover .kanji {
-  margin-bottom: 16px; /* Sama dengan mode lengkap */
-  transform: scale(1.05);
+.kanji-grid.minimal-mode .kanji-card:hover .kanji {
+  margin-bottom: 16px;
+  transform: scale(1.05) !important;
 }
 
-.kanji-card.minimal:hover .furigana,
-.kanji-card.minimal:hover .romaji,
-.kanji-card.minimal:hover .meaning {
+.kanji-grid.minimal-mode .kanji-card:hover .furigana,
+.kanji-grid.minimal-mode .kanji-card:hover .romaji,
+.kanji-grid.minimal-mode .kanji-card:hover .meaning {
   display: block;
   opacity: 1;
   height: auto;
+}
+
+/* Ensure consistent card size */
+.kanji-grid.minimal-mode .kanji-card,
+.kanji-grid.show-all .kanji-card {
+  min-height: 160px;
 }
 
 /* Show-All Mode */
