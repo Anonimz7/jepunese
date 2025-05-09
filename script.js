@@ -4,6 +4,8 @@ let filteredData = [];
 let currentPage = 1;
 let perPage = 10;
 
+let currentDisplayMode = 'minimal'; // Default mode saat startup
+
 const levelButtons = document.querySelectorAll('.level-btn');
 const searchInput = document.getElementById('searchInput');
 const categoryFilter = document.getElementById('categoryFilter');
