@@ -272,8 +272,7 @@ button:disabled {
   max-width: 1000px;
   margin: 0 auto;
 }
-
-/* Kanji Card Styles (ukuran original) */
+/* Kanji Card Minimalist Modern */
 .kanji-card {
   background: var(--card-bg);
   border-radius: 12px;
@@ -286,64 +285,75 @@ button:disabled {
   position: relative;
   overflow: hidden;
   will-change: transform;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 160px; /* Tetapkan tinggi minimal yang konsisten */
-  height: 160px; /* Tambahkan tinggi tetap */
 }
 
-/* Posisi Kanji (centered in minimal mode) */
-.kanji-card .kanji {
+/* Karakter Kanji */
+.kanji {
   font-size: 2.6rem;
   font-weight: 600;
+  margin-bottom: 16px;
   color: var(--primary);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  line-height: 1;
-  margin: auto 0; /* Pusatkan vertikal */
-}
-
-/* Secondary info (hidden in minimal mode) */
-.kanji-card .furigana,
-.kanji-card .romaji,
-.kanji-card .meaning {
-  opacity: 0;
-  height: auto; /* Ubah dari 0 ke auto */
-  overflow: hidden;
-  transform: translateY(5px);
+  display: block;
   transition: all 0.3s ease;
-  visibility: hidden; /* Tambahkan ini untuk menyembunyikan tanpa mempengaruhi layout */
+  line-height: 1;
 }
 
-.kanji-card .furigana {
+/* Furigana (reading) */
+.furigana {
   font-size: 0.85rem;
   color: var(--primary);
   margin-bottom: 4px;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.3s ease;
   font-weight: 500;
+  letter-spacing: 0.5px;
 }
 
-.kanji-card .romaji {
+/* Romaji */
+.romaji {
   font-size: 0.75rem;
   color: #888;
   margin-bottom: 8px;
-  transition-delay: 0.05s;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.3s ease 0.05s;
+  font-style: italic;
 }
 
-.kanji-card .meaning {
+/* Meaning */
+.meaning {
   font-size: 0.85rem;
   color: var(--text);
-  transition-delay: 0.1s;
+  font-weight: 400;
+  opacity: 0;
+  transform: translateY(5px);
+  transition: all 0.3s ease 0.1s;
+  line-height: 1.5;
+}
+
+/* Meaning Languages */
+.meaning .indo {
+  display: block;
+  color: #ff6b6b;
+  margin-top: 2px;
+}
+
+.meaning .inggris {
+  display: block;
+  color: #4d96ff;
+  margin-top: 2px;
 }
 
 /* Hover Effects */
 .kanji-card:hover {
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  border-color: rgba(79, 70, 229, 0.2);
   transform: translateY(-4px);
 }
 
 .kanji-card:hover .kanji {
   transform: scale(1.05);
-  margin: 16px 0;
 }
 
 .kanji-card:hover .furigana,
@@ -351,16 +361,98 @@ button:disabled {
 .kanji-card:hover .meaning {
   opacity: 1;
   transform: translateY(0);
-  visibility: visible; /* Tambahkan ini untuk menampilkan */
 }
 
-/* Full Display Mode */
+/* Subtle Background Pattern */
+.kanji-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(79, 70, 229, 0.03) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.kanji-card:hover::after {
+  opacity: 1;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .kanji-card {
+    padding: 18px 12px;
+    border-radius: 10px;
+  }
+  
+  .kanji {
+    font-size: 2.2rem;
+    margin-bottom: 12px;
+  }
+  
+  .furigana, .meaning {
+    font-size: 0.8rem;
+  }
+}
+
+/* Perbaikan Centering Kanji */
+.kanji-card.minimal {
+  position: relative; /* Container relatif */
+  height: 160px; /* Fixed height untuk konsistensi */
+  display: flex;
+  flex-direction: column;
+}
+
+.kanji-card.minimal .kanji {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover State */
+.kanji-card.minimal:hover .kanji {
+  position: static;
+  transform: none;
+  margin: 16px 0 12px 0;
+  top: auto;
+  left: auto;
+}
+
+/* Konten sekunder */
+.kanji-card.minimal .furigana,
+.kanji-card.minimal .romaji,
+.kanji-card.minimal .meaning {
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.kanji-card.minimal:hover .furigana,
+.kanji-card.minimal:hover .romaji,
+.kanji-card.minimal:hover .meaning {
+  opacity: 1;
+  height: auto;
+  overflow: visible;
+}
+
+/* Penyesuaian untuk mode lengkap */
 .kanji-grid.show-all .kanji-card {
   justify-content: flex-start;
+  min-height: auto;
 }
 
 .kanji-grid.show-all .kanji {
-  margin: 16px 0;
+  margin-bottom: 12px;
+  flex-grow: 0;
 }
 
 .kanji-grid.show-all .furigana,
@@ -368,16 +460,9 @@ button:disabled {
 .kanji-grid.show-all .meaning {
   opacity: 1;
   transform: translateY(0);
-  visibility: visible;
 }
 
-@media (max-width: 768px) {
-  .kanji-card {
-    height: 160px;
-    padding: 18px 12px;
-  }
-  
-  .kanji {
-    font-size: 2.2rem;
-  }
+/* Efek hover saat mode lengkap aktif */
+.kanji-grid.show-all .kanji-card:hover .kanji {
+  transform: scale(1.05);
 }
