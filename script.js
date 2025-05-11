@@ -28,6 +28,7 @@ const modalOnyomiList = kanjiModal.querySelector('.onyomi-list');
 const modalKunyomiList = kanjiModal.querySelector('.kunyomi-list');
 const modalKategori = kanjiModal.querySelector('.modal-kategori');
 const modalJlpt = kanjiModal.querySelector('.modal-jlpt'); // Mengubah referensi di JS
+const googleSearchButton = document.getElementById('googleSearchButton'); // Ambil tombol Cari di Google
 
 const minimalBtn = document.getElementById('minimalBtn');
 const fullBtn = document.getElementById('fullBtn');
@@ -430,6 +431,17 @@ function showKanjiModal(item) {
 
  modalKategori.textContent = item.kategori || '-';
  modalJlpt.textContent = item.jlpt || '-'; // Mengubah referensi di JS
+
+  if (googleSearchButton && item.kanji) {
+      const searchTerm = encodeURIComponent("Jelaskan kanji: " + item.kanji);
+      googleSearchButton.href = `https://www.google.com/search?q=${searchTerm}`;
+
+      googleSearchButton.innerHTML = `<i class="fas fa-search"></i> Cari ${item.kanji} di Google`;
+
+      googleSearchButton.style.display = ''; // Pastikan tombol terlihat
+  } else if (googleSearchButton) {
+       googleSearchButton.style.display = 'none';
+  }
 
  kanjiModal.classList.add('visible'); // Tampilkan modal
 }
