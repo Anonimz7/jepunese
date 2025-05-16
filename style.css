@@ -1,4 +1,4 @@
-  /* Menggunakan SEMUA bobot dan gaya font lokal Poppins yang Anda punya */
+/* Menggunakan SEMUA bobot dan gaya font lokal Poppins yang Anda punya */
   /* Asumsi file font Poppins berada di folder 'fonts/poppins/' */
   @font-face { font-family: 'Poppins'; src: url('fonts/poppins/Poppins-Thin.ttf') format('truetype'); font-weight: 100; font-style: normal; }
   @font-face { font-family: 'Poppins'; src: url('fonts/poppins/Poppins-ThinItalic.ttf') format('truetype'); font-weight: 100; font-style: italic; }
@@ -440,3 +440,106 @@
  footer p {
   margin: 0; /* Hapus margin default dari paragraf di dalam footer */
  }
+
+/* --- New styles for select mode UI --- */
+
+/* Style for the select controls container */
+#selectControls {
+    /* Basic styling, adjust as needed */
+    margin: 20px auto 15px; /* Space above and below */
+    max-width: 1000px; /* Match grid container width */
+    text-align: center;
+    font-size: 1rem;
+    color: var(--text); /* Inherit text color */
+    display: flex; /* Use flexbox for button alignment */
+    justify-content: center; /* Center the flex items */
+    align-items: center;
+    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+    gap: 10px; /* Space between items */
+}
+
+/* Style for the count span */
+#selectControls #selectedCountInfo {
+    font-weight: normal;
+    color: var(--text);
+}
+
+#selectControls #selectedCount {
+    font-weight: bold;
+    color: var(--primary); /* Highlight the count */
+}
+
+
+/* Style for buttons within select controls */
+#selectControls button {
+    padding: 8px 12px; /* Adjust padding */
+    background: var(--card-bg); /* Button background */
+    color: var(--text); /* Button text color */
+    border: 1px solid var(--border); /* Button border */
+    border-radius: 5px; /* Button corner radius */
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+#selectControls button:hover {
+    background-color: var(--border); /* Hover effect */
+}
+
+#selectControls button#cancelSelectBtn {
+    color: #ff6b6b; /* Color for cancel button */
+    border-color: #ff6b6b;
+}
+#selectControls button#cancelSelectBtn:hover {
+    background-color: rgba(255, 107, 107, 0.1);
+}
+
+#selectControls button#shuffleBtn {
+    color: #f59e0b; /* Color for shuffle button (secondary color) */
+    border-color: #f59e0b;
+}
+#selectControls button#shuffleBtn:hover {
+     background-color: rgba(245, 158, 11, 0.1);
+}
+
+
+/* Style for the select indicator on the card */
+.character-card .select-indicator {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    font-size: 1.3rem;
+    color: #ccc; /* Default color */
+    z-index: 5; /* Above other card content */
+     /* Ensure pointer events go through to the card */
+    pointer-events: none;
+}
+
+/* Style for the select indicator when the card is selected */
+.character-card.selected .select-indicator {
+    color: var(--primary); /* Primary color when selected */
+}
+
+/* Optional: Add a border or background change for selected cards */
+.character-card.selected {
+    border-color: var(--primary); /* Highlight border when selected */
+    /* background-color: rgba(79, 70, 229, 0.05); /* Optional: subtle background change */
+}
+
+/* Hide the original status text when select controls are shown */
+.status[style*="display: none"] {
+    display: none;
+}
+
+
+/* Adjustments for smaller screens */
+@media (max-width: 768px) {
+    #selectControls {
+        flex-direction: column; /* Stack buttons vertically */
+        gap: 8px; /* Adjust gap */
+    }
+    #selectControls button {
+         width: 80%; /* Make buttons wider */
+         max-width: 200px;
+    }
+}
