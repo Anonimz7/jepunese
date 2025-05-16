@@ -48,6 +48,9 @@ selectControlsContainer.style.fontWeight = 'normal';
 selectControlsContainer.style.color = 'var(--text)';
 selectControlsContainer.style.display = 'none'; // Ensure hidden initially
 
+// --- New flag to differentiate long press from click ---
+let isLongPressHandled = false;
+
 
 document.addEventListener('DOMContentLoaded', () => {
     // Insert the new container before the kanjiContainer as early as possible
@@ -91,21 +94,21 @@ async function loadLevelData(level) {
             filePath = `data/jlpt_${level}.json`;
             currentDataType = 'kanji';
             const response = await fetch(filePath);
-            if (!response.ok) { throw new Error(`Gagal memuat data ${level.toUpperCase()}: ${response.status}`); }
+            if (!response.ok) { throw new Error(`Gagal memuat data ${level.toUpperCase()} karena file tidak ditemukan atau ada masalah: ${response.status}`); } // Perbaiki pesan error
             data = await response.json();
             loadedData = data; // Simpan data kanji
         } else if (level === 'hiragana') {
             filePath = `data/hirakana.json`; // Path file hiragana/katakana Anda
             currentDataType = 'hiragana';
             const response = await fetch(filePath);
-            if (!response.ok) { throw new Error(`Gagal memuat data Hiragana: ${response.status}`); }
+            if (!response.ok) { throw new Error(`Gagal memuat data Hiragana karena file tidak ditemukan atau ada masalah: ${response.status}`); } // Perbaiki pesan error
             data = await response.json();
             loadedData = data.hiragana; // Ambil hanya array hiragana
         } else if (level === 'katakana') {
             filePath = `data/hirakana.json`; // Path file hiragana/katakana Anda
             currentDataType = 'katakana';
             const response = await fetch(filePath);
-            if (!response.ok) { throw new Error(`Gagal memuat data Katakana: ${response.status}`); }
+            if (!response.ok) { throw new Error(`Gagal memuat data Katakana karena file tidak ditemukan atau ada masalah: ${response.status}`); } // Perbaiki pesan error
             data = await response.json();
             loadedData = data.katakana; // Ambil hanya array katakana
         } else {
@@ -147,7 +150,7 @@ async function loadLevelData(level) {
                 </div>
             `;
         }
-        console.error("Error:", error);
+        console.error("Error loading data:", error); // Log error yang lebih informatif
         if (statusInfo) statusInfo.textContent = `Gagal memuat data ${level.toUpperCase() || currentLevel}.`;
 
 
@@ -413,14 +416,12 @@ function renderCharacters(dataToRender, dataType) {
 
 
     let cardsHtml = dataSubset.map(item => {
-        // --- Modified: Add select indicator logic for ALL types ---
         // Use the character string as the identifier for selection
         const characterId = dataType === 'kanji' ? item.kanji : item.karakter;
         const isSelected = isSelectMode && selectedCards.has(characterId);
         const selectedClass = isSelected ? ' selected' : '';
         // Add indicator in select mode for ALL card types
         const selectIndicatorHtml = isSelectMode ? '<div class="select-indicator"><i class="fas fa-check-circle"></i></div>' : '';
-        // --- End Modified ---
 
 
         if (dataType === 'kanji') {
@@ -470,7 +471,8 @@ function renderCharacters(dataToRender, dataType) {
         card.removeEventListener('mouseleave', handleMouseUp);
         card.removeEventListener('touchstart', handleTouchStart);
         card.removeEventListener('touchend', handleTouchEnd);
-        card.removeEventListener('touchmove', handleTouchEnd);
+        card.removeEventListener('touchmove', handleTouchMove); // Fix: Use handleTouchMove
+
 
         // Tambahkan listener baru
         card.addEventListener('click', handleCardClick);
@@ -480,7 +482,7 @@ function renderCharacters(dataToRender, dataType) {
          card.addEventListener('mouseleave', handleMouseUp); // Clear timer if mouse leaves
          card.addEventListener('touchstart', handleTouchStart);
          card.addEventListener('touchend', handleTouchEnd);
-         card.addEventListener('touchmove', handleTouchEnd); // Clear timer if touch moves
+         card.addEventListener('touchmove', handleTouchMove); // Fix: Use handleTouchMove
     });
 
      updateSelectControls(); // Ensure select controls are updated after render
@@ -488,34 +490,86 @@ function renderCharacters(dataToRender, dataType) {
 }
 
 
-// --- New event handler functions for long press (Modified for all types) ---
+// --- New event handler functions for long press (Modified for all types and click differentiation) ---
 function handleMouseDown(event) {
     // Only trigger long press on left mouse button
     if (event.button !== 0) return;
+    isLongPressHandled = false; // Reset flag
     startLongPressTimer(event.currentTarget);
 }
 
-function handleMouseUp() {
-    clearLongPressTimer();
+function handleMouseUp(event) {
+    // If the timer was cleared before completing (i.e., it was a short press)
+    // AND the long press logic didn't fire...
+    if (longPressTimer && !isLongPressHandled) {
+        // It was a short click action
+        const card = event.currentTarget;
+        // Manually trigger the "click" behavior for non-select mode
+        if (!isSelectMode) {
+             const item = JSON.parse(card.dataset.item);
+             if (card.classList.contains('type-kanji')) {
+                 showKanjiModal(item);
+             } else if (card.classList.contains('type-hiragana') || card.classList.contains('type-katakana')) {
+                 // Optional: Add visual feedback for non-kanji/kana cards in normal mode if desired
+                  console.log(`Klik pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item); // Only log to console
+             }
+        } else {
+            // If in select mode, a short click also toggles selection (this is handled by handleCardClick anyway, but explicit here)
+             const item = JSON.parse(card.dataset.item);
+             toggleCardSelection(card, item);
+        }
+    }
+    clearLongPressTimer(); // Always clear timer on mouse up
 }
 
 function handleTouchStart(event) {
-     // Prevent default to avoid scrolling interference
-    if (event.cancelable) {
-        event.preventDefault();
-    }
+     // Prevent default to avoid scrolling interference and potential double-tap issues
+     // if (event.cancelable) { // Check if preventDefault is allowed
+          event.preventDefault();
+     // }
+    isLongPressHandled = false; // Reset flag
     startLongPressTimer(event.currentTarget);
 }
 
-function handleTouchEnd() {
-    clearLongPressTimer();
+function handleTouchEnd(event) {
+     // If the timer was cleared before completing (i.e., it was a short press)
+     // AND the long press logic didn't fire...
+     if (longPressTimer && !isLongPressHandled) {
+         // It was a short touch action
+         const card = event.currentTarget;
+         // Manually trigger the "click" behavior for non-select mode
+         if (!isSelectMode) {
+              const item = JSON.parse(card.dataset.item);
+              if (card.classList.contains('type-kanji')) {
+                  showKanjiModal(item);
+              } else if (card.classList.contains('type-hiragana') || card.classList.contains('type-katakana')) {
+                  // Optional: Add visual feedback
+                   console.log(`Tap pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item); // Only log to console
+              }
+         } else {
+             // If in select mode, a short tap also toggles selection (handled by handleCardClick)
+              const item = JSON.parse(card.dataset.item);
+              toggleCardSelection(card, item);
+         }
+     }
+    clearLongPressTimer(); // Always clear timer on touch end
+    // Note: event.preventDefault() in touchstart might prevent click event generation,
+    // so explicitly handling short press in touchend is more reliable here.
 }
+
+function handleTouchMove() {
+    // If the touch moves significantly before the timer finishes, cancel the long press
+    clearLongPressTimer();
+    isLongPressHandled = false; // Ensure flag is reset
+}
+
 
 function startLongPressTimer(cardElement) {
     clearLongPressTimer(); // Clear any existing timer
     longPressTimer = setTimeout(() => {
         // Long press detected
-        // Activate select mode for ANY character card
+        isLongPressHandled = true; // Set flag
+
         if (!isSelectMode) {
             toggleSelectMode(true);
         }
@@ -525,10 +579,13 @@ function startLongPressTimer(cardElement) {
             const item = JSON.parse(cardElement.dataset.item);
             // Use the character string for selection
             const characterId = cardElement.classList.contains('type-kanji') ? item.kanji : item.karakter;
-            if (!selectedCards.has(characterId)) {
+             if (!selectedCards.has(characterId)) {
                 toggleCardSelection(cardElement, item);
             }
         }
+        // Prevent default browser behavior (like context menu) on long press
+         // This is often handled by preventDefault on touchstart/mousedown,
+         // but setting the flag here can also signal to prevent subsequent actions.
     }, LONG_PRESS_TIME);
 }
 
@@ -541,26 +598,35 @@ function clearLongPressTimer() {
 // --- End New event handler functions for long press ---
 
 
-// --- Fungsi handle klik card (Modified for all types) ---
+// --- Fungsi handle klik card (Modified) ---
 function handleCardClick(event) {
     // Clear long press timer just in case click fires after touchstart but before timeout
     clearLongPressTimer();
+
+    // --- Fix: Only handle click if long press was NOT handled ---
+    // In this revised logic, short clicks are handled in handleMouseUp/handleTouchEnd.
+    // This handleCardClick will primarily handle the case where the long-press timer
+    // *didn't* complete, and the browser still generated a click event.
+    // Or, it handles clicks when already in select mode.
 
     const card = event.currentTarget;
     const item = JSON.parse(card.dataset.item); // Get data from data-item attribute
 
     if (isSelectMode) {
-        // If in select mode, toggle selection for ANY character card
+        // If in select mode, always toggle selection on click
          toggleCardSelection(card, item);
     } else {
-        // If not in select mode, show modal for kanji or do nothing for others
-        if (card.classList.contains('type-kanji')) {
-            showKanjiModal(item);
-        } else if (card.classList.contains('type-hiragana') || card.classList.contains('type-katakana')) {
-            // Optional: Add visual feedback for non-kanji cards in normal mode if desired
-            console.log(`Klik pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item); // Only log to console
-        }
-        // Other card types do nothing
+        // If NOT in select mode, and long press wasn't handled, this is a standard click.
+        // However, the logic for standard click (showing modal) is now moved to
+        // handleMouseUp/handleTouchEnd when !isLongPressHandled.
+        // So, if we reach here and !isSelectMode, it might be a click event that
+        // wasn't caught by the touchend/mouseup logic immediately after timer clear.
+        // We can safely ignore it here or add a console log if needed for debugging.
+        console.log("Click event ignored because short press handled in mouseup/touchend or already in select mode.");
+         // If for some reason the touchend/mouseup short-press logic didn't fire,
+         // and isSelectMode is false, we could potentially put the modal logic back here as a fallback,
+         // but the current structure aims to handle it in touchend/mouseup for better click/long-press distinction.
+         // Let's keep it focused on select mode toggling for now.
     }
 }
 
@@ -748,8 +814,14 @@ function handleShuffleDisplay() {
          const characterId = item.kanji || item.karakter; // Get the identifier
          if (selectedCards.has(characterId)) {
              // Replace the original selected item with the next item from the shuffled selected list
-             newOrderedDisplayedItems.push(shuffledSelectedItems[shuffledIndex]);
-             shuffledIndex++;
+             // Ensure we don't go out of bounds if something is wrong (shouldn't happen with correct logic)
+              if (shuffledIndex < shuffledSelectedItems.length) {
+                 newOrderedDisplayedItems.push(shuffledSelectedItems[shuffledIndex]);
+                 shuffledIndex++;
+             } else {
+                 // Fallback: if shuffled items run out, just push the original (should not happen)
+                  newOrderedDisplayedItems.push(item);
+             }
          } else {
              // Keep non-selected items in their original relative positions
              newOrderedDisplayedItems.push(item);
