@@ -474,7 +474,7 @@ function renderCharacters(dataToRender, dataType) {
         card.removeEventListener('click', handleCardClick);
         card.removeEventListener('mousedown', handleMouseDown);
         card.removeEventListener('mouseup', handleMouseUp);
-        card.removeEventListener('mouseleave', handleMouseUp);
+        card.removeEventListener('mouseleave', handleMouseLeave); // FIX: Use handleMouseLeave
         card.removeEventListener('touchstart', handleTouchStart);
         card.removeEventListener('touchend', handleTouchEnd);
         card.removeEventListener('touchmove', handleTouchMove);
@@ -485,7 +485,7 @@ function renderCharacters(dataToRender, dataType) {
         // Add long press listener to ALL character cards
          card.addEventListener('mousedown', handleMouseDown);
          card.addEventListener('mouseup', handleMouseUp);
-         card.addEventListener('mouseleave', handleMouseUp); // Clear timer if mouse leaves
+         card.addEventListener('mouseleave', handleMouseLeave); // FIX: Use handleMouseLeave
          card.addEventListener('touchstart', handleTouchStart);
          card.addEventListener('touchend', handleTouchEnd);
          card.addEventListener('touchmove', handleTouchMove);
@@ -494,6 +494,15 @@ function renderCharacters(dataToRender, dataType) {
      updateSelectControls(); // Ensure select controls are updated after render
      updateStatus(); // Ensure main status is updated
 }
+
+// --- New function for mouseleave ---
+function handleMouseLeave() {
+    // Only clear the timer on mouseleave. Don't trigger selection logic.
+    clearLongPressTimer();
+    // It might also be helpful to reset flags here if needed, but clearLongPressTimer
+    // also affects `isLongPressHandled` indirectly via the timer status.
+}
+// --- End New function ---
 
 
 // --- New event handler functions for long press (Modified for all types and click differentiation) ---
@@ -519,7 +528,8 @@ function handleMouseUp(event) {
          event.preventDefault();
     } else {
         // If NOT in select mode, use the flag to check for short click
-        if (longPressTimer && !isLongPressHandled) {
+        // Check if it was a short click (timer was set but didn't complete) AND not a long press
+        if (longPressTimer === null && !isLongPressHandled) { // Timer is null if it was cleared by a quick release
             // It was a short click action
              // Standard click behavior (show modal for Kanji, log for Kana)
             if (card.classList.contains('type-kanji')) {
@@ -637,6 +647,8 @@ function clearLongPressTimer() {
         clearTimeout(longPressTimer);
         longPressTimer = null;
     }
+    // Reset longPressHandled here as well if the timer is cleared for ANY reason (short click, scroll, mouseleave)
+    isLongPressHandled = false; // Reset flag whenever timer is cleared
 }
 // --- End New event handler functions for long press ---
 
