@@ -1,10 +1,10 @@
 let currentLevel = 'n5';
-let loadedData = []; // Mengganti kanjiData menjadi loadedData untuk menyimpan data saat ini
+let loadedData = [];
 let filteredData = [];
 let currentPage = 1;
-let perPage = 3;
-let displayMode = 'minimal'; // State awal tampilan: 'minimal' atau 'full'
-let currentDataType = 'kanji'; // 'kanji', 'hiragana', atau 'katakana'
+let perPage = 14;
+let displayMode = 'minimal';
+let currentDataType = 'kanji';
 
 const levelButtons = document.querySelectorAll('.level-btn');
 const searchInput = document.getElementById('searchInput');
@@ -14,10 +14,9 @@ const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
 const pageInfo = document.getElementById('pageInfo');
 const statusInfo = document.getElementById('statusInfo');
-const kanjiContainer = document.getElementById('kanjiContainer'); // Tetap pakai nama ini di JS
+const kanjiContainer = document.getElementById('kanjiContainer');
 
-// Ambil elemen modal
-const kanjiModal = document.getElementById('kanjiModal'); // Tetap pakai nama ini di JS
+const kanjiModal = document.getElementById('kanjiModal');
 const closeModalBtn = kanjiModal.querySelector('.close-button');
 const modalKanji = kanjiModal.querySelector('.modal-kanji');
 const modalFurigana = kanjiModal.querySelector('.modal-furigana');
@@ -27,64 +26,67 @@ const modalInggris = kanjiModal.querySelector('.modal-inggris');
 const modalOnyomiList = kanjiModal.querySelector('.onyomi-list');
 const modalKunyomiList = kanjiModal.querySelector('.kunyomi-list');
 const modalKategori = kanjiModal.querySelector('.modal-kategori');
-const modalJlpt = kanjiModal.querySelector('.modal-jlpt'); // Mengubah referensi di JS
-const googleSearchButton = document.getElementById('googleSearchButton'); // Ambil tombol Cari di Google
+const modalJlpt = kanjiModal.querySelector('.modal-jlpt');
+const googleSearchButton = document.getElementById('googleSearchButton');
 
 const minimalBtn = document.getElementById('minimalBtn');
 const fullBtn = document.getElementById('fullBtn');
 
-// --- New variables for select mode and touch handling ---
-let longPressTimer;
-const LONG_PRESS_TIME = 500; // milliseconds
-let isSelectMode = false;
-// Store character strings (kanji or karakter) as unique identifiers
-let selectedCards = new Set();
-const selectControlsContainer = document.createElement('div'); // Create a new container for select controls
+// --- Revised State Variables ---
+let pressTimer = null; // Stores the setTimeout ID for long press
+let pressTarget = null; // Stores the card element currently being pressed
+let movedDuringPress = false; // True if significant movement occurred during the current press
+const LONG_PRESS_TIME = 500; // Duration for long press in milliseconds
+
+let isSelectMode = false; // Global state: is select mode active?
+let selectedCards = new Set(); // Stores the identifiers of selected cards
+
+let startX = 0; // Starting X coordinate of a press (for drag detection)
+let startY = 0; // Starting Y coordinate of a press (for drag detection)
+const MOVE_THRESHOLD = 15; // Pixels threshold to consider it a move/drag
+
+
+const selectControlsContainer = document.createElement('div');
 selectControlsContainer.id = 'selectControls';
-// Initial display style will be set by toggleSelectMode
 selectControlsContainer.style.textAlign = 'center';
 selectControlsContainer.style.marginBottom = '15px';
 selectControlsContainer.style.fontWeight = 'normal';
 selectControlsContainer.style.color = 'var(--text)';
-selectControlsContainer.style.display = 'none'; // Ensure hidden initially
-
-// --- Variables for scroll/tap differentiation ---
-let startX = 0;
-let startY = 0;
-let isScrolling = false; // Flag set by touchmove if significant movement occurs
-let isLongPressHandled = false; // Flag set by long press timer if it completes
-
-// Variable to store the card element currently being interacted with
-let activeCardElement = null;
+selectControlsContainer.style.display = 'none';
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Insert the new container before the kanjiContainer as early as possible
     if (kanjiContainer && kanjiContainer.parentNode) {
          kanjiContainer.parentNode.insertBefore(selectControlsContainer, kanjiContainer);
     } else {
         console.error("Error: kanjiContainer or its parent not found.");
-        // Handle this error case, perhaps delay insertion or show a message
     }
-
 
     loadLevelData(currentLevel);
     setupEventListeners();
     loadTheme();
-    // Script opsional untuk tahun di footer
     const currentYearSpan = document.getElementById('currentYear');
     if (currentYearSpan) {
         currentYearSpan.textContent = new Date().getFullYear();
     }
+
+    // Add global mouse/touch move/end listeners for robust drag/cleanup detection
+    // Use capture phase (true) for move listeners to ensure they run before specific element handlers
+    document.addEventListener('mousemove', handleGlobalMouseMove, true);
+    document.addEventListener('mouseup', handleGlobalMouseEnd); // Use global mouseup for cleanup if release outside card
+    document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false, capture: true }); // passive: false needed for preventDefault
+    document.addEventListener('touchend', handleGlobalTouchEnd);
+    document.addEventListener('touchcancel', handleGlobalTouchEnd); // Handle touchcancel too
+
+
 });
 
 async function loadLevelData(level) {
     try {
         statusInfo.textContent = `Memuat data ${level.toUpperCase()}...`;
         if (kanjiContainer) {
-             kanjiContainer.innerHTML = '<div class="message">Memuat data...</div>'; // Mengubah teks
+             kanjiContainer.innerHTML = '<div class="message">Memuat data...</div>';
         }
-        // Sembunyikan pagination dan filter saat memuat
         if (prevBtn) prevBtn.disabled = true;
         if (nextBtn) nextBtn.disabled = true;
         if (pageInfo) pageInfo.textContent = '';
@@ -100,45 +102,40 @@ async function loadLevelData(level) {
             filePath = `data/jlpt_${level}.json`;
             currentDataType = 'kanji';
             const response = await fetch(filePath);
-            if (!response.ok) { throw new Error(`Gagal memuat data ${level.toUpperCase()} karena file tidak ditemukan atau ada masalah: ${response.status}`); } // Perbaiki pesan error
+            if (!response.ok) { throw new Error(`Gagal memuat data ${level.toUpperCase()} karena file tidak ditemukan atau ada masalah: ${response.status}`); }
             data = await response.json();
-            loadedData = data; // Simpan data kanji
+            loadedData = data;
         } else if (level === 'hiragana') {
-            filePath = `data/hirakana.json`; // Path file hiragana/katakana Anda
+            filePath = `data/hirakana.json`;
             currentDataType = 'hiragana';
             const response = await fetch(filePath);
-            if (!response.ok) { throw new Error(`Gagal memuat data Hiragana karena file tidak ditemukan atau ada masalah: ${response.status}`); } // Perbaiki pesan error
+            if (!response.ok) { throw new Error(`Gagal memuat data Hiragana karena file tidak ditemukan atau ada masalah: ${response.status}`); }
             data = await response.json();
-            loadedData = data.hiragana; // Ambil hanya array hiragana
+            loadedData = data.hiragana;
         } else if (level === 'katakana') {
-            filePath = `data/hirakana.json`; // Path file hiragana/katakana Anda
+            filePath = `data/hirakana.json`;
             currentDataType = 'katakana';
             const response = await fetch(filePath);
-            if (!response.ok) { throw new Error(`Gagal memuat data Katakana karena file tidak ditemukan atau ada masalah: ${response.status}`); } // Perbaiki pesan error
+            if (!response.ok) { throw new Error(`Gagal memuat data Katakana karena file tidak ditemukan atau ada masalah: ${response.status}`); }
             data = await response.json();
-            loadedData = data.katakana; // Ambil hanya array katakana
+            loadedData = data.katakana;
         } else {
             loadedData = [];
             currentDataType = 'unknown';
         }
 
-        filteredData = [...loadedData]; // Reset filtered data
-        currentPage = 1; // Reset page
+        filteredData = [...loadedData];
+        currentPage = 1;
 
-        // Exit select mode when loading new data
-        toggleSelectMode(false); // This will also hide selectControlsContainer
+        toggleSelectMode(false);
 
-        // Update Category Filter Options
         populateCategoryFilter(loadedData, currentDataType);
 
-        // Aktifkan kembali kontrol setelah data dimuat
         if (searchInput) searchInput.disabled = false;
         if (categoryFilter) categoryFilter.disabled = false;
         if (perPageSelect) perPageSelect.disabled = false;
 
-
-        // Set display mode and render
-        setDisplayMode(displayMode); // setDisplayMode memanggil renderCharacters()
+        setDisplayMode(displayMode);
 
         updateStatus();
 
@@ -156,28 +153,24 @@ async function loadLevelData(level) {
                 </div>
             `;
         }
-        console.error("Error loading data:", error); // Log error yang lebih informatif
+        console.error("Error loading data:", error);
         if (statusInfo) statusInfo.textContent = `Gagal memuat data ${level.toUpperCase() || currentLevel}.`;
 
-
-        // Pastikan kontrol dinonaktifkan jika gagal load
         if (searchInput) searchInput.disabled = true;
         if (categoryFilter) categoryFilter.disabled = true;
         if (perPageSelect) perPageSelect.disabled = true;
         if (prevBtn) prevBtn.disabled = true;
         if (nextBtn) nextBtn.disabled = true;
         if (pageInfo) pageInfo.textContent = '';
-        loadedData = []; // Reset data
-        filteredData = []; // Reset data
-        populateCategoryFilter([], currentDataType); // Kosongkan filter kategori
-         toggleSelectMode(false); // Exit select mode on error
+        loadedData = [];
+        filteredData = [];
+        populateCategoryFilter([], currentDataType);
+         toggleSelectMode(false);
     }
 }
 
-// Fungsi baru untuk mengisi opsi filter kategori
 function populateCategoryFilter(data, dataType) {
     const categories = new Set();
-    // Untuk Kanji, gunakan item.kategori
     if (dataType === 'kanji') {
         data.forEach(item => {
             if (item.kategori) {
@@ -185,7 +178,6 @@ function populateCategoryFilter(data, dataType) {
             }
         });
     } else if (dataType === 'hiragana' || dataType === 'katakana') {
-        // Untuk Hiragana/Katakana dari file hirakana.json, gunakan item.kategori
         data.forEach(item => {
             if (item.kategori) {
                 categories.add(item.kategori);
@@ -193,10 +185,9 @@ function populateCategoryFilter(data, dataType) {
         });
     }
 
-
     if (categoryFilter) {
-        categoryFilter.innerHTML = '<option value="">Pilih Kategori</option>'; // Reset options
-        const sortedCategories = Array.from(categories).sort(); // Urutkan kategori
+        categoryFilter.innerHTML = '<option value="">Pilih Kategori</option>';
+        const sortedCategories = Array.from(categories).sort();
         sortedCategories.forEach(category => {
             const option = document.createElement('option');
             option.value = category;
@@ -204,17 +195,12 @@ function populateCategoryFilter(data, dataType) {
             categoryFilter.appendChild(option);
         });
 
-        // Nonaktifkan filter jika tidak ada kategori unik selain default atau jika data kosong
-        // Nonaktifkan filter kategori untuk Hiragana/Katakana jika tidak ada kategori unik
         categoryFilter.disabled = (dataType === 'hiragana' || dataType === 'katakana') && sortedCategories.length === 0;
-        // Nonaktifkan juga untuk Kanji jika tidak ada kategori
         if (dataType === 'kanji') {
             categoryFilter.disabled = sortedCategories.length === 0;
         }
     }
 
-
-    // Mengubah placeholder search input berdasarkan tipe data
     if (searchInput) {
         if (dataType === 'kanji') {
             searchInput.placeholder = 'Cari kanji (contoh: 水, mizu, air...)';
@@ -228,19 +214,18 @@ function populateCategoryFilter(data, dataType) {
     }
 }
 
-
 function setupEventListeners() {
     levelButtons.forEach(btn => {
         btn.addEventListener('click', () => {
             currentLevel = btn.dataset.level;
             currentPage = 1;
             if(searchInput) searchInput.value = '';
-            if(categoryFilter) categoryFilter.value = ''; // Reset kategori filter saat ganti level
-            loadLevelData(currentLevel); // loadLevelData handles data type and rendering
+            if(categoryFilter) categoryFilter.value = '';
+            loadLevelData(currentLevel);
         });
     });
 
-    setupDisplayToggleListeners(); // Setup listeners for display mode buttons
+    setupDisplayToggleListeners();
 
     if(searchInput) searchInput.addEventListener('input', debounce(handleSearch, 300));
 
@@ -255,8 +240,8 @@ function setupEventListeners() {
         perPageSelect.addEventListener('change', () => {
             perPage = parseInt(perPageSelect.value);
             currentPage = 1;
-            toggleSelectMode(false); // Exit select mode on perPage change
-            renderCharacters(filteredData, currentDataType); // Panggil render dengan data yang sudah difilter
+            toggleSelectMode(false);
+            renderCharacters(filteredData, currentDataType);
             updateStatus();
         });
     }
@@ -265,7 +250,7 @@ function setupEventListeners() {
         prevBtn.addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage--;
-                toggleSelectMode(false); // Exit select mode on page change
+                toggleSelectMode(false);
                 renderCharacters(filteredData, currentDataType);
                 updateStatus();
             }
@@ -277,7 +262,7 @@ function setupEventListeners() {
             const totalPages = perPage === 0 ? 1 : Math.ceil(filteredData.length / perPage);
             if (perPage !== 0 && currentPage < totalPages) {
                 currentPage++;
-                toggleSelectMode(false); // Exit select mode on page change
+                toggleSelectMode(false);
                 renderCharacters(filteredData, currentDataType);
                 updateStatus();
             }
@@ -287,8 +272,6 @@ function setupEventListeners() {
     const themeToggleBtn = document.getElementById("themeToggle");
     if(themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
 
-
-    // Event listener untuk modal (Tetap sama) - Modal hanya untuk Kanji
     if(closeModalBtn) closeModalBtn.addEventListener('click', hideKanjiModal);
     if(kanjiModal) {
         kanjiModal.addEventListener('click', (event) => {
@@ -299,8 +282,6 @@ function setupEventListeners() {
     }
 }
 
-
-// --- Fungsi untuk mengatur mode tampilan ---
 function setupDisplayToggleListeners() {
     if(minimalBtn) {
         minimalBtn.addEventListener('click', () => {
@@ -314,7 +295,6 @@ function setupDisplayToggleListeners() {
     }
 }
 
-// --- Fungsi untuk mengatur mode tampilan ---
 function setDisplayMode(mode) {
     displayMode = mode;
     if (kanjiContainer) {
@@ -323,37 +303,31 @@ function setDisplayMode(mode) {
             kanjiContainer.classList.add('display-minimal');
             if(minimalBtn) minimalBtn.classList.add('active');
             if(fullBtn) fullBtn.classList.remove('active');
-        } else { // mode === 'full'
+        } else {
             kanjiContainer.classList.remove('display-minimal');
             kanjiContainer.classList.add('display-full');
             if(fullBtn) fullBtn.classList.add('active');
             if(minimalBtn) minimalBtn.classList.remove('active');
         }
     }
-    // Re-render untuk memastikan tampilan card sesuai mode
-     // Exit select mode when changing display mode
     toggleSelectMode(false);
     renderCharacters(filteredData, currentDataType);
 }
-
 
 function handleSearch() {
     const keyword = searchInput.value.toLowerCase().trim();
     const selectedCategory = categoryFilter.value;
 
     filteredData = loadedData.filter(item => {
-        let matchesKeyword = false; // Default ke false jika ada keyword dan belum cocok
+        let matchesKeyword = false;
 
         if (!keyword) {
-            matchesKeyword = true; // Jika tidak ada keyword, semua item cocok
+            matchesKeyword = true;
         } else {
-            // Jika ada keyword, cek berdasarkan tipe data
             if (currentDataType === 'kanji') {
-                // Cek field khusus Kanji
-                // Pastikan properti ada sebelum mengaksesnya, meskipun seharusnya ada jika data valid
                 const kanji = item.kanji || '';
                 const furigana = item.furigana ? item.furigana.toLowerCase() : '';
-                const romaji = item.romaji ? item.romaji.toLowerCase() : ''; // Romaji juga ada di data Kanji
+                const romaji = item.romaji ? item.romaji.toLowerCase() : '';
                 const indo = item.indo ? item.indo.toLowerCase() : '';
                 const inggris = item.inggris ? item.inggris.toLowerCase() : '';
                 const onyomiMatch = (item.onyomi && item.onyomi.some(o => (o.kana || '').toLowerCase().includes(keyword) || (o.romaji || '').toLowerCase().includes(keyword)));
@@ -369,7 +343,6 @@ function handleSearch() {
                     kunyomiMatch;
 
             } else if (currentDataType === 'hiragana' || currentDataType === 'katakana') {
-                // Cek field khusus Hiragana/Katakana
                 const karakter = item.karakter || '';
                 const romaji = item.romaji ? item.romaji.toLowerCase() : '';
 
@@ -377,37 +350,31 @@ function handleSearch() {
                     karakter.includes(keyword) ||
                     romaji.includes(keyword);
             }
-            // Jika currentDataType tidak diketahui, matchesKeyword tetap false
         }
-
-
-        const matchesCategory = !selectedCategory || (item.kategori && item.kategori === selectedCategory); // Tambahkan cek item.kategori
-
+        const matchesCategory = !selectedCategory || (item.kategori && item.kategori === selectedCategory);
 
         return matchesKeyword && matchesCategory;
     });
 
     currentPage = 1;
-    toggleSelectMode(false); // Exit select mode on search/filter change
-    renderCharacters(filteredData, currentDataType); // Panggil renderCharacters
+    toggleSelectMode(false);
+    renderCharacters(filteredData, currentDataType);
     updateStatus();
 }
 
-// --- Fungsi Rendering Karakter (diganti dari renderKanji) ---
 function renderCharacters(dataToRender, dataType) {
     if (!kanjiContainer) {
          console.error("Error: kanjiContainer not found.");
          return;
     }
-    kanjiContainer.innerHTML = ''; // Bersihkan container
+    kanjiContainer.innerHTML = '';
 
     if (dataToRender.length === 0) {
-        kanjiContainer.innerHTML = `<div class="message">Tidak ada karakter yang cocok.</div>`; // Mengubah teks
-        // Pastikan pagination dinonaktifkan/sembunyikan jika tidak ada data
+        kanjiContainer.innerHTML = `<div class="message">Tidak ada karakter yang cocok.</div>`;
         if(prevBtn) prevBtn.disabled = true;
         if(nextBtn) nextBtn.disabled = true;
         if(pageInfo) pageInfo.textContent = '';
-        updateSelectControls(); // Ensure select controls are hidden
+        updateSelectControls();
         return;
     }
 
@@ -417,26 +384,20 @@ function renderCharacters(dataToRender, dataType) {
     } else {
         const start = (currentPage - 1) * perPage;
         const end = start + perPage;
-        // Use the dataToRender length for slicing, not filteredData length,
-        // in case dataToRender is already a subset (like after shuffle on current page)
         dataSubset = dataToRender.slice(start, end);
     }
 
-
     let cardsHtml = dataSubset.map(item => {
-        // Use the character string as the identifier for selection
         const characterId = dataType === 'kanji' ? item.kanji : item.karakter;
         const isSelected = isSelectMode && selectedCards.has(characterId);
         const selectedClass = isSelected ? ' selected' : '';
-        // Add indicator in select mode for ALL card types
         const selectIndicatorHtml = isSelectMode ? '<div class="select-indicator"><i class="fas fa-check-circle"></i></div>' : '';
 
-
         if (dataType === 'kanji') {
-            // Struktur HTML untuk Card Kanji
             return `
                 <div class="character-card type-kanji${selectedClass}" data-item='${JSON.stringify(item)}'>
-                    ${selectIndicatorHtml} <div class="primary-char">${item.kanji}</div>
+                    ${selectIndicatorHtml}
+                    <div class="primary-char">${item.kanji}</div>
                     <div class="kanji-card-details">
                         <div class="furigana">${item.furigana}</div>
                         <div class="romaji">${item.romaji}</div>
@@ -448,32 +409,27 @@ function renderCharacters(dataToRender, dataType) {
                 </div>
             `;
         } else if (dataType === 'hiragana' || dataType === 'katakana') {
-            // Struktur HTML untuk Card Hiragana/Katakana
             return `
                 <div class="character-card type-${dataType}${selectedClass}" data-item='${JSON.stringify(item)}'>
-                    ${selectIndicatorHtml} <div class="primary-char">${item.karakter}</div>
+                    ${selectIndicatorHtml}
+                    <div class="primary-char">${item.karakter}</div>
                     <div class="secondary-text">${item.romaji}</div>
                 </div>
             `;
         }
-        return ''; // Fallback kosong jika tipe data tidak diketahui
+        return '';
     }).join('');
 
     kanjiContainer.innerHTML = cardsHtml;
 
-
-    // Atur status halaman setelah merender
-    // Use filteredData length to calculate total pages and update pagination controls
     const totalPages = perPage === 0 ? 1 : Math.ceil(filteredData.length / perPage);
     if(prevBtn) prevBtn.disabled = currentPage === 1 || perPage === 0;
     if(nextBtn) nextBtn.disabled = currentPage === totalPages || perPage === 0;
     if(pageInfo) pageInfo.textContent = perPage === 0 ? '' : `Halaman ${currentPage}/${totalPages}`;
 
-
-    // Tambahkan event listener ke SEMUA kartu yang dirender
     const cards = kanjiContainer.querySelectorAll('.character-card');
     cards.forEach(card => {
-        // Hapus listener sebelumnya untuk mencegah duplikasi (Pentung!)
+        // Remove old listeners - ensure ALL potential old listeners are removed
         card.removeEventListener('click', handleCardClick);
         card.removeEventListener('mousedown', handleMouseDown);
         card.removeEventListener('mouseup', handleMouseUp);
@@ -483,421 +439,252 @@ function renderCharacters(dataToRender, dataType) {
         card.removeEventListener('touchmove', handleTouchMove);
 
 
-        // Tambahkan listener baru
-        card.addEventListener('click', handleCardClick);
-        // Add long press listener to ALL character cards
-         card.addEventListener('mousedown', handleMouseDown);
-         card.addEventListener('mouseup', handleMouseUp);
-         card.addEventListener('mouseleave', handleMouseLeave);
-         card.addEventListener('touchstart', handleTouchStart);
-         card.addEventListener('touchend', handleTouchEnd);
-         card.addEventListener('touchmove', handleTouchMove);
+        // Add new listeners
+        // We don't need click listener on the card anymore with the new approach
+        // card.addEventListener('click', handleCardClick);
+        card.addEventListener('mousedown', handleMouseDown);
+        card.addEventListener('mouseup', handleMouseUp);
+        card.addEventListener('mouseleave', handleMouseLeave);
+        card.addEventListener('touchstart', handleTouchStart);
+        card.addEventListener('touchend', handleTouchEnd);
+        card.addEventListener('touchmove', handleTouchMove);
     });
 
-     updateSelectControls(); // Ensure select controls are updated after render
-     updateStatus(); // Ensure main status is updated
+     updateSelectControls();
+     updateStatus();
 }
 
-// --- New function for mouseleave ---
-function handleMouseLeave() {
-    // Clear timer and reset long press/scrolling flags on mouseleave
-    clearLongPressTimer();
-}
-// --- End New function ---
 
+// --- Event Handlers using Revised State ---
 
-// --- New event handler functions for long press (Modified for all types and click differentiation) ---
 function handleMouseDown(event) {
-    // Only trigger long press on left mouse button
+    // Only handle left click
     if (event.button !== 0) return;
-    isLongPressHandled = false; // Reset flag for a new press
-    isScrolling = false; // Reset scrolling flag for a new press
-    activeCardElement = event.currentTarget; // Store the card element
-    startLongPressTimer(activeCardElement); // Pass element to timer
+    // Only start a new press if one is not already active
+    if (pressTarget !== null) return;
+
+    pressTarget = event.currentTarget;
+    movedDuringPress = false;
+    startX = event.clientX; // Use clientX for desktop
+    startY = event.clientY;
+
+    // Start the long press timer
+    pressTimer = setTimeout(() => {
+        // Long press detected
+        if (pressTarget && !movedDuringPress) {
+            // Ensure it's still the same target and no move occurred
+            // Action: Activate select mode and select the long-pressed card
+            if (!isSelectMode) {
+                toggleSelectMode(true); // This activates the mode
+            }
+            // Select the card that was long-pressed (will only select if mode just became active or already active)
+             if (isSelectMode && !selectedCards.has(getCharacterId(pressTarget))) { // Check if already selected before toggling
+                 const item = JSON.parse(pressTarget.dataset.item);
+                 toggleCardSelection(pressTarget, item); // Select initial card
+             }
+        }
+        pressTimer = null; // Clear timer after execution
+    }, LONG_PRESS_TIME);
+}
+
+// Global mousemove listener to detect movement during press
+function handleGlobalMouseMove(event) {
+    if (pressTarget && pressTimer !== null) { // Only track if a press is active and timer is running
+        const currentX = event.clientX;
+        const currentY = event.clientY;
+        const deltaX = Math.abs(currentX - startX);
+        const deltaY = Math.abs(currentY - startY);
+
+        if (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) {
+            movedDuringPress = true;
+            if (pressTimer !== null) {
+                clearTimeout(pressTimer); // Cancel long press timer on significant move
+                pressTimer = null;
+            }
+             // No preventDefault here to allow native scrolling
+        }
+    }
 }
 
 function handleMouseUp(event) {
-    const card = event.currentTarget;
-    const item = JSON.parse(card.dataset.item);
+    // Check if this release is on the active press target
+    if (pressTarget === event.currentTarget) {
+        if (pressTimer !== null) {
+            // Timer was still running - it was a click
+            clearTimeout(pressTimer); // Clear the long press timer
+            pressTimer = null;
 
-    // Check if timer is active before clearing
-    // const timerWasActive = longPressTimer !== null; // Not strictly needed anymore
+            if (!movedDuringPress) { // Only trigger click action if no move
+                // It was a clean click/tap
+                const card = event.currentTarget;
+                const item = JSON.parse(card.dataset.item);
 
-    clearLongPressTimer(); // Clear timer and reset long press/scrolling flags
-
-    // Decide action based on mode and whether long press was handled
-    if (isSelectMode) {
-         // If in select mode, and long press was NOT handled by the timer (meaning it was a short click/release)
-         // The check `!isLongPressHandled` after `clearLongPressTimer` works because isLongPressHandled is only set true by the timer.
-         if (!isLongPressHandled) {
-             // It was a short click while in select mode - toggle selection
-              toggleCardSelection(card, item);
-         }
-         // If isLongPressHandled is true, the long press timer already activated mode and selected the card.
-         // We do NOT want to toggle again here.
-
-         // Prevent the default click event from potentially firing after this mouseup
-         event.preventDefault();
-
-    } else {
-        // If NOT in select mode, check if it was a short click (timer started but didn't complete AND not a long press AND not a scroll)
-        // Check flags AFTER clearTimer, which reflects state before timer completion
-         if (!isLongPressHandled && !isScrolling) {
-             // It was a short click action for showing modal
-            if (card.classList.contains('type-kanji')) {
-                showKanjiModal(item);
-            } else if (card.classList.contains('type-hiragana') || card.classList.contains('katakana')) {
-                 console.log(`Klik pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
+                if (isSelectMode) {
+                    // If in select mode, click toggles selection
+                    toggleCardSelection(card, item);
+                } else {
+                    // If not in select mode, show modal (if Kanji)
+                    if (card.classList.contains('type-kanji')) {
+                        showKanjiModal(item);
+                    } else if (card.classList.contains('type-hiragana') || card.classList.contains('katakana')) {
+                        console.log(`Klik pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
+                    }
+                }
             }
+            // If movedDuringPress is true, it was a drag, no action here.
         }
-        // If isLongPressHandled was true (before reset), the long press activated mode.
-        // If isScrolling was true (before reset), it was a scroll.
-        // In those cases, no modal/selection toggle here.
+        // If pressTimer was null, it means long press timer already fired.
+        // Action for long press is handled in setTimeout callback.
+        // No further action needed on mouseup if timer fired.
+
+        // Reset press state
+        pressTarget = null;
+        movedDuringPress = false;
+
+        // Prevent default click after handling mouseup
+        event.preventDefault();
     }
-    // Reset scrolling flag again on mouse up for robustness
-     isScrolling = false;
+    // If release is on a different target, global mouseup listener handles cleanup
+}
+
+function handleMouseLeave() {
+    // If mouse leaves card while pressing and timer is running, treat as move intent
+    if (pressTarget && pressTarget === event.currentTarget && pressTimer !== null) {
+        movedDuringPress = true;
+        clearTimeout(pressTimer);
+        pressTimer = null;
+    }
+}
+
+// Global mouseup listener for cleanup (if press ends outside any card)
+function handleGlobalMouseEnd() {
+    if (pressTarget !== null) {
+        if (pressTimer !== null) {
+            clearTimeout(pressTimer);
+        }
+        pressTarget = null;
+        movedDuringPress = false;
+    }
 }
 
 
 function handleTouchStart(event) {
-    // Record start position
+    // Only handle single touch
+    if (event.touches.length !== 1) return;
+    // Only start a new press if one is not already active
+    if (pressTarget !== null) return;
+
+    pressTarget = event.currentTarget;
+    movedDuringPress = false;
     startX = event.touches[0].clientX;
     startY = event.touches[0].clientY;
-    isScrolling = false; // Reset scroll flag
-    isLongPressHandled = false; // Reset long press flag
-    activeCardElement = event.currentTarget; // Store the card element
 
-    // Do NOT prevent default here initially. Let the browser see if it's a scroll.
-    // event.preventDefault(); // Remove this line
-    // Note: This might allow native browser context menus on long touch if not
-    // prevented elsewhere or if the OS overrides.
+    // No prevent default here to allow natural scrolling
+    // event.preventDefault(); // Keep REMOVED
 
-    startLongPressTimer(activeCardElement); // Pass element to timer
+    // Start the long press timer
+    pressTimer = setTimeout(() => {
+        if (pressTarget && !movedDuringPress) {
+            // Long press detected
+             if (!isSelectMode) {
+                 toggleSelectMode(true);
+             }
+             // Select the card that was long-pressed (will only select if mode just became active or already active)
+              if (isSelectMode && !selectedCards.has(getCharacterId(pressTarget))) { // Check if already selected before toggling
+                 const item = JSON.parse(pressTarget.dataset.item);
+                 toggleCardSelection(pressTarget, item); // Select initial card
+              }
+        }
+        pressTimer = null; // Clear timer after execution
+    }, LONG_PRESS_TIME);
+}
+
+// Global touchmove listener for movedDuringPress and cancelling long press early
+function handleGlobalTouchMove(event) {
+    if (pressTarget && pressTimer !== null && event.touches.length === 1) {
+        const currentX = event.touches[0].clientX;
+        const currentY = event.touches[0].clientY;
+        const deltaX = Math.abs(currentX - startX);
+        const deltaY = Math.abs(currentY - startY);
+
+        // Use a slightly larger threshold for touch to account for finger wobble
+        const touchMoveThreshold = 20;
+
+        if (deltaX > touchMoveThreshold || deltaY > touchMoveThreshold) {
+            movedDuringPress = true;
+            if (pressTimer !== null) {
+                clearTimeout(pressTimer);
+                pressTimer = null;
+            }
+            // Allow browser to handle the scroll
+             // event.preventDefault(); // Keep REMOVED
+        }
+    }
 }
 
 function handleTouchEnd(event) {
-     const card = event.currentTarget;
-     const item = JSON.parse(card.dataset.item);
+    // Check if this release is on the active press target
+    if (pressTarget === event.currentTarget) {
+        if (pressTimer !== null) {
+            // Timer was still running - it was a tap
+            clearTimeout(pressTimer);
+            pressTimer = null;
 
-     // Check if timer is active before clearing
-     // const timerWasActive = longPressTimer !== null; // Not strictly needed
+            if (!movedDuringPress) { // Only trigger tap action if no move
+                // It was a clean tap
+                const card = event.currentTarget;
+                const item = JSON.parse(card.dataset.item);
 
-     clearLongPressTimer(); // Clear timer and reset long press/scrolling flags
-
-     // Calculate total distance moved from start to end (Fix Issue 2)
-     const endX = event.changedTouches[0].clientX; // Use changedTouches for touchend
-     const endY = event.changedTouches[0].clientY;
-     const deltaX = Math.abs(endX - startX);
-     const deltaY = Math.abs(endY - startY);
-     const tapThreshold = 20; // Define a threshold for a clear tap (adjust as needed)
-
-
-     // Decide action based on mode and whether long press was handled and if it was a tap (not a drag/scroll)
-     // If long press was NOT handled AND total movement is below tap threshold
-     if (!isLongPressHandled && (deltaX < tapThreshold && deltaY < tapThreshold)) {
-         // It was a short touch action (tap)
-         if (isSelectMode) {
-             // If in select mode, a short tap toggles selection.
-             toggleCardSelection(card, item);
-             // Prevent default touch behavior (like tap highlight, click generation)
-             event.preventDefault();
-         } else {
-             // Standard click behavior (show modal for Kanji, log for Kana)
-             if (card.classList.contains('type-kanji')) {
-                 showKanjiModal(item);
-             } else if (card.classList.contains('type-hiragana') || card.classList.contains('katakana')) {
-                  console.log(`Tap pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
-             }
-         }
-     }
-     // If isLongPressHandled was true, the long press activated mode (selection handled by timer callback if !wasSelectMode).
-     // If total movement >= tapThreshold, it was a drag/scroll, no modal/toggle here.
-
-     // Reset scrolling flag again on touch end
-     isScrolling = false;
-}
-
-function handleTouchMove(event) {
-     // Calculate distance moved from start
-     const currentX = event.touches[0].clientX;
-     const currentY = event.touches[0].clientY;
-     const deltaX = Math.abs(currentX - startX);
-     const deltaY = Math.abs(currentY - startY);
-
-     // Only check for scroll if long press not handled and not already scrolling
-    if (isLongPressHandled || isScrolling) {
-        // If long press was already detected or we are already scrolling, allow default scroll behavior.
-        // Also, if we are scrolling, we might need to prevent default to ensure smooth scrolling
-        // if it wasn't handled by the browser already, but usually letting default happen is best.
-         return;
-     }
-
-    const moveThreshold = 15; // Pixels threshold to consider it a scroll/drag (Keep original or adjust)
-
-    // If movement exceeds threshold, assume it's a scroll/drag
-    if (deltaX > moveThreshold || deltaY > moveThreshold) {
-        isScrolling = true;
-        clearLongPressTimer(); // Cancel long press timer (resets isLongPressHandled too)
-        // Do NOT prevent default here. Allow scrolling.
-    }
-    // If movement is within threshold, the timer continues, waiting for a long press.
-}
-
-
-// clearLongPressTimer is defined above with reset flags
-
-
-// --- Fungsi handle klik card (Modified) ---
-function handleCardClick(event) {
-    // This handler should now do nothing important
-    // All click/tap/longpress handling is done in mouseup/touchend
-    // and the longpress timer callback.
-    console.log("Click event fired. Primarily handled by mouseup/touchend.");
-    // event.preventDefault(); // Optional: uncomment if needed for testing
-}
-
-
-// --- New functions for select mode (Modified for all types) ---
-function toggleSelectMode(enable) {
-    // Select mode can be activated for any character type now
-    isSelectMode = enable;
-    selectedCards.clear(); // Clear selection when entering or exiting mode
-
-    const cards = kanjiContainer ? kanjiContainer.querySelectorAll('.character-card') : [];
-    cards.forEach(card => {
-        card.classList.remove('selected'); // Remove selected class from all cards
-        // Remove or add select indicator based on new mode state for ALL cards
-        const existingIndicator = card.querySelector('.select-indicator');
-        if (isSelectMode && !existingIndicator) {
-            const indicator = document.createElement('div');
-            indicator.classList.add('select-indicator');
-            indicator.innerHTML = '<i class="fas fa-check-circle"></i>';
-            card.insertBefore(indicator, card.firstChild); // Add indicator
-        } else if (!isSelectMode && existingIndicator) {
-            existingIndicator.remove(); // Remove indicator if exiting mode
+                if (isSelectMode) {
+                    toggleCardSelection(card, item);
+                } else {
+                    if (card.classList.contains('type-kanji')) {
+                        showKanjiModal(item);
+                    } else if (card.classList.contains('type-hiragana') || card.classList.contains('katakana')) {
+                         console.log(`Tap pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
+                    }
+                }
+            }
         }
-    });
+        // If pressTimer was null, it means long press timer already fired.
 
-    // Show/hide select controls and update them
-    if(selectControlsContainer) selectControlsContainer.style.display = isSelectMode ? 'flex' : 'none'; // Use flex for centering buttons
-    updateSelectControls();
+        // Reset press state
+        pressTarget = null;
+        movedDuringPress = false;
 
-    // Update status display to reflect select mode
-    updateStatus();
+        // Prevent default behaviors like tap highlight, click generation
+        event.preventDefault();
+    }
+     // If release is on a different target, global touchend listener handles cleanup
 }
 
-function toggleCardSelection(cardElement, item) {
-    // Use the appropriate character string for Set operations
-    const characterId = item.kanji || item.karakter; // Get identifier regardless of type
-
-    if (selectedCards.has(characterId)) {
-        selectedCards.delete(characterId);
-        cardElement.classList.remove('selected');
-    } else {
-        selectedCards.add(characterId);
-        cardElement.classList.add('selected');
-    }
-    updateSelectControls(); // Update the count and button state
-}
-
-function updateSelectControls() {
-    if (!isSelectMode) {
-        if(selectControlsContainer) {
-             selectControlsContainer.innerHTML = ''; // Clear controls if not in select mode
-             selectControlsContainer.style.display = 'none'; // Ensure hidden
-        }
-        return;
-    }
-
-    if (!selectControlsContainer) {
-         console.error("Error: selectControlsContainer not found.");
-         return;
-    }
-
-    // Count ALL displayed character cards
-    const cards = kanjiContainer ? kanjiContainer.querySelectorAll('.character-card') : [];
-    const totalDisplayed = cards.length;
-    const selectedCount = selectedCards.size;
-
-    let selectControlsHtml = `
-        <span id="selectedCountInfo">
-            <span id="selectedCount">${selectedCount}</span> dipilih
-        </span>
-        <button id="selectAllBtn"></button>
-        <button id="cancelSelectBtn">Batal</button>
-        <button id="shuffleBtn">Acak Tampilan Ini</button>
-    `;
-
-    // Set innerHTML to update the DOM with new buttons
-    selectControlsContainer.innerHTML = selectControlsHtml;
-
-    // --- Get button references *after* setting innerHTML ---
-    const selectAllBtn = document.getElementById('selectAllBtn');
-    const cancelSelectBtn = document.getElementById('cancelSelectBtn');
-    const shuffleBtn = document.getElementById('shuffleBtn');
-    // --- End Get button references ---
-
-    // Determine Select All/Deselect All text based on selected displayed cards
-    if (selectedCount === totalDisplayed && totalDisplayed > 0) {
-        if(selectAllBtn) selectAllBtn.textContent = 'Batal Pilih Semua';
-    } else {
-        if(selectAllBtn) selectAllBtn.textContent = 'Pilih Semua';
-    }
-
-    // Disable Shuffle button if no cards are selected
-    if (shuffleBtn) {
-        shuffleBtn.disabled = selectedCount === 0;
-    }
-
-    // Add event listeners to the new buttons
-    // Ensure listeners are added only once or removed before adding
-    // Since we replace innerHTML, old listeners are removed automatically.
-    // Just add the new ones.
-    if (selectAllBtn) {
-         selectAllBtn.addEventListener('click', handleSelectAllToggle);
-    }
-    if (cancelSelectBtn) {
-        cancelSelectBtn.addEventListener('click', handleCancelSelect);
-    }
-     if (shuffleBtn) {
-         shuffleBtn.addEventListener('click', handleShuffleDisplay);
-     }
-
-
-    // Update the main status text visibility
-    if(statusInfo) statusInfo.style.display = isSelectMode ? 'none' : 'block';
-
-    // Update the count display within the selectControlsContainer
-    const selectedCountSpan = document.getElementById('selectedCount');
-    if(selectedCountSpan) {
-        selectedCountSpan.textContent = selectedCount;
-    }
-}
-
-
-function handleSelectAllToggle() {
-    const cards = kanjiContainer ? kanjiContainer.querySelectorAll('.character-card') : []; // Target ALL displayed cards
-    const totalDisplayed = cards.length;
-    const selectedCount = selectedCards.size;
-
-    if (selectedCount === totalDisplayed && totalDisplayed > 0) {
-        // Deselect all currently displayed cards
-        cards.forEach(card => {
-            const item = JSON.parse(card.dataset.item);
-             const characterId = item.kanji || item.karakter; // Get identifier regardless of type
-             selectedCards.delete(characterId);
-             card.classList.remove('selected');
-        });
-    } else {
-        // Select all currently displayed cards
-        selectedCards.clear(); // Clear existing selection first
-        cards.forEach(card => {
-            const item = JSON.parse(card.dataset.item);
-            const characterId = item.kanji || item.karakter; // Get identifier regardless of type
-            selectedCards.add(characterId);
-            card.classList.add('selected');
-        });
-    }
-    updateSelectControls();
-}
-
-function handleCancelSelect() {
-    toggleSelectMode(false); // Exit select mode
-}
-
-// --- FIX for Shuffle on Subsequent Pages ---
-function handleShuffleDisplay() {
-    if (!isSelectMode || selectedCards.size === 0) return; // Only shuffle in select mode and if items are selected
-
-    if (!filteredData || filteredData.length === 0) {
-         console.error("Error: Data not found for shuffle.");
-         return;
-    }
-
-    // Determine the slice of filteredData corresponding to the current page
-    const startIndex = (currentPage - 1) * perPage;
-    // Ensure endIndex does not exceed filteredData length
-    const endIndex = perPage === 0 ? filteredData.length : Math.min(startIndex + perPage, filteredData.length);
-
-    // Get the actual item objects from the current page slice of filteredData
-    const currentViewItems = filteredData.slice(startIndex, endIndex);
-
-    // Separate selected and non-selected items from this current view slice
-    const selectedCurrentViewItems = currentViewItems.filter(item => {
-         const characterId = item.kanji || item.karakter; // Get the identifier
-         return selectedCards.has(characterId);
-    });
-
-    const nonSelectedCurrentViewItems = currentViewItems.filter(item => {
-         const characterId = item.kanji || item.karakter; // Get the identifier
-         return !selectedCards.has(characterId);
-    });
-
-    // Shuffle ONLY the selected items in the current view
-    const shuffledSelectedCurrentViewItems = shuffleArray([...selectedCurrentViewItems]); // Create a copy before shuffling
-
-    // Create the new ordered list for the current view slice
-    const newOrderedCurrentViewItems = [];
-    let shuffledIndex = 0;
-
-    // Iterate through the ORIGINAL order of items in the current view slice
-    currentViewItems.forEach(item => {
-         const characterId = item.kanji || item.karakter; // Get the identifier
-         if (selectedCards.has(characterId)) {
-             // Replace the original selected item's position with the next item from the shuffled selected list
-              if (shuffledIndex < shuffledSelectedCurrentViewItems.length) {
-                 newOrderedCurrentViewItems.push(shuffledSelectedCurrentViewItems[shuffledIndex]);
-                 shuffledIndex++;
-             } else {
-                 // Fallback: if shuffled items run out (should not happen with correct logic), push original
-                  newOrderedCurrentViewItems.push(item);
-             }
-         } else {
-             // Keep non-selected items in their original relative positions within the slice
-             newOrderedCurrentViewItems.push(item);
+// Global touchend/touchcancel listener for cleanup
+function handleGlobalTouchEnd(event) {
+     if (pressTarget !== null) {
+         if (pressTimer !== null) {
+             clearTimeout(pressTimer);
          }
-    });
-
-    // --- Update the filteredData array with the modified slice ---
-    // Create a new filteredData array by replacing the current page's slice
-    const updatedFilteredData = [
-        ...filteredData.slice(0, startIndex), // Items before the current page
-        ...newOrderedCurrentViewItems,      // The newly ordered items for the current page
-        ...filteredData.slice(endIndex)       // Items after the current page
-    ];
-
-    filteredData = updatedFilteredData; // Update the global filteredData array
-
-
-    // Clear the selection after shuffling the displayed items
-    selectedCards.clear();
-
-    // Re-render the cards using the main filteredData array.
-    // renderCharacters will automatically render the correct (current) page from the updated filteredData.
-    renderCharacters(filteredData, currentDataType);
-
-    updateSelectControls(); // Update controls (count will be 0, shuffle button disabled)
-     // Keep the status info consistent with the displayed items after shuffle
-     // The main status text is hidden anyway in select mode.
+         pressTarget = null;
+         movedDuringPress = false;
+     }
 }
-// --- End FIX ---
 
 
-// Helper function to shuffle an array (Fisher-Yates Algorithm)
-function shuffleArray(array) {
-    let currentIndex = array.length, randomIndex;
-    while (currentIndex !== 0) {
-        randomIndex = Math.floor(Math.random() * currentIndex);
-        currentIndex--;
-        // Swap elements
-        [array[currentIndex], array[randomIndex]] = [ array[randomIndex], array[currentIndex]];
-    }
-    return array;
+// Helper to get character ID regardless of type
+function getCharacterId(cardElement) {
+     // Ensure item data exists
+     if (!cardElement || !cardElement.dataset || !cardElement.dataset.item) {
+         console.error("Invalid card element or data for getCharacterId");
+         return null; // Return null or handle error appropriately
+     }
+     const item = JSON.parse(cardElement.dataset.item);
+     return item.kanji || item.karakter;
 }
-// --- End New functions for select mode ---
 
 
-// --- Fungsi untuk menampilkan modal dengan detail kanji (Tidak berubah, hanya dipanggil untuk Kanji) ---
+// --- Other functions (remain the same) ---
+
+// Function to display modal (assuming it exists elsewhere)
 function showKanjiModal(item) {
     if(!kanjiModal) return;
 
@@ -907,7 +694,6 @@ function showKanjiModal(item) {
     if(modalIndo) modalIndo.textContent = item.indo;
     if(modalInggris) modalInggris.textContent = item.inggris;
 
-    // Render Onyomi
     if(modalOnyomiList) {
         modalOnyomiList.innerHTML = '';
         if (item.onyomi && item.onyomi.length > 0) {
@@ -915,7 +701,6 @@ function showKanjiModal(item) {
         } else { modalOnyomiList.innerHTML = '<li>-</li>'; }
     }
 
-    // Render Kunyomi
     if(modalKunyomiList) {
         modalKunyomiList.innerHTML = '';
         if (item.kunyomi && item.kunyomi.length > 0) {
@@ -924,53 +709,45 @@ function showKanjiModal(item) {
     }
 
     if(modalKategori) modalKategori.textContent = item.kategori || '-';
-    if(modalJlpt) modalJlpt.textContent = item.jlpt || '-'; // Mengubah referensi di JS
+    if(modalJlpt) modalJlpt.textContent = item.jlpt || '-';
 
     if (googleSearchButton && item.kanji) {
         const searchTerm = encodeURIComponent("Jelaskan kanji: " + item.kanji);
         googleSearchButton.href = `https://www.google.com/search?q=${searchTerm}`;
-
         googleSearchButton.innerHTML = `<i class="fas fa-search"></i> Cari ${item.kanji} di Google`;
-
-        googleSearchButton.style.display = ''; // Pastikan tombol terlihat
+        googleSearchButton.style.display = '';
     } else if (googleSearchButton) {
         googleSearchButton.style.display = 'none';
     }
 
-    kanjiModal.classList.add('visible'); // Tampilkan modal
+    kanjiModal.classList.add('visible');
 }
 
-// --- Fungsi untuk menyembunyikan modal (Tidak Berubah) ---
 function hideKanjiModal() {
-    if(kanjiModal) kanjiModal.classList.remove('visible'); // Sembunyikan modal
+    if(kanjiModal) kanjiModal.classList.remove('visible');
 }
 
 function updateStatus() {
-    // This function now primarily updates the main status text
-    // The select mode status is handled by updateSelectControls()
-
     const totalItems = filteredData.length;
     let statusText = '';
 
     if (totalItems === 0) {
-        statusText = `Tidak ada karakter ditemukan untuk ${currentLevel.toUpperCase() || currentDataType.charAt(0).toUpperCase() + currentDataType.slice(1)} dengan filter saat ini.`; // Mengubah teks
-        // Sembunyikan paginasi jika tidak ada data
+        statusText = `Tidak ada karakter ditemukan untuk ${currentLevel.toUpperCase() || currentDataType.charAt(0).toUpperCase() + currentDataType.slice(1)} dengan filter saat ini.`;
         if(prevBtn) prevBtn.disabled = true;
         if(nextBtn) nextBtn.disabled = true;
         if(pageInfo) pageInfo.textContent = '';
     } else {
-        const typeLabel = currentDataType === 'kanji' ? 'kanji' : (currentDataType === 'hiragana' ? 'hiragana' : 'katakana'); // Tentukan label tipe data
+        const typeLabel = currentDataType === 'kanji' ? 'kanji' : (currentDataType === 'hiragana' ? 'hiragana' : 'katakana');
         if (perPage === 0) {
-            statusText = `Menampilkan semua ${totalItems} ${typeLabel} ${currentDataType === 'kanji' ? currentLevel.toUpperCase() : ''}`.trim(); // Sesuaikan teks
+            statusText = `Menampilkan semua ${totalItems} ${typeLabel} ${currentDataType === 'kanji' ? currentLevel.toUpperCase() : ''}`.trim();
         } else {
             const start = (currentPage - 1) * perPage + 1;
             const end = Math.min(currentPage * perPage, totalItems);
-            statusText = `Menampilkan ${start}-${end} dari ${totalItems} ${typeLabel} ${currentDataType === 'kanji' ? currentLevel.toUpperCase() : ''}`.trim(); // Sesuaikan teks
+            statusText = `Menampilkan ${start}-${end} dari ${totalItems} ${typeLabel} ${currentDataType === 'kanji' ? currentLevel.toUpperCase() : ''}`.trim();
         }
     }
 
     if(statusInfo) statusInfo.textContent = statusText;
-    // Hide statusInfo when select mode is active
     if(statusInfo) statusInfo.style.display = isSelectMode ? 'none' : 'block';
 }
 
@@ -1004,4 +781,201 @@ function setTheme(theme) {
             icon.classList.replace('fa-sun', 'fa-moon');
         }
     }
+}
+
+
+function toggleSelectMode(enable) {
+    isSelectMode = enable;
+    selectedCards.clear();
+
+    const cards = kanjiContainer ? kanjiContainer.querySelectorAll('.character-card') : [];
+    cards.forEach(card => {
+        card.classList.remove('selected');
+        const existingIndicator = card.querySelector('.select-indicator');
+        if (isSelectMode && !existingIndicator) {
+            const indicator = document.createElement('div');
+            indicator.classList.add('select-indicator');
+            indicator.innerHTML = '<i class="fas fa-check-circle"></i>';
+            card.insertBefore(indicator, card.firstChild);
+        } else if (!isSelectMode && existingIndicator) {
+            existingIndicator.remove();
+        }
+    });
+
+    if(selectControlsContainer) selectControlsContainer.style.display = isSelectMode ? 'flex' : 'none';
+    updateSelectControls();
+    updateStatus();
+}
+
+function toggleCardSelection(cardElement, item) {
+    const characterId = item.kanji || item.karakter;
+
+    if (selectedCards.has(characterId)) {
+        selectedCards.delete(characterId);
+        cardElement.classList.remove('selected');
+    } else {
+        selectedCards.add(characterId);
+        cardElement.classList.add('selected');
+    }
+    updateSelectControls();
+}
+
+function updateSelectControls() {
+    if (!isSelectMode) {
+        if(selectControlsContainer) {
+             selectControlsContainer.innerHTML = '';
+             selectControlsContainer.style.display = 'none';
+        }
+        return;
+    }
+
+    if (!selectControlsContainer) {
+         console.error("Error: selectControlsContainer not found.");
+         return;
+    }
+
+    const cards = kanjiContainer ? kanjiContainer.querySelectorAll('.character-card') : [];
+    const totalDisplayed = cards.length;
+    const selectedCount = selectedCards.size;
+
+    let selectControlsHtml = `
+        <span id="selectedCountInfo">
+            <span id="selectedCount">${selectedCount}</span> dipilih
+        </span>
+        <button id="selectAllBtn"></button>
+        <button id="cancelSelectBtn">Batal</button>
+        <button id="shuffleBtn">Acak Tampilan Ini</button>
+    `;
+
+    selectControlsContainer.innerHTML = selectControlsHtml;
+
+    const selectAllBtn = document.getElementById('selectAllBtn');
+    const cancelSelectBtn = document.getElementById('cancelSelectBtn');
+    const shuffleBtn = document.getElementById('shuffleBtn');
+
+    if (selectedCount === totalDisplayed && totalDisplayed > 0) {
+        if(selectAllBtn) selectAllBtn.textContent = 'Batal Pilih Semua';
+    } else {
+        if(selectAllBtn) selectAllBtn.textContent = 'Pilih Semua';
+    }
+
+    if (shuffleBtn) {
+        shuffleBtn.disabled = selectedCount === 0;
+    }
+
+    if (selectAllBtn) {
+         selectAllBtn.addEventListener('click', handleSelectAllToggle);
+    }
+    if (cancelSelectBtn) {
+        cancelSelectBtn.addEventListener('click', handleCancelSelect);
+    }
+     if (shuffleBtn) {
+         shuffleBtn.addEventListener('click', handleShuffleDisplay);
+     }
+
+    if(statusInfo) statusInfo.style.display = isSelectMode ? 'none' : 'block';
+    const selectedCountSpan = document.getElementById('selectedCount');
+    if(selectedCountSpan) {
+        selectedCountSpan.textContent = selectedCount;
+    }
+}
+
+function handleSelectAllToggle() {
+    const cards = kanjiContainer ? kanjiContainer.querySelectorAll('.character-card') : [];
+    const totalDisplayed = cards.length;
+    const selectedCount = selectedCards.size;
+
+    if (selectedCount === totalDisplayed && totalDisplayed > 0) {
+        cards.forEach(card => {
+            const item = JSON.parse(card.dataset.item);
+             const characterId = item.kanji || item.karakter;
+             selectedCards.delete(characterId);
+             card.classList.remove('selected');
+        });
+    } else {
+        selectedCards.clear();
+        cards.forEach(card => {
+            const item = JSON.parse(card.dataset.item);
+            const characterId = item.kanji || item.karakter;
+            selectedCards.add(characterId);
+            card.classList.add('selected');
+        });
+    }
+    updateSelectControls();
+}
+
+function handleCancelSelect() {
+    toggleSelectMode(false);
+}
+
+function handleShuffleDisplay() {
+    if (!isSelectMode || selectedCards.size === 0) return;
+
+    if (!filteredData || filteredData.length === 0) {
+         console.error("Error: Data not found for shuffle.");
+         return;
+    }
+
+    const startIndex = (currentPage - 1) * perPage;
+    const endIndex = perPage === 0 ? filteredData.length : Math.min(startIndex + perPage, filteredData.length);
+
+    const currentViewItems = filteredData.slice(startIndex, endIndex);
+
+    const selectedCurrentViewItems = currentViewItems.filter(item => {
+         const characterId = item.kanji || item.karakter;
+         return selectedCards.has(characterId);
+    });
+
+    const nonSelectedCurrentViewItems = currentViewItems.filter(item => {
+         const characterId = item.kanji || item.karakter;
+         return !selectedCards.has(characterId);
+    });
+
+    const shuffledSelectedCurrentViewItems = shuffleArray([...selectedCurrentViewItems]);
+
+    const newOrderedCurrentViewItems = [];
+    let shuffledIndex = 0;
+
+    currentViewItems.forEach(item => {
+         const characterId = item.kanji || item.karakter;
+         if (selectedCards.has(characterId)) {
+              if (shuffledIndex < shuffledSelectedCurrentViewItems.length) {
+                 newOrderedCurrentViewItems.push(shuffledSelectedCurrentViewItems[shuffledIndex]);
+                 shuffledIndex++;
+             } else {
+                  newOrderedCurrentViewItems.push(item);
+             }
+         } else {
+             newOrderedCurrentViewItems.push(item);
+         }
+    });
+
+    const updatedFilteredData = [
+        ...filteredData.slice(0, startIndex),
+        ...newOrderedCurrentViewItems,
+        ...filteredData.slice(endIndex)
+    ];
+
+    filteredData = updatedFilteredData;
+
+    selectedCards.clear();
+    renderCharacters(filteredData, currentDataType);
+    updateSelectControls();
+}
+
+function shuffleArray(array) {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [ array[randomIndex], array[currentIndex]];
+    }
+    return array;
+}
+
+// This click handler is mostly disabled in the new logic,
+// as mouseup/touchend handle the actions.
+function handleCardClick(event) {
+    console.log("Click event fired. Handled by mouseup/touchend.");
+    // event.preventDefault();
 }
