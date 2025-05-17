@@ -2,7 +2,7 @@ let currentLevel = 'n5';
 let loadedData = []; // Mengganti kanjiData menjadi loadedData untuk menyimpan data saat ini
 let filteredData = [];
 let currentPage = 1;
-let perPage = 3;
+let perPage = 14;
 let displayMode = 'minimal'; // State awal tampilan: 'minimal' atau 'full'
 let currentDataType = 'kanji'; // 'kanji', 'hiragana', atau 'katakana'
 
@@ -505,27 +505,33 @@ function handleMouseDown(event) {
 }
 
 function handleMouseUp(event) {
-    // If the timer was cleared before completing (i.e., it was a short press)
-    // AND the long press logic didn't fire...
-    if (longPressTimer && !isLongPressHandled) {
-        // It was a short click action
-        const card = event.currentTarget;
-        const item = JSON.parse(card.dataset.item);
-        // Manually trigger the "click" behavior based on current mode
-        if (!isSelectMode) {
-              // Standard click behavior (show modal for Kanji, log for Kana)
-             if (card.classList.contains('type-kanji')) {
-                 showKanjiModal(item);
-             } else if (card.classList.contains('type-hiragana') || card.classList.contains('type-katakana')) {
-                 // Optional: Add visual feedback for non-kanji/kana cards in normal mode if desired
-                  console.log(`Klik pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item); // Only log to console
-             }
-        } else {
-            // If in select mode, a short click also toggles selection
-             toggleCardSelection(card, item);
+    // Always clear timer
+    clearLongPressTimer();
+
+    const card = event.currentTarget;
+    const item = JSON.parse(card.dataset.item);
+
+    // --- Modified Logic: Handle selection toggle here when in select mode ---
+    if (isSelectMode) {
+        // If in select mode, any mouse up on a card toggles selection
+         toggleCardSelection(card, item);
+         // Prevent the default click event from potentially firing after this mouseup
+         event.preventDefault();
+    } else {
+        // If NOT in select mode, use the flag to check for short click
+        if (longPressTimer && !isLongPressHandled) {
+            // It was a short click action
+             // Standard click behavior (show modal for Kanji, log for Kana)
+            if (card.classList.contains('type-kanji')) {
+                showKanjiModal(item);
+            } else if (card.classList.contains('type-hiragana') || card.classList.contains('type-katakana')) {
+                 console.log(`Klik pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
+            }
         }
+        // If isLongPressHandled was true, the long press logic already ran.
+        // No action needed here for that case.
     }
-    clearLongPressTimer(); // Always clear timer on mouse up
+    // --- End Modified Logic ---
 }
 
 function handleTouchStart(event) {
@@ -547,28 +553,29 @@ function handleTouchEnd(event) {
      // Clear timer if it's still running
      clearLongPressTimer();
 
-     // If long press was not handled AND it was not a scroll, then it's a short tap
-     if (!isLongPressHandled && !isScrolling) {
-         // It was a short touch action (tap)
-         const card = event.currentTarget;
-         const item = JSON.parse(card.dataset.item);
-         // Manually trigger the "click" behavior based on current mode
-         if (!isSelectMode) {
-               // Standard click behavior (show modal for Kanji, log for Kana)
-              if (card.classList.contains('type-kanji')) {
-                  showKanjiModal(item);
-              } else if (card.classList.contains('type-hiragana') || card.classList.contains('type-katakana')) {
-                  // Optional: Add visual feedback
-                   console.log(`Tap pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item); // Only log to console
-              }
-         } else {
-             // If in select mode, a short tap also toggles selection
-              toggleCardSelection(card, item);
+     const card = event.currentTarget;
+     const item = JSON.parse(card.dataset.item);
+
+     // --- Modified Logic: Handle selection toggle here when in select mode ---
+     if (isSelectMode) {
+         // If in select mode, any touch end on a card toggles selection
+         toggleCardSelection(card, item);
+         // Prevent default touch behavior (like tap highlight, click generation)
+         event.preventDefault();
+     } else {
+         // If NOT in select mode, use flags to check for short tap (not scroll)
+         if (!isLongPressHandled && !isScrolling) {
+             // It was a short touch action (tap)
+              // Standard click behavior (show modal for Kanji, log for Kana)
+             if (card.classList.contains('type-kanji')) {
+                 showKanjiModal(item);
+             } else if (card.classList.contains('type-hiragana') || card.classList.contains('type-katakana')) {
+                  console.log(`Tap pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
+             }
          }
+         // If isLongPressHandled was true or isScrolling was true, the other logic handled it.
      }
-     // If isLongPressHandled was true, the long press logic already ran.
-     // If isScrolling was true, the browser handled the scroll.
-     // In those cases, do nothing more here.
+     // --- End Modified Logic ---
 }
 
 function handleTouchMove(event) {
@@ -612,7 +619,7 @@ function startLongPressTimer(cardElement) {
         // Select the card if not already selected (only if in select mode)
         if (isSelectMode) {
             const item = JSON.parse(cardElement.dataset.item);
-            const characterId = cardElement.classList.contains('type-kanji') ? item.kanji : item.karakter;
+            const characterId = item.kanji || item.karakter; // Get identifier regardless of type
              if (!selectedCards.has(characterId)) {
                 toggleCardSelection(cardElement, item);
             }
@@ -636,19 +643,19 @@ function clearLongPressTimer() {
 
 // --- Fungsi handle klik card (Modified) ---
 function handleCardClick(event) {
-    // Clear long press timer just in case (belt and suspenders)
+    // Clear long press timer (redundant now, but harmless)
     clearLongPressTimer();
 
-    // In this revised logic, short clicks are handled in handleMouseUp/handleTouchEnd.
-    // This handler primarily captures click events that might still fire.
-    // We only want it to do something if in select mode.
-     if (isSelectMode) {
-         const card = event.currentTarget;
-         const item = JSON.parse(card.dataset.item);
-         toggleCardSelection(card, item);
-     }
-     // If not in select mode, the click event is effectively ignored here,
-     // as the short-press behavior was handled in mouseup/touchend.
+    // --- Modified Logic: This handler should now do nothing important ---
+    // All click/tap/longpress handling is done in mouseup/touchend
+    // and the longpress timer callback.
+    // We can add a console log for debugging if needed, but it should
+    // not interfere with the main logic.
+    console.log("Click event fired. Primarily handled by mouseup/touchend.");
+
+    // Preventing default here might stop some browser behaviors if they
+    // weren't stopped by the mouseup/touchend preventDefault.
+    // event.preventDefault(); // Optional: uncomment if needed for testing
 }
 
 
@@ -683,7 +690,7 @@ function toggleSelectMode(enable) {
 
 function toggleCardSelection(cardElement, item) {
     // Use the appropriate character string for Set operations
-    const characterId = cardElement.classList.contains('type-kanji') ? item.kanji : item.karakter;
+    const characterId = item.kanji || item.karakter; // Get identifier regardless of type
 
     if (selectedCards.has(characterId)) {
         selectedCards.delete(characterId);
@@ -779,7 +786,7 @@ function handleSelectAllToggle() {
         // Deselect all currently displayed cards
         cards.forEach(card => {
             const item = JSON.parse(card.dataset.item);
-             const characterId = card.classList.contains('type-kanji') ? item.kanji : item.karakter;
+             const characterId = item.kanji || item.karakter; // Get identifier regardless of type
              selectedCards.delete(characterId);
              card.classList.remove('selected');
         });
@@ -788,7 +795,7 @@ function handleSelectAllToggle() {
         selectedCards.clear(); // Clear existing selection first
         cards.forEach(card => {
             const item = JSON.parse(card.dataset.item);
-            const characterId = card.classList.contains('type-kanji') ? item.kanji : item.karakter;
+            const characterId = item.kanji || item.karakter; // Get identifier regardless of type
             selectedCards.add(characterId);
             card.classList.add('selected');
         });
@@ -841,15 +848,15 @@ function handleShuffleDisplay() {
          if (selectedCards.has(characterId)) {
              // Replace the original selected item's position with the next item from the shuffled selected list
               if (shuffledIndex < shuffledSelectedCurrentViewItems.length) {
-                 newOrderedCurrentViewItems.push(shuffledSelectedCurrentViewItems[shuffledIndex]);
+                 newOrderedDisplayedItems.push(shuffledSelectedCurrentViewItems[shuffledIndex]);
                  shuffledIndex++;
              } else {
                  // Fallback: if shuffled items run out (should not happen with correct logic), push original
-                  newOrderedCurrentViewItems.push(item);
+                  newOrderedDisplayedItems.push(item);
              }
          } else {
              // Keep non-selected items in their original relative positions within the slice
-             newOrderedCurrentViewItems.push(item);
+             newOrderedDisplayedItems.push(item);
          }
     });
 
