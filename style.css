@@ -84,14 +84,22 @@
     font-weight: normal;
   }
 
-  /* Pagination Controls (Dipindahkan ke bawah) */
+  /* Pagination Controls */
   .pagination-controls {
     display: flex;
-    gap: 10px;
+    gap: 10px; /* Gap antara .perPage dan .pagination-buttons di desktop */
     align-items: center;
     justify-content: center; /* Tengahkan kontrol paginasi */
     margin-top: 30px; /* Tambahkan jarak di atas paginasi */
     margin-bottom: 20px; /* Tambahkan jarak di bawah paginasi jika diperlukan */
+    flex-direction: row; /* Default layout: row di desktop */
+  }
+
+  /* Style untuk kontainer baru .pagination-buttons */
+  .pagination-buttons {
+      display: flex; /* Gunakan flexbox untuk children (tombol & span) */
+      align-items: center; /* Tengahkan secara vertikal */
+      gap: 10px; /* Jarak antara tombol dan info halaman */
   }
 
 
@@ -133,12 +141,34 @@
     flex-shrink: 0; font-weight: normal;
   }
 
+  /* Media Query for Mobile */
   @media (max-width: 768px) {
     .controls { flex-direction: column; align-items: stretch; }
     #searchInput { width: 100%; flex: 1 0 auto; }
     .display-toggle, #categoryFilter { width: 100%; justify-content: center; }
-    .pagination-controls { flex-direction: column; gap: 15px;}
-    .level-selector { /* Pastikan level selector di mobile tetap menengahkan */ justify-content: center; }
+
+    /* Modifikasi pagination-controls di mobile */
+    .pagination-controls {
+      flex-direction: column; /* Stack children (#perPage dan .pagination-buttons) */
+      gap: 15px; /* Jarak antara select dan grup tombol */
+      align-items: center; /* Tengahkan item secara horizontal */
+    }
+
+    /* Atur tampilan select#perPage di mobile */
+     .pagination-controls select#perPage {
+         width: auto; /* Atau atur lebar spesifik jika perlu */
+         min-width: 150px; /* Contoh min-width */
+     }
+
+
+    /* Style untuk kontainer grup tombol .pagination-buttons di mobile */
+    .pagination-buttons {
+        display: flex; /* Agar tombol & info halaman berdampingan */
+        align-items: center; /* Tengahkan secara vertikal */
+        justify-content: center; /* Tengahkan grup tombol secara horizontal */
+        gap: 10px; /* Jarak antar item di dalam grup tombol */
+        width: 100%; /* Agar grup tombol bisa ditengahkan di dalam flex column parent */
+    }
   }
 
   .display-toggle-btn { background: transparent; border: none; color: var(--text); cursor: pointer; font-weight: 500; padding: 6px 10px; border-radius: 4px; transition: all 0.2s; }
@@ -222,7 +252,7 @@
      justify-content: center;
      align-items: center;
      padding: 15px; /* Padding disesuaikan */
-     cursor: default;
+     cursor: pointer; /* Kembali ke pointer cursor */
      border-color: var(--secondary); /* Contoh: border warna kuning untuk Hiragana */
   }
 
@@ -249,7 +279,7 @@
      justify-content: center;
      align-items: center;
      padding: 15px;
-     cursor: default;
+     cursor: pointer; /* Kembali ke pointer cursor */
      border-color: #4d96ff; /* Contoh: border warna biru untuk Katakana */
   }
 
@@ -440,106 +470,3 @@
  footer p {
   margin: 0; /* Hapus margin default dari paragraf di dalam footer */
  }
-
-/* --- New styles for select mode UI --- */
-
-/* Style for the select controls container */
-#selectControls {
-    /* Basic styling, adjust as needed */
-    margin: 20px auto 15px; /* Space above and below */
-    max-width: 1000px; /* Match grid container width */
-    text-align: center;
-    font-size: 1rem;
-    color: var(--text); /* Inherit text color */
-    display: flex; /* Use flexbox for button alignment */
-    justify-content: center; /* Center the flex items */
-    align-items: center;
-    flex-wrap: wrap; /* Allow items to wrap on smaller screens */
-    gap: 10px; /* Space between items */
-}
-
-/* Style for the count span */
-#selectControls #selectedCountInfo {
-    font-weight: normal;
-    color: var(--text);
-}
-
-#selectControls #selectedCount {
-    font-weight: bold;
-    color: var(--primary); /* Highlight the count */
-}
-
-
-/* Style for buttons within select controls */
-#selectControls button {
-    padding: 8px 12px; /* Adjust padding */
-    background: var(--card-bg); /* Button background */
-    color: var(--text); /* Button text color */
-    border: 1px solid var(--border); /* Button border */
-    border-radius: 5px; /* Button corner radius */
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s ease, border-color 0.2s ease;
-}
-
-#selectControls button:hover {
-    background-color: var(--border); /* Hover effect */
-}
-
-#selectControls button#cancelSelectBtn {
-    color: #ff6b6b; /* Color for cancel button */
-    border-color: #ff6b6b;
-}
-#selectControls button#cancelSelectBtn:hover {
-    background-color: rgba(255, 107, 107, 0.1);
-}
-
-#selectControls button#shuffleBtn {
-    color: #f59e0b; /* Color for shuffle button (secondary color) */
-    border-color: #f59e0b;
-}
-#selectControls button#shuffleBtn:hover {
-     background-color: rgba(245, 158, 11, 0.1);
-}
-
-
-/* Style for the select indicator on the card */
-.character-card .select-indicator {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    font-size: 1.3rem;
-    color: #ccc; /* Default color */
-    z-index: 5; /* Above other card content */
-     /* Ensure pointer events go through to the card */
-    pointer-events: none;
-}
-
-/* Style for the select indicator when the card is selected */
-.character-card.selected .select-indicator {
-    color: var(--primary); /* Primary color when selected */
-}
-
-/* Optional: Add a border or background change for selected cards */
-.character-card.selected {
-    border-color: var(--primary); /* Highlight border when selected */
-    /* background-color: rgba(79, 70, 229, 0.05); /* Optional: subtle background change */
-}
-
-/* Hide the original status text when select controls are shown */
-.status[style*="display: none"] {
-    display: none;
-}
-
-
-/* Adjustments for smaller screens */
-@media (max-width: 768px) {
-    #selectControls {
-        flex-direction: column; /* Stack buttons vertically */
-        gap: 8px; /* Adjust gap */
-    }
-    #selectControls button {
-         width: 80%; /* Make buttons wider */
-         max-width: 200px;
-    }
-}
