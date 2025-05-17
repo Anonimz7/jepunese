@@ -51,8 +51,11 @@ selectControlsContainer.style.display = 'none'; // Ensure hidden initially
 // --- Variables for scroll/tap differentiation ---
 let startX = 0;
 let startY = 0;
-let isScrolling = false;
-let isLongPressHandled = false; // Flag to differentiate long press from click
+let isScrolling = false; // Flag set by touchmove if significant movement occurs
+let isLongPressHandled = false; // Flag set by long press timer if it completes
+
+// Variable to store the card element currently being interacted with
+let activeCardElement = null;
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -497,9 +500,8 @@ function renderCharacters(dataToRender, dataType) {
 
 // --- New function for mouseleave ---
 function handleMouseLeave() {
-    // Only clear the timer on mouseleave. Don't trigger selection logic.
-    clearLongPressTimer(); // This will also reset isLongPressHandled = false
-    // isScrolling = false; // Reset scrolling flag on mouseleave as well
+    // Clear timer and reset long press/scrolling flags on mouseleave
+    clearLongPressTimer();
 }
 // --- End New function ---
 
@@ -509,7 +511,9 @@ function handleMouseDown(event) {
     // Only trigger long press on left mouse button
     if (event.button !== 0) return;
     isLongPressHandled = false; // Reset flag for a new press
-    startLongPressTimer(event.currentTarget);
+    isScrolling = false; // Reset scrolling flag for a new press
+    activeCardElement = event.currentTarget; // Store the card element
+    startLongPressTimer(activeCardElement); // Pass element to timer
 }
 
 function handleMouseUp(event) {
@@ -517,39 +521,40 @@ function handleMouseUp(event) {
     const item = JSON.parse(card.dataset.item);
 
     // Check if timer is active before clearing
-    const timerWasActive = longPressTimer !== null;
+    // const timerWasActive = longPressTimer !== null; // Not strictly needed anymore
 
-    clearLongPressTimer(); // Clear timer and reset isLongPressHandled = false
+    clearLongPressTimer(); // Clear timer and reset long press/scrolling flags
 
-    // Decide action based on state *before* clearing timer, and current mode/scroll state
+    // Decide action based on mode and whether long press was handled
     if (isSelectMode) {
-         // If in select mode, any mouse up on a card toggles selection.
-         // The only exception is if a long press just finished on *this specific event sequence*
-         // which activated the mode and selected the first card.
-         // However, given the complexity, and the fact that `toggleCardSelection` is idempotent
-         // (toggling twice returns to original state), the simplest robust behavior is
-         // to always toggle on mouseup when in select mode.
-         toggleCardSelection(card, item);
+         // If in select mode, and long press was NOT handled by the timer (meaning it was a short click/release)
+         // The check `!isLongPressHandled` after `clearLongPressTimer` works because isLongPressHandled is only set true by the timer.
+         if (!isLongPressHandled) {
+             // It was a short click while in select mode - toggle selection
+              toggleCardSelection(card, item);
+         }
+         // If isLongPressHandled is true, the long press timer already activated mode and selected the card.
+         // We do NOT want to toggle again here.
+
          // Prevent the default click event from potentially firing after this mouseup
          event.preventDefault();
 
     } else {
-        // If NOT in select mode, check if it was a short click (timer started but didn't complete)
-        // We know it wasn't a long press if isLongPressHandled was false *before* clearTimer.
-        // Also ensure it wasn't a scroll.
-        if (!isLongPressHandled && !isScrolling) { // Check flags AFTER clearTimer, but effectively reflects state before timer completion
+        // If NOT in select mode, check if it was a short click (timer started but didn't complete AND not a long press AND not a scroll)
+        // Check flags AFTER clearTimer, which reflects state before timer completion
+         if (!isLongPressHandled && !isScrolling) {
              // It was a short click action for showing modal
             if (card.classList.contains('type-kanji')) {
                 showKanjiModal(item);
-            } else if (card.classList.contains('type-hiragana') || card.classList.contains('type-katakana')) {
+            } else if (card.classList.contains('type-hiragana') || card.classList.contains('katakana')) {
                  console.log(`Klik pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
             }
         }
         // If isLongPressHandled was true (before reset), the long press activated mode.
-        // If isScrolling was true, it was a scroll.
+        // If isScrolling was true (before reset), it was a scroll.
         // In those cases, no modal/selection toggle here.
     }
-     // Reset scrolling flag on mouse up
+    // Reset scrolling flag again on mouse up for robustness
      isScrolling = false;
 }
 
@@ -560,13 +565,14 @@ function handleTouchStart(event) {
     startY = event.touches[0].clientY;
     isScrolling = false; // Reset scroll flag
     isLongPressHandled = false; // Reset long press flag
+    activeCardElement = event.currentTarget; // Store the card element
 
     // Do NOT prevent default here initially. Let the browser see if it's a scroll.
     // event.preventDefault(); // Remove this line
     // Note: This might allow native browser context menus on long touch if not
     // prevented elsewhere or if the OS overrides.
 
-    startLongPressTimer(event.currentTarget);
+    startLongPressTimer(activeCardElement); // Pass element to timer
 }
 
 function handleTouchEnd(event) {
@@ -574,16 +580,24 @@ function handleTouchEnd(event) {
      const item = JSON.parse(card.dataset.item);
 
      // Check if timer is active before clearing
-     const timerWasActive = longPressTimer !== null;
+     // const timerWasActive = longPressTimer !== null; // Not strictly needed
 
-     clearLongPressTimer(); // Clear timer and reset isLongPressHandled = false, isScrolling = false
+     clearLongPressTimer(); // Clear timer and reset long press/scrolling flags
 
-     // Decide action based on state *before* clearing timer, and current mode/scroll state
-     // If long press was not handled AND it was not a scroll, then it's a short tap
-     if (!isLongPressHandled && !isScrolling) { // Check flags AFTER clearTimer
+     // Calculate total distance moved from start to end (Fix Issue 2)
+     const endX = event.changedTouches[0].clientX; // Use changedTouches for touchend
+     const endY = event.changedTouches[0].clientY;
+     const deltaX = Math.abs(endX - startX);
+     const deltaY = Math.abs(endY - startY);
+     const tapThreshold = 20; // Define a threshold for a clear tap (adjust as needed)
+
+
+     // Decide action based on mode and whether long press was handled and if it was a tap (not a drag/scroll)
+     // If long press was NOT handled AND total movement is below tap threshold
+     if (!isLongPressHandled && (deltaX < tapThreshold && deltaY < tapThreshold)) {
          // It was a short touch action (tap)
          if (isSelectMode) {
-             // If in select mode, a short tap also toggles selection
+             // If in select mode, a short tap toggles selection.
              toggleCardSelection(card, item);
              // Prevent default touch behavior (like tap highlight, click generation)
              event.preventDefault();
@@ -591,80 +605,46 @@ function handleTouchEnd(event) {
              // Standard click behavior (show modal for Kanji, log for Kana)
              if (card.classList.contains('type-kanji')) {
                  showKanjiModal(item);
-             } else if (card.classList.contains('type-hiragana') || card.classList.contains('type-katakana')) {
+             } else if (card.classList.contains('type-hiragana') || card.classList.contains('katakana')) {
                   console.log(`Tap pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
              }
          }
      }
-     // If isLongPressHandled was true (before reset), long press activated mode.
-     // If isScrolling was true (before reset), the browser handled scroll.
-     // In those cases, no modal/selection toggle here.
+     // If isLongPressHandled was true, the long press activated mode (selection handled by timer callback if !wasSelectMode).
+     // If total movement >= tapThreshold, it was a drag/scroll, no modal/toggle here.
 
      // Reset scrolling flag again on touch end
      isScrolling = false;
 }
 
 function handleTouchMove(event) {
-    if (isLongPressHandled || isScrolling) {
-        // If long press was already detected or we are already scrolling, do nothing more here
-        return;
-    }
+     // Calculate distance moved from start
+     const currentX = event.touches[0].clientX;
+     const currentY = event.touches[0].clientY;
+     const deltaX = Math.abs(currentX - startX);
+     const deltaY = Math.abs(currentY - startY);
 
-    // Calculate distance moved
-    const currentX = event.touches[0].clientX;
-    const currentY = event.touches[0].clientY;
-    const deltaX = Math.abs(currentX - startX);
-    const deltaY = Math.abs(currentY - startY);
-    const moveThreshold = 15; // Pixels threshold to consider it a scroll/drag
+     // Only check for scroll if long press not handled and not already scrolling
+    if (isLongPressHandled || isScrolling) {
+        // If long press was already detected or we are already scrolling, allow default scroll behavior.
+        // Also, if we are scrolling, we might need to prevent default to ensure smooth scrolling
+        // if it wasn't handled by the browser already, but usually letting default happen is best.
+         return;
+     }
+
+    const moveThreshold = 15; // Pixels threshold to consider it a scroll/drag (Keep original or adjust)
 
     // If movement exceeds threshold, assume it's a scroll/drag
     if (deltaX > moveThreshold || deltaY > moveThreshold) {
         isScrolling = true;
-        clearLongPressTimer(); // Cancel long press timer (this resets isLongPressHandled too)
+        clearLongPressTimer(); // Cancel long press timer (resets isLongPressHandled too)
         // Do NOT prevent default here. Allow scrolling.
-        // If event.cancelable is true, we could potentially prevent default
-        // to stop the tap-highlight or other default touch behaviors *if*
-        // a scroll is detected, but allowing the browser's native scroll
-        // handling is usually best.
     }
     // If movement is within threshold, the timer continues, waiting for a long press.
 }
 
 
-function startLongPressTimer(cardElement) {
-    clearLongPressTimer(); // Clear any existing timer and reset isLongPressHandled
-    longPressTimer = setTimeout(() => {
-        // Long press detected
-        isLongPressHandled = true; // Set flag
-
-        // Only activate select mode if not already active
-        if (!isSelectMode) {
-            toggleSelectMode(true);
-        }
-
-        // Select the card if not already selected (only if in select mode)
-        // Selection is handled by mouseup/touchend in select mode, but adding it here
-        // ensures the initial long-pressed card is selected when mode activates.
-         if (isSelectMode) { // Check isSelectMode again in case toggleSelectMode was called
-             const item = JSON.parse(cardElement.dataset.item);
-             const characterId = item.kanji || item.karakter; // Get identifier regardless of type
-              if (!selectedCards.has(characterId)) {
-                 toggleCardSelection(cardElement, item);
-             }
-         }
-
-    }, LONG_PRESS_TIME);
-}
-
-function clearLongPressTimer() {
-    if (longPressTimer) {
-        clearTimeout(longPressTimer);
-        longPressTimer = null;
-    }
-    // Reset longPressHandled and isScrolling whenever timer is cleared for ANY reason (short click, scroll, mouseleave)
-    isLongPressHandled = false;
-    isScrolling = false; // Reset scrolling flag here too for consistency
-}
+// clearLongPressTimer is defined above with reset flags
 
 
 // --- Fungsi handle klik card (Modified) ---
@@ -829,8 +809,8 @@ function handleCancelSelect() {
 function handleShuffleDisplay() {
     if (!isSelectMode || selectedCards.size === 0) return; // Only shuffle in select mode and if items are selected
 
-    if (!kanjiContainer || !filteredData || filteredData.length === 0) {
-         console.error("Error: Data or container not found for shuffle.");
+    if (!filteredData || filteredData.length === 0) {
+         console.error("Error: Data not found for shuffle.");
          return;
     }
 
