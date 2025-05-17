@@ -33,7 +33,7 @@ const googleSearchButton = document.getElementById('googleSearchButton'); // Amb
 const minimalBtn = document.getElementById('minimalBtn');
 const fullBtn = document.getElementById('fullBtn');
 
-// --- New variables for select mode ---
+// --- New variables for select mode and touch handling ---
 let longPressTimer;
 const LONG_PRESS_TIME = 500; // milliseconds
 let isSelectMode = false;
@@ -48,8 +48,11 @@ selectControlsContainer.style.fontWeight = 'normal';
 selectControlsContainer.style.color = 'var(--text)';
 selectControlsContainer.style.display = 'none'; // Ensure hidden initially
 
-// --- New flag to differentiate long press from click ---
-let isLongPressHandled = false;
+// --- Variables for scroll/tap differentiation ---
+let startX = 0;
+let startY = 0;
+let isScrolling = false;
+let isLongPressHandled = false; // Flag to differentiate long press from click
 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -504,9 +507,10 @@ function handleMouseUp(event) {
     if (longPressTimer && !isLongPressHandled) {
         // It was a short click action
         const card = event.currentTarget;
-        // Manually trigger the "click" behavior for non-select mode
+        const item = JSON.parse(card.dataset.item);
+        // Manually trigger the "click" behavior based on current mode
         if (!isSelectMode) {
-             const item = JSON.parse(card.dataset.item);
+              // Standard click behavior (show modal for Kanji, log for Kana)
              if (card.classList.contains('type-kanji')) {
                  showKanjiModal(item);
              } else if (card.classList.contains('type-hiragana') || card.classList.contains('type-katakana')) {
@@ -514,8 +518,7 @@ function handleMouseUp(event) {
                   console.log(`Klik pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item); // Only log to console
              }
         } else {
-            // If in select mode, a short click also toggles selection (this is handled by handleCardClick anyway, but explicit here)
-             const item = JSON.parse(card.dataset.item);
+            // If in select mode, a short click also toggles selection
              toggleCardSelection(card, item);
         }
     }
@@ -523,23 +526,32 @@ function handleMouseUp(event) {
 }
 
 function handleTouchStart(event) {
-     // Prevent default to avoid scrolling interference and potential double-tap issues
-     // if (event.cancelable) { // Check if preventDefault is allowed
-          event.preventDefault();
-     // }
-    isLongPressHandled = false; // Reset flag
+    // Record start position
+    startX = event.touches[0].clientX;
+    startY = event.touches[0].clientY;
+    isScrolling = false; // Reset scroll flag
+    isLongPressHandled = false; // Reset long press flag
+
+    // Do NOT prevent default here initially. Let the browser see if it's a scroll.
+    // event.preventDefault(); // Remove this line
+    // Note: This might allow native browser context menus on long touch if not
+    // prevented elsewhere or if the OS overrides.
+
     startLongPressTimer(event.currentTarget);
 }
 
 function handleTouchEnd(event) {
-     // If the timer was cleared before completing (i.e., it was a short press)
-     // AND the long press logic didn't fire...
-     if (longPressTimer && !isLongPressHandled) {
-         // It was a short touch action
+     // Clear timer if it's still running
+     clearLongPressTimer();
+
+     // If long press was not handled AND it was not a scroll, then it's a short tap
+     if (!isLongPressHandled && !isScrolling) {
+         // It was a short touch action (tap)
          const card = event.currentTarget;
-         // Manually trigger the "click" behavior for non-select mode
+         const item = JSON.parse(card.dataset.item);
+         // Manually trigger the "click" behavior based on current mode
          if (!isSelectMode) {
-              const item = JSON.parse(card.dataset.item);
+               // Standard click behavior (show modal for Kanji, log for Kana)
               if (card.classList.contains('type-kanji')) {
                   showKanjiModal(item);
               } else if (card.classList.contains('type-hiragana') || card.classList.contains('type-katakana')) {
@@ -547,20 +559,39 @@ function handleTouchEnd(event) {
                    console.log(`Tap pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item); // Only log to console
               }
          } else {
-             // If in select mode, a short tap also toggles selection (handled by handleCardClick)
-              const item = JSON.parse(card.dataset.item);
+             // If in select mode, a short tap also toggles selection
               toggleCardSelection(card, item);
          }
      }
-    clearLongPressTimer(); // Always clear timer on touch end
-    // Note: event.preventDefault() in touchstart might prevent click event generation,
-    // so explicitly handling short press in touchend is more reliable here.
+     // If isLongPressHandled was true, the long press logic already ran.
+     // If isScrolling was true, the browser handled the scroll.
+     // In those cases, do nothing more here.
 }
 
-function handleTouchMove() {
-    // If the touch moves significantly before the timer finishes, cancel the long press
-    clearLongPressTimer();
-    isLongPressHandled = false; // Ensure flag is reset
+function handleTouchMove(event) {
+    if (isLongPressHandled || isScrolling) {
+        // If long press was already detected or we are already scrolling, do nothing more here
+        return;
+    }
+
+    // Calculate distance moved
+    const currentX = event.touches[0].clientX;
+    const currentY = event.touches[0].clientY;
+    const deltaX = Math.abs(currentX - startX);
+    const deltaY = Math.abs(currentY - startY);
+    const moveThreshold = 15; // Pixels threshold to consider it a scroll/drag
+
+    // If movement exceeds threshold, assume it's a scroll/drag
+    if (deltaX > moveThreshold || deltaY > moveThreshold) {
+        isScrolling = true;
+        clearLongPressTimer(); // Cancel long press timer
+        // Do NOT prevent default here. Allow scrolling.
+        // If event.cancelable is true, we could potentially prevent default
+        // to stop the tap-highlight or other default touch behaviors *if*
+        // a scroll is detected, but allowing the browser's native scroll
+        // handling is usually best.
+    }
+    // If movement is within threshold, the timer continues, waiting for a long press.
 }
 
 
@@ -570,22 +601,24 @@ function startLongPressTimer(cardElement) {
         // Long press detected
         isLongPressHandled = true; // Set flag
 
+        // Only activate select mode if not already active
         if (!isSelectMode) {
             toggleSelectMode(true);
         }
 
-        // Select the card if not already selected
+        // Select the card if not already selected (only if in select mode)
         if (isSelectMode) {
             const item = JSON.parse(cardElement.dataset.item);
-            // Use the character string for selection
             const characterId = cardElement.classList.contains('type-kanji') ? item.kanji : item.karakter;
              if (!selectedCards.has(characterId)) {
                 toggleCardSelection(cardElement, item);
             }
         }
-        // Prevent default browser behavior (like context menu) on long press
-         // This is often handled by preventDefault on touchstart/mousedown,
-         // but setting the flag here can also signal to prevent subsequent actions.
+        // At this point, long press was successful. If needed, prevent default
+        // browser behavior like the context menu. event.preventDefault() on
+        // touchstart is typically used, but we removed it to allow scrolling.
+        // Preventing it here might be too late or interfere. Testing needed
+        // if context menu becomes an issue.
     }, LONG_PRESS_TIME);
 }
 
@@ -600,34 +633,19 @@ function clearLongPressTimer() {
 
 // --- Fungsi handle klik card (Modified) ---
 function handleCardClick(event) {
-    // Clear long press timer just in case click fires after touchstart but before timeout
+    // Clear long press timer just in case (belt and suspenders)
     clearLongPressTimer();
 
-    // --- Fix: Only handle click if long press was NOT handled ---
     // In this revised logic, short clicks are handled in handleMouseUp/handleTouchEnd.
-    // This handleCardClick will primarily handle the case where the long-press timer
-    // *didn't* complete, and the browser still generated a click event.
-    // Or, it handles clicks when already in select mode.
-
-    const card = event.currentTarget;
-    const item = JSON.parse(card.dataset.item); // Get data from data-item attribute
-
-    if (isSelectMode) {
-        // If in select mode, always toggle selection on click
+    // This handler primarily captures click events that might still fire.
+    // We only want it to do something if in select mode.
+     if (isSelectMode) {
+         const card = event.currentTarget;
+         const item = JSON.parse(card.dataset.item);
          toggleCardSelection(card, item);
-    } else {
-        // If NOT in select mode, and long press wasn't handled, this is a standard click.
-        // However, the logic for standard click (showing modal) is now moved to
-        // handleMouseUp/handleTouchEnd when !isLongPressHandled.
-        // So, if we reach here and !isSelectMode, it might be a click event that
-        // wasn't caught by the touchend/mouseup logic immediately after timer clear.
-        // We can safely ignore it here or add a console log if needed for debugging.
-        console.log("Click event ignored because short press handled in mouseup/touchend or already in select mode.");
-         // If for some reason the touchend/mouseup short-press logic didn't fire,
-         // and isSelectMode is false, we could potentially put the modal logic back here as a fallback,
-         // but the current structure aims to handle it in touchend/mouseup for better click/long-press distinction.
-         // Let's keep it focused on select mode toggling for now.
-    }
+     }
+     // If not in select mode, the click event is effectively ignored here,
+     // as the short-press behavior was handled in mouseup/touchend.
 }
 
 
