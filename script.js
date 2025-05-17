@@ -2,7 +2,7 @@ let currentLevel = 'n5';
 let loadedData = []; // Mengganti kanjiData menjadi loadedData untuk menyimpan data saat ini
 let filteredData = [];
 let currentPage = 1;
-let perPage = 5;
+let perPage = 14;
 let displayMode = 'minimal'; // State awal tampilan: 'minimal' atau 'full'
 let currentDataType = 'kanji'; // 'kanji', 'hiragana', atau 'katakana'
 
@@ -414,6 +414,8 @@ function renderCharacters(dataToRender, dataType) {
     } else {
         const start = (currentPage - 1) * perPage;
         const end = start + perPage;
+        // Use the dataToRender length for slicing, not filteredData length,
+        // in case dataToRender is already a subset (like after shuffle on current page)
         dataSubset = dataToRender.slice(start, end);
     }
 
@@ -458,6 +460,7 @@ function renderCharacters(dataToRender, dataType) {
 
 
     // Atur status halaman setelah merender
+    // Use filteredData length to calculate total pages and update pagination controls
     const totalPages = perPage === 0 ? 1 : Math.ceil(filteredData.length / perPage);
     if(prevBtn) prevBtn.disabled = currentPage === 1 || perPage === 0;
     if(nextBtn) nextBtn.disabled = currentPage === totalPages || perPage === 0;
@@ -474,7 +477,7 @@ function renderCharacters(dataToRender, dataType) {
         card.removeEventListener('mouseleave', handleMouseUp);
         card.removeEventListener('touchstart', handleTouchStart);
         card.removeEventListener('touchend', handleTouchEnd);
-        card.removeEventListener('touchmove', handleTouchMove); // Fix: Use handleTouchMove
+        card.removeEventListener('touchmove', handleTouchMove);
 
 
         // Tambahkan listener baru
@@ -485,7 +488,7 @@ function renderCharacters(dataToRender, dataType) {
          card.addEventListener('mouseleave', handleMouseUp); // Clear timer if mouse leaves
          card.addEventListener('touchstart', handleTouchStart);
          card.addEventListener('touchend', handleTouchEnd);
-         card.addEventListener('touchmove', handleTouchMove); // Fix: Use handleTouchMove
+         card.addEventListener('touchmove', handleTouchMove);
     });
 
      updateSelectControls(); // Ensure select controls are updated after render
@@ -797,69 +800,82 @@ function handleCancelSelect() {
     toggleSelectMode(false); // Exit select mode
 }
 
-// --- Modified: Shuffle only selected displayed items of ANY type ---
+// --- FIX for Shuffle on Subsequent Pages ---
 function handleShuffleDisplay() {
     if (!isSelectMode || selectedCards.size === 0) return; // Only shuffle in select mode and if items are selected
 
-    if (!kanjiContainer) {
-         console.error("Error: kanjiContainer not found for shuffle.");
+    if (!kanjiContainer || !filteredData || filteredData.length === 0) {
+         console.error("Error: Data or container not found for shuffle.");
          return;
     }
 
-    const currentCardElements = Array.from(kanjiContainer.querySelectorAll('.character-card')); // Get ALL displayed cards
-    // Get the data items corresponding to the currently displayed cards
-    const currentDisplayedItems = currentCardElements.map(card => JSON.parse(card.dataset.item));
+    // Determine the slice of filteredData corresponding to the current page
+    const startIndex = (currentPage - 1) * perPage;
+    // Ensure endIndex does not exceed filteredData length
+    const endIndex = perPage === 0 ? filteredData.length : Math.min(startIndex + perPage, filteredData.length);
 
-    // Separate selected and non-selected items from the *currently displayed* set
-    const selectedDisplayedItems = currentDisplayedItems.filter(item => {
+    // Get the actual item objects from the current page slice of filteredData
+    const currentViewItems = filteredData.slice(startIndex, endIndex);
+
+    // Separate selected and non-selected items from this current view slice
+    const selectedCurrentViewItems = currentViewItems.filter(item => {
          const characterId = item.kanji || item.karakter; // Get the identifier
          return selectedCards.has(characterId);
     });
 
-    const nonSelectedDisplayedItems = currentDisplayedItems.filter(item => {
+    const nonSelectedCurrentViewItems = currentViewItems.filter(item => {
          const characterId = item.kanji || item.karakter; // Get the identifier
          return !selectedCards.has(characterId);
     });
 
-    // Shuffle ONLY the selected items
-    const shuffledSelectedItems = shuffleArray([...selectedDisplayedItems]); // Create a copy before shuffling
+    // Shuffle ONLY the selected items in the current view
+    const shuffledSelectedCurrentViewItems = shuffleArray([...selectedCurrentViewItems]); // Create a copy before shuffling
 
-    // Create a new ordered list of displayed items, with selected items shuffled
-    const newOrderedDisplayedItems = []; // This will hold all items (any type) in the new order
+    // Create the new ordered list for the current view slice
+    const newOrderedCurrentViewItems = [];
     let shuffledIndex = 0;
 
-    currentDisplayedItems.forEach(item => {
+    // Iterate through the ORIGINAL order of items in the current view slice
+    currentViewItems.forEach(item => {
          const characterId = item.kanji || item.karakter; // Get the identifier
          if (selectedCards.has(characterId)) {
-             // Replace the original selected item with the next item from the shuffled selected list
-             // Ensure we don't go out of bounds if something is wrong (shouldn't happen with correct logic)
-              if (shuffledIndex < shuffledSelectedItems.length) {
-                 newOrderedDisplayedItems.push(shuffledSelectedItems[shuffledIndex]);
+             // Replace the original selected item's position with the next item from the shuffled selected list
+              if (shuffledIndex < shuffledSelectedCurrentViewItems.length) {
+                 newOrderedCurrentViewItems.push(shuffledSelectedCurrentViewItems[shuffledIndex]);
                  shuffledIndex++;
              } else {
-                 // Fallback: if shuffled items run out, just push the original (should not happen)
-                  newOrderedDisplayedItems.push(item);
+                 // Fallback: if shuffled items run out (should not happen with correct logic), push original
+                  newOrderedCurrentViewItems.push(item);
              }
          } else {
-             // Keep non-selected items in their original relative positions
-             newOrderedDisplayedItems.push(item);
+             // Keep non-selected items in their original relative positions within the slice
+             newOrderedCurrentViewItems.push(item);
          }
     });
+
+    // --- Update the filteredData array with the modified slice ---
+    // Create a new filteredData array by replacing the current page's slice
+    const updatedFilteredData = [
+        ...filteredData.slice(0, startIndex), // Items before the current page
+        ...newOrderedCurrentViewItems,      // The newly ordered items for the current page
+        ...filteredData.slice(endIndex)       // Items after the current page
+    ];
+
+    filteredData = updatedFilteredData; // Update the global filteredData array
+
 
     // Clear the selection after shuffling the displayed items
     selectedCards.clear();
 
-    // Re-render the displayed cards using the new ordered list
-    // We can directly call renderCharacters with this new list as the dataToRender
-    // because it represents the complete set of items currently shown on the page.
-    // Note: This re-renders the *current page* with the shuffled items.
-    renderCharacters(newOrderedDisplayedItems, currentDataType); // Re-render the displayed subset
+    // Re-render the cards using the main filteredData array.
+    // renderCharacters will automatically render the correct (current) page from the updated filteredData.
+    renderCharacters(filteredData, currentDataType);
 
     updateSelectControls(); // Update controls (count will be 0, shuffle button disabled)
      // Keep the status info consistent with the displayed items after shuffle
      // The main status text is hidden anyway in select mode.
 }
-// --- End Modified ---
+// --- End FIX ---
 
 
 // Helper function to shuffle an array (Fisher-Yates Algorithm)
