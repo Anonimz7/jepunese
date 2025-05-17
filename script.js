@@ -2,7 +2,7 @@ let currentLevel = 'n5';
 let loadedData = []; // Mengganti kanjiData menjadi loadedData untuk menyimpan data saat ini
 let filteredData = [];
 let currentPage = 1;
-let perPage = 14;
+let perPage = 3;
 let displayMode = 'minimal'; // State awal tampilan: 'minimal' atau 'full'
 let currentDataType = 'kanji'; // 'kanji', 'hiragana', atau 'katakana'
 
