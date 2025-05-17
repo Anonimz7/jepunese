@@ -2,7 +2,7 @@ let currentLevel = 'n5';
 let loadedData = [];
 let filteredData = [];
 let currentPage = 1;
-let perPage = 14;
+let perPage = 3;
 let displayMode = 'minimal';
 let currentDataType = 'kanji';
 
@@ -429,25 +429,23 @@ function renderCharacters(dataToRender, dataType) {
 
     const cards = kanjiContainer.querySelectorAll('.character-card');
     cards.forEach(card => {
-        // Remove old listeners - ensure ALL potential old listeners are removed
-        card.removeEventListener('click', handleCardClick);
+        // Remove old listeners - remove ALL previous potential mouse/touch listeners
+        // We don't need local mousemove/touchmove/globalend listeners on cards with the new global approach
+        card.removeEventListener('click', handleCardClick); // This one was already mostly disabled
         card.removeEventListener('mousedown', handleMouseDown);
         card.removeEventListener('mouseup', handleMouseUp);
         card.removeEventListener('mouseleave', handleMouseLeave);
         card.removeEventListener('touchstart', handleTouchStart);
         card.removeEventListener('touchend', handleTouchEnd);
-        card.removeEventListener('touchmove', handleTouchMove);
+        // Removed: card.removeEventListener('touchmove', handleTouchMove); // This was the source of the error
 
-
-        // Add new listeners
-        // We don't need click listener on the card anymore with the new approach
-        // card.addEventListener('click', handleCardClick);
+        // Add new listeners - only mousedown/mouseup/mouseleave and touchstart/touchend on the card
         card.addEventListener('mousedown', handleMouseDown);
         card.addEventListener('mouseup', handleMouseUp);
         card.addEventListener('mouseleave', handleMouseLeave);
         card.addEventListener('touchstart', handleTouchStart);
         card.addEventListener('touchend', handleTouchEnd);
-        card.addEventListener('touchmove', handleTouchMove);
+
     });
 
      updateSelectControls();
@@ -461,7 +459,16 @@ function handleMouseDown(event) {
     // Only handle left click
     if (event.button !== 0) return;
     // Only start a new press if one is not already active
-    if (pressTarget !== null) return;
+    if (pressTarget !== null) {
+         // If a press is already active, something unexpected happened (e.g., right click during left click press).
+         // Clean up the old press state before starting a new one.
+          if (pressTimer !== null) {
+              clearTimeout(pressTimer);
+          }
+          pressTarget = null;
+          movedDuringPress = false;
+     }
+
 
     pressTarget = event.currentTarget;
     movedDuringPress = false;
@@ -478,9 +485,13 @@ function handleMouseDown(event) {
                 toggleSelectMode(true); // This activates the mode
             }
             // Select the card that was long-pressed (will only select if mode just became active or already active)
-             if (isSelectMode && !selectedCards.has(getCharacterId(pressTarget))) { // Check if already selected before toggling
+             // Ensure pressTarget is still a valid DOM element and part of the document
+            if (pressTarget && pressTarget.isConnected && isSelectMode && !selectedCards.has(getCharacterId(pressTarget))) { // Check if already selected before toggling
                  const item = JSON.parse(pressTarget.dataset.item);
                  toggleCardSelection(pressTarget, item); // Select initial card
+             } else if (pressTarget && pressTarget.isConnected && isSelectMode && selectedCards.has(getCharacterId(pressTarget))) {
+                 // If already selected, a long press while selected should maybe deselect?
+                 // Or maybe do nothing. Current spec is unclear. Sticking to "select if not already selected".
              }
         }
         pressTimer = null; // Clear timer after execution
@@ -489,16 +500,19 @@ function handleMouseDown(event) {
 
 // Global mousemove listener to detect movement during press
 function handleGlobalMouseMove(event) {
-    if (pressTarget && pressTimer !== null) { // Only track if a press is active and timer is running
+    // Check if we have an active press and the timer is still running
+    if (pressTarget && pressTimer !== null) {
         const currentX = event.clientX;
         const currentY = event.clientY;
         const deltaX = Math.abs(currentX - startX);
         const deltaY = Math.abs(currentY - startY);
 
+        // Check if movement exceeds the threshold
         if (deltaX > MOVE_THRESHOLD || deltaY > MOVE_THRESHOLD) {
-            movedDuringPress = true;
+            movedDuringPress = true; // Mark that movement occurred
+            // Cancel the long press timer immediately on significant move
             if (pressTimer !== null) {
-                clearTimeout(pressTimer); // Cancel long press timer on significant move
+                clearTimeout(pressTimer);
                 pressTimer = null;
             }
              // No preventDefault here to allow native scrolling
@@ -509,18 +523,19 @@ function handleGlobalMouseMove(event) {
 function handleMouseUp(event) {
     // Check if this release is on the active press target
     if (pressTarget === event.currentTarget) {
+        // It's the end of a press on the same target
         if (pressTimer !== null) {
             // Timer was still running - it was a click
             clearTimeout(pressTimer); // Clear the long press timer
             pressTimer = null;
 
-            if (!movedDuringPress) { // Only trigger click action if no move
+            if (!movedDuringPress) { // Only trigger click action if no move occurred during the press
                 // It was a clean click/tap
                 const card = event.currentTarget;
                 const item = JSON.parse(card.dataset.item);
 
                 if (isSelectMode) {
-                    // If in select mode, click toggles selection
+                    // If in select mode, a clean click toggles selection
                     toggleCardSelection(card, item);
                 } else {
                     // If not in select mode, show modal (if Kanji)
@@ -531,17 +546,16 @@ function handleMouseUp(event) {
                     }
                 }
             }
-            // If movedDuringPress is true, it was a drag, no action here.
+            // If movedDuringPress is true, it was a drag (but ended on the same target), no specific action here.
         }
-        // If pressTimer was null, it means long press timer already fired.
-        // Action for long press is handled in setTimeout callback.
+        // If pressTimer was null, it means long press timer already fired (action handled in setTimeout callback).
         // No further action needed on mouseup if timer fired.
 
         // Reset press state
         pressTarget = null;
         movedDuringPress = false;
 
-        // Prevent default click after handling mouseup
+        // Prevent default click after handling mouseup to avoid double events
         event.preventDefault();
     }
     // If release is on a different target, global mouseup listener handles cleanup
@@ -550,18 +564,23 @@ function handleMouseUp(event) {
 function handleMouseLeave() {
     // If mouse leaves card while pressing and timer is running, treat as move intent
     if (pressTarget && pressTarget === event.currentTarget && pressTimer !== null) {
-        movedDuringPress = true;
+        movedDuringPress = true; // Mark as moved
+        // Cancel the long press timer when mouse leaves the element during press
         clearTimeout(pressTimer);
         pressTimer = null;
+        // Note: pressTarget is NOT set to null here, it will be cleared on mouseup/globalmouseup.
     }
 }
 
 // Global mouseup listener for cleanup (if press ends outside any card)
 function handleGlobalMouseEnd() {
+    // If there was an active press target when mouseup happened anywhere
     if (pressTarget !== null) {
+        // If the timer was still running, clear it
         if (pressTimer !== null) {
             clearTimeout(pressTimer);
         }
+        // Reset press state regardless of where the mouseup occurred
         pressTarget = null;
         movedDuringPress = false;
     }
@@ -572,28 +591,39 @@ function handleTouchStart(event) {
     // Only handle single touch
     if (event.touches.length !== 1) return;
     // Only start a new press if one is not already active
-    if (pressTarget !== null) return;
+    if (pressTarget !== null) {
+         // If a press is already active (e.g., multi-touch scenario or unexpected event order)
+         // Clean up the old press state.
+         if (pressTimer !== null) {
+             clearTimeout(pressTimer);
+         }
+         pressTarget = null;
+         movedDuringPress = false;
+     }
 
     pressTarget = event.currentTarget;
     movedDuringPress = false;
     startX = event.touches[0].clientX;
     startY = event.touches[0].clientY;
 
-    // No prevent default here to allow natural scrolling
+    // No prevent default here on touchstart to allow natural scrolling initially
     // event.preventDefault(); // Keep REMOVED
 
     // Start the long press timer
     pressTimer = setTimeout(() => {
         if (pressTarget && !movedDuringPress) {
             // Long press detected
-             if (!isSelectMode) {
-                 toggleSelectMode(true);
-             }
-             // Select the card that was long-pressed (will only select if mode just became active or already active)
-              if (isSelectMode && !selectedCards.has(getCharacterId(pressTarget))) { // Check if already selected before toggling
-                 const item = JSON.parse(pressTarget.dataset.item);
-                 toggleCardSelection(pressTarget, item); // Select initial card
-              }
+             // Ensure pressTarget is still a valid DOM element and part of the document
+            if (pressTarget && pressTarget.isConnected) {
+                 if (!isSelectMode) {
+                     toggleSelectMode(true); // Activate mode
+                 }
+                 // Select the card that was long-pressed (will only select if mode just became active or already active)
+                 if (isSelectMode && !selectedCards.has(getCharacterId(pressTarget))) { // Check if already selected
+                     const item = JSON.parse(pressTarget.dataset.item);
+                     toggleCardSelection(pressTarget, item); // Select initial card
+                 }
+            }
         }
         pressTimer = null; // Clear timer after execution
     }, LONG_PRESS_TIME);
@@ -601,6 +631,7 @@ function handleTouchStart(event) {
 
 // Global touchmove listener for movedDuringPress and cancelling long press early
 function handleGlobalTouchMove(event) {
+    // Check if we have an active press and the timer is still running, and it's a single touch
     if (pressTarget && pressTimer !== null && event.touches.length === 1) {
         const currentX = event.touches[0].clientX;
         const currentY = event.touches[0].clientY;
@@ -611,61 +642,91 @@ function handleGlobalTouchMove(event) {
         const touchMoveThreshold = 20;
 
         if (deltaX > touchMoveThreshold || deltaY > touchMoveThreshold) {
-            movedDuringPress = true;
+            movedDuringPress = true; // Mark that movement occurred
+            // Cancel the long press timer immediately on significant move
             if (pressTimer !== null) {
                 clearTimeout(pressTimer);
                 pressTimer = null;
             }
-            // Allow browser to handle the scroll
+            // Allowing default here lets the browser handle scrolling naturally
              // event.preventDefault(); // Keep REMOVED
         }
     }
+     // If not an active single touch press with timer, allow default behavior (e.g. multi-touch zoom, natural scroll)
 }
 
 function handleTouchEnd(event) {
-    // Check if this release is on the active press target
-    if (pressTarget === event.currentTarget) {
-        if (pressTimer !== null) {
-            // Timer was still running - it was a tap
-            clearTimeout(pressTimer);
-            pressTimer = null;
+    // Check if this release is on the active press target AND the touch that started the press is ending
+    // event.changedTouches contains the touches that ended
+     let touchEndedOnTarget = false;
+     for (let i = 0; i < event.changedTouches.length; i++) {
+         const endedTouch = event.changedTouches[i];
+         // We can't directly match the original touch ID easily here,
+         // so we rely on the touch ending *on the same element* and the global state (pressTarget).
+         // This is a simplification. A more robust way needs tracking touch IDs.
+         // For now, let's assume if the release is on the pressTarget element, it's the correct touch.
+         if (endedTouch.target === pressTarget) {
+              touchEndedOnTarget = true;
+              break;
+         }
+     }
 
-            if (!movedDuringPress) { // Only trigger tap action if no move
-                // It was a clean tap
-                const card = event.currentTarget;
-                const item = JSON.parse(card.dataset.item);
+    // Only process if the touch ended on the currently active press target element
+    if (touchEndedOnTarget && pressTarget !== null) {
+         if (pressTimer !== null) {
+             // Timer was still running - it was a tap
+             clearTimeout(pressTimer); // Clear the long press timer
+             pressTimer = null;
 
-                if (isSelectMode) {
-                    toggleCardSelection(card, item);
-                } else {
-                    if (card.classList.contains('type-kanji')) {
-                        showKanjiModal(item);
-                    } else if (card.classList.contains('type-hiragana') || card.classList.contains('katakana')) {
-                         console.log(`Tap pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
-                    }
-                }
-            }
-        }
-        // If pressTimer was null, it means long press timer already fired.
+             if (!movedDuringPress) { // Only trigger tap action if no move occurred during the press
+                 // It was a clean tap
+                 const card = pressTarget; // Use pressTarget which is the card element
+                 const item = JSON.parse(card.dataset.item);
 
-        // Reset press state
-        pressTarget = null;
-        movedDuringPress = false;
+                 if (isSelectMode) {
+                     // If in select mode, a clean tap toggles selection
+                     toggleCardSelection(card, item);
+                 } else {
+                     // If not in select mode, show modal (if Kanji)
+                     if (card.classList.contains('type-kanji')) {
+                         showKanjiModal(item);
+                     } else if (card.classList.contains('type-hiragana') || card.classList.contains('katakana')) {
+                          console.log(`Tap pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
+                     }
+                 }
+             }
+             // If movedDuringPress is true, it was a drag (but ended on the same target), no specific action here.
+         }
+         // If pressTimer was null, it means long press timer already fired (action handled in setTimeout callback).
+         // No further action needed on touchend if timer fired.
 
-        // Prevent default behaviors like tap highlight, click generation
-        event.preventDefault();
-    }
-     // If release is on a different target, global touchend listener handles cleanup
+         // Reset press state
+         pressTarget = null;
+         movedDuringPress = false;
+
+         // Prevent default behaviors like tap highlight, click generation on this element
+         event.preventDefault();
+     }
+     // If touch ended on a different target or not on any element, global touchend/touchcancel handles cleanup.
 }
 
 // Global touchend/touchcancel listener for cleanup
 function handleGlobalTouchEnd(event) {
+    // If there was an active press target when touchend happened anywhere
      if (pressTarget !== null) {
-         if (pressTimer !== null) {
-             clearTimeout(pressTimer);
+         // Check if *any* of the touches that ended were the one that started the press.
+         // This requires tracking touch IDs, which is complex with the current state.
+         // A simpler cleanup: if any touch ends while pressTarget is set, clear the state.
+         // This might occasionally cancel a press if another finger is lifted, but it's safer than a lingering state.
+
+         // If any touch ended, clear the current press state
+         if (event.changedTouches.length > 0) {
+             if (pressTimer !== null) {
+                 clearTimeout(pressTimer);
+             }
+             pressTarget = null;
+             movedDuringPress = false;
          }
-         pressTarget = null;
-         movedDuringPress = false;
      }
 }
 
@@ -677,14 +738,18 @@ function getCharacterId(cardElement) {
          console.error("Invalid card element or data for getCharacterId");
          return null; // Return null or handle error appropriately
      }
-     const item = JSON.parse(cardElement.dataset.item);
-     return item.kanji || item.karakter;
+     try {
+         const item = JSON.parse(cardElement.dataset.item);
+         return item.kanji || item.karakter;
+     } catch (e) {
+         console.error("Error parsing item data for getCharacterId:", e);
+         return null;
+     }
 }
 
 
-// --- Other functions (remain the same) ---
+// --- Other functions ---
 
-// Function to display modal (assuming it exists elsewhere)
 function showKanjiModal(item) {
     if(!kanjiModal) return;
 
