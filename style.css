@@ -121,8 +121,70 @@
   .message { text-align: center; grid-column: 1 / -1; padding: 20px; color: var(--text); font-weight: normal; }
 
   /* Theme Toggle */
-  .theme-toggle { position: fixed; top: 20px; right: 20px; background: var(--card-bg); border: 2px solid var(--border); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-  .theme-toggle i { font-size: 1.2rem; color: var(--text); }
+  .theme-toggle {
+    position: fixed;
+    top: 20px; /* Jarak dari atas */
+    right: 20px; /* Jarak dari kanan */
+    background: var(--card-bg);
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    width: 40px; /* Ukuran standar */
+    height: 40px; /* Ukuran standar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 100; /* Pastikan di atas konten lain */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+     transition: background 0.3s, color 0.1s; /* Tambahkan transisi */
+}
+.theme-toggle i {
+    font-size: 1.2rem; /* Ukuran ikon standar */
+    color: var(--text);
+}
+
+/* New Floating Display Toggle (placed below theme-toggle) */
+.display-toggle-fab {
+  position: fixed;
+  top: 70px; /* Posisikan di bawah theme-toggle (sekitar 40px tinggi + 10px jarak + 20px top theme toggle) */
+  right: 20px; /* Sejajarkan dengan theme-toggle */
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  width: 40px; /* Samakan ukuran dengan theme toggle */
+  height: 40px; /* Samakan ukuran dengan theme toggle */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 100; /* Sama dengan theme-toggle */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.1s;
+}
+
+.display-fab-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.display-fab-btn i {
+    font-size: 1.2rem; /* Samakan ukuran ikon dengan theme toggle */
+    color: var(--text);
+}
+
+.display-toggle-fab:hover {
+    background-color: var(--border);
+}
+
 
   #categoryFilter {
     min-width: 180px;
@@ -170,6 +232,24 @@
         gap: 10px; /* Jarak antar item di dalam grup tombol */
         width: 100%; /* Agar grup tombol bisa ditengahkan di dalam flex column parent */
     }
+
+    /* Media query for position on smaller screens */
+    .theme-toggle {
+        top: 15px;
+        right: 15px;
+        width: 35px; height: 35px; /* Sedikit lebih kecil di mobile */
+    }
+     .theme-toggle i { font-size: 1rem; } /* Ikon lebih kecil */
+
+
+    .display-toggle-fab {
+        top: 55px; /* Sesuaikan top berdasarkan ukuran mobile theme-toggle (35px tinggi + 5px jarak + 15px top) */
+        right: 15px;
+        width: 35px; height: 35px; /* Samakan ukuran dengan theme toggle mobile */
+    }
+     .display-fab-btn i {
+         font-size: 1rem; /* Samakan ukuran ikon dengan theme toggle mobile */
+     }
   }
 
   .display-toggle-btn { background: transparent; border: none; color: var(--text); cursor: pointer; font-weight: 500; padding: 6px 10px; border-radius: 4px; transition: all 0.2s; }
@@ -242,61 +322,6 @@
   }
    .character-card.type-kanji .secondary-text { /* Untuk Furigana, Romaji, Meaning di Kanji Card */
      font-weight: normal; /* Default weight */
-   }
-
-
-  /* Styles Khusus untuk Card Hiragana */
-  .character-card.type-hiragana {
-     height: 160px; /* Tinggi tetap untuk hiragana card */
-     display: flex; /* Gunakan flexbox untuk menengahkan */
-     flex-direction: column;
-     justify-content: center;
-     align-items: center;
-     padding: 15px; /* Padding disesuaikan */
-     cursor: default;
-     border-color: var(--secondary); /* Contoh: border warna kuning untuk Hiragana */
-  }
-
-  .character-card.type-hiragana .primary-char { /* Untuk Karakter Hiragana */
-     font-size: 3.5rem; /* Ukuran karakter hiragana lebih besar */
-     font-weight: 600; /* Bobot hiragana */
-     margin-bottom: 5px; /* Jarak dengan romaji */
-     color: var(--primary); /* Warna */
-     line-height: 1;
-  }
-
-   .character-card.type-hiragana .secondary-text { /* Untuk Romaji Hiragana */
-     font-size: 1rem; /* Ukuran romaji hiragana */
-     font-weight: normal; /* Bobot romaji */
-     color: #888; /* Warna romaji */
-     font-style: italic; /* Romaji italic */
-   }
-
-   /* Styles Khusus untuk Card Katakana (Sama seperti Hiragana tapi beda warna border) */
-  .character-card.type-katakana {
-     height: 160px; /* Tinggi tetap */
-     display: flex;
-     flex-direction: column;
-     justify-content: center;
-     align-items: center;
-     padding: 15px;
-     cursor: default;
-     border-color: #4d96ff; /* Contoh: border warna biru untuk Katakana */
-  }
-
-  .character-card.type-katakana .primary-char { /* Untuk Karakter Katakana */
-     font-size: 3.5rem;
-     font-weight: 600;
-     margin-bottom: 5px;
-     color: var(--primary);
-     line-height: 1;
-  }
-
-   .character-card.type-katakana .secondary-text { /* Untuk Romaji Katakana */
-     font-size: 1rem;
-     font-weight: normal;
-     color: #888;
-     font-style: italic;
    }
 
 
@@ -574,17 +599,4 @@
 /* Style to hide non-selected cards in focus mode */
 .kanji-grid.focus-mode .character-card:not(.selected) {
     display: none !important; /* Hide non-selected cards when focus-mode class is active */
-}
-
-
-/* Adjustments for smaller screens */
-@media (max-width: 768px) {
-    #selectControls {
-        flex-direction: column; /* Stack buttons vertically */
-        gap: 8px; /* Adjust gap */
-    }
-    #selectControls button {
-         width: 80%; /* Make buttons wider */
-         max-width: 200px;
-    }
 }

@@ -32,6 +32,11 @@ const googleSearchButton = document.getElementById('googleSearchButton');
 const minimalBtn = document.getElementById('minimalBtn');
 const fullBtn = document.getElementById('fullBtn');
 
+// Variabel baru untuk FAB display toggle
+const displayToggleFab = document.getElementById('displayToggleFab');
+const displayModeFabToggle = document.getElementById('displayModeFabToggle');
+
+
 // --- Revised State Variables ---
 let pressTimer = null; // Stores the setTimeout ID for long press
 let pressTarget = null; // Stores the card element currently being pressed
@@ -81,7 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('touchend', handleTouchEnd);
     document.addEventListener('touchcancel', handleGlobalTouchEnd);
 
-
+    // Panggil setDisplayMode di sini untuk mengatur ikon FAB berdasarkan mode awal ('minimal')
+    setDisplayMode(displayMode); // displayMode defaultnya adalah 'minimal'
 });
 
 async function loadLevelData(level) {
@@ -120,8 +126,7 @@ async function loadLevelData(level) {
             currentDataType = 'katakana';
             const response = await fetch(filePath);
             if (!response.ok) { throw new Error(`Gagal memuat data Katakana karena file tidak ditemukan atau ada masalah: ${response.status}`); }
-            data = await response.json();
-            loadedData = data.katakana;
+            data = await response.katakana;
         } else {
             loadedData = [];
             currentDataType = 'unknown';
@@ -141,7 +146,7 @@ async function loadLevelData(level) {
         if (categoryFilter) categoryFilter.disabled = false;
         if (perPageSelect) perPageSelect.disabled = false;
 
-        setDisplayMode(displayMode); // This will call renderCharacters
+        // setDisplayMode is called in DOMContentLoaded now, no need here
 
         updateStatus();
 
@@ -233,7 +238,7 @@ function setupEventListeners() {
         });
     });
 
-    setupDisplayToggleListeners();
+    setupDisplayToggleListeners(); // Listeners for top display buttons
 
     if(searchInput) searchInput.addEventListener('input', debounce(handleSearch, 300));
 
@@ -298,6 +303,11 @@ function setupEventListeners() {
         });
     }
 
+    // Event listener untuk tombol FAB display toggle
+    if (displayModeFabToggle) {
+        displayModeFabToggle.addEventListener('click', handleFabDisplayToggle);
+    }
+
     // Using delegation on selectControlsContainer for select mode buttons
      if (selectControlsContainer) {
          selectControlsContainer.addEventListener('click', (event) => {
@@ -320,6 +330,7 @@ function setupEventListeners() {
 }
 
 function setupDisplayToggleListeners() {
+    // These listeners are for the original buttons in the .controls div
     if(minimalBtn) {
         minimalBtn.addEventListener('click', () => {
             setDisplayMode('minimal');
@@ -332,22 +343,51 @@ function setupDisplayToggleListeners() {
     }
 }
 
+// Fungsi untuk menangani klik pada tombol FAB display toggle
+function handleFabDisplayToggle() {
+    console.log("Tombol FAB Display diklik!"); // Debug log
+    // Tentukan mode baru berdasarkan mode saat ini
+    const newMode = displayMode === 'minimal' ? 'full' : 'minimal';
+    // Panggil setDisplayMode untuk mengganti tampilan dan memperbarui semua tombol
+    setDisplayMode(newMode);
+}
+
+
 function setDisplayMode(mode) {
+    console.log("Memanggil setDisplayMode dengan mode:", mode); // Debug log
     displayMode = mode;
     if (kanjiContainer) {
         // Remove both classes first
         kanjiContainer.classList.remove('display-minimal', 'display-full');
+
+        // Update top buttons and FAB icon based on the new mode
         if (mode === 'minimal') {
             kanjiContainer.classList.add('display-minimal');
+            // Update top buttons
             if(minimalBtn) minimalBtn.classList.add('active');
             if(fullBtn) fullBtn.classList.remove('active');
+            // Update FAB icon
+            if (displayModeFabToggle) {
+                const icon = displayModeFabToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-list'); // Hapus ikon mode full
+                    icon.classList.add('fa-grip-horizontal'); // Tambahkan ikon mode minimal
+                }
+            }
         } else { // mode === 'full'
             kanjiContainer.classList.add('display-full');
+            // Update top buttons
             if(fullBtn) fullBtn.classList.add('active');
             if(minimalBtn) minimalBtn.classList.remove('active');
+            // Update FAB icon
+            if (displayModeFabToggle) {
+                const icon = displayModeFabToggle.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-grip-horizontal'); // Hapus ikon mode minimal
+                    icon.classList.add('fa-list'); // Tambahkan ikon mode full
+                }
+            }
         }
-        // Keep select mode active and selections when changing display mode.
-        // renderCharacters will handle displaying the correct cards based on isSelectMode and isFocusMode.
     }
     // Re-render characters with the current selections and focus state
     renderCharacters(isFocusMode ? getFocusedData() : filteredData, currentDataType);
@@ -515,7 +555,7 @@ function renderCharacters(dataToRender, dataType) {
     const cards = kanjiContainer.querySelectorAll('.character-card');
     cards.forEach(card => {
         // Remove old listeners if any
-        card.removeEventListener('click', handleCardClick);
+        card.removeEventListener('click', handleCardClick); // Mostly handled by mouseup/touchend now
         card.removeEventListener('mousedown', handleMouseDown);
         card.removeEventListener('mouseup', handleMouseUp);
         card.removeEventListener('mouseleave', handleMouseLeave);
@@ -805,8 +845,31 @@ function handleGlobalTouchEnd(event) {
          // A simpler cleanup: if any touch ends while pressTarget is set, clear the state.
          // This might occasionally cancel a press if another finger is lifted, but it's safer than a lingering state.
 
-         // If any touch ended, clear the current press state
-         if (event.changedTouches.length > 0) {
+         if (event.changedTouches && event.changedTouches.length > 0) {
+             let relevantTouchEnded = false;
+              // Simple check: If any touch that ended has the same clientX/clientY as the press start point within threshold
+              // This is not a perfect ID match but can help prevent clearing on unrelated touches ending.
+              for(let i = 0; i < event.changedTouches.length; i++) {
+                  const endedTouch = event.changedTouches[i];
+                   const deltaX = Math.abs(endedTouch.clientX - startX);
+                   const deltaY = Math.abs(endedTouch.clientY - startY);
+                   if (deltaX < MOVE_THRESHOLD && deltaY < MOVE_THRESHOLD) {
+                       relevantTouchEnded = true;
+                       break;
+                   }
+              }
+
+              // If a touch that ended was near the start point, or if we can't check precisely, clear the state
+              // A more robust solution would map touchstart event's touch.identifier and check against touchend's changedTouches[i].identifier
+             if (relevantTouchEnded || event.changedTouches.length === 1) { // Simpler fallback check
+                 if (pressTimer !== null) {
+                     clearTimeout(pressTimer);
+                 }
+                 pressTarget = null;
+                 movedDuringPress = false;
+             }
+         } else {
+             // If no changed touches (e.g., mouseup) and pressTarget is set, clear state
              if (pressTimer !== null) {
                  clearTimeout(pressTimer);
              }
@@ -1287,12 +1350,12 @@ function shuffleArray(array) {
 // --- New Focus Feature Logic ---
 
 function handleFocusToggle() {
-    if (!isSelectMode) return; // Focus only works in select mode
+    if (!isSelectMode) return; // Fokus hanya berfungsi dalam mode pilih
 
     if (isFocusMode) {
-        // Currently in focus mode, switch back to full filtered view
+        // Saat ini dalam mode fokus, beralih kembali ke tampilan filter penuh
         isFocusMode = false;
-        // When returning from focus mode, reset pagination to page 1
+        // Saat keluar dari mode fokus, atur ulang paginasi ke halaman 1
         currentPage = 1;
 
         // --- Recalculate filteredData based ONLY on category filter when exiting focus mode ---
@@ -1304,7 +1367,7 @@ function handleFocusToggle() {
         });
          // --- End recalculate filteredData ---
 
-         // Clear search input and reset placeholder when exiting focus mode (already done when entering, but good to ensure)
+         // Clear search input and reset placeholder when exiting focus mode
         if(searchInput) {
              searchInput.value = ''; // Clear input value
              // Reset placeholder based on current data type
@@ -1317,12 +1380,17 @@ function handleFocusToggle() {
              } else {
                  searchInput.placeholder = 'Cari...';
              }
+             // Aktifkan kembali input pencarian
+             searchInput.disabled = false; // Tambahkan baris ini
          }
 
-        // Render the newly calculated filtered data
-        renderCharacters(filteredData, currentDataType);
+
+         // When entering focus mode, display all selected items at once (no pagination)
+         // The renderCharacters function handles disabling pagination in focus mode.
+         // Call renderCharacters with the data from getFocusedData(), which now filters from loadedData.
+        renderCharacters(filteredData, currentDataType); // Render data yang baru difilter
     } else {
-        // Not in focus mode, switch to focused view (show only selected)
+        // Tidak dalam mode fokus, beralih ke tampilan fokus (hanya tampilkan yang dipilih)
         if (selectedCards.size === 0) {
             alert("Pilih minimal satu karakter untuk menggunakan fitur Fokus.");
             return;
@@ -1342,17 +1410,18 @@ function handleFocusToggle() {
              } else {
                  searchInput.placeholder = 'Cari...';
              }
+            // Nonaktifkan input pencarian
+            searchInput.disabled = true; // Tambahkan baris ini
          }
-         // --- End clear search input ---
 
 
          // When entering focus mode, display all selected items at once (no pagination)
          // The renderCharacters function handles disabling pagination in focus mode.
          // Call renderCharacters with the data from getFocusedData(), which now filters from loadedData.
-        renderCharacters(getFocusedData(), currentDataType); // Render only selected data
+        renderCharacters(getFocusedData(), currentDataType); // Render hanya data yang dipilih
     }
-    updateSelectControls(); // Update button text ("Fokus" / "Kembalikan") and button disabled state
-    updateStatus(); // Update status text
+    updateSelectControls(); // Perbarui teks tombol ("Fokus" / "Kembalikan") dan status tombol disabled
+    updateStatus(); // Perbarui teks status
 }
 
 // Helper function to get the data subset for focus mode
