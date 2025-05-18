@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mousemove', handleGlobalMouseMove, true);
     document.addEventListener('mouseup', handleGlobalMouseEnd); // Use global mouseup for cleanup if release outside card
     document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false, capture: true }); // passive: false needed for preventDefault
-    document.addEventListener('touchend', handleGlobalTouchEnd);
+    document.addEventListener('touchend', handleTouchEnd);
     document.addEventListener('touchcancel', handleGlobalTouchEnd);
 
 
@@ -127,7 +127,7 @@ async function loadLevelData(level) {
             currentDataType = 'unknown';
         }
 
-        filteredData = [...loadedData];
+        filteredData = [...loadedData]; // Initially filteredData is the same as loadedData
         currentPage = 1;
 
         // Reset select mode and focus mode on level change
@@ -208,6 +208,7 @@ function populateCategoryFilter(data, dataType) {
         }
     }
 
+    // Update search input placeholder based on data type
     if (searchInput) {
         if (dataType === 'kanji') {
             searchInput.placeholder = 'Cari kanji (contoh: 水, mizu, air...)';
@@ -226,8 +227,8 @@ function setupEventListeners() {
         btn.addEventListener('click', () => {
             currentLevel = btn.dataset.level;
             currentPage = 1;
-            if(searchInput) searchInput.value = '';
-            if(categoryFilter) categoryFilter.value = '';
+            if(searchInput) searchInput.value = ''; // Clear search input on level change
+            if(categoryFilter) categoryFilter.value = ''; // Reset category filter on level change
             loadLevelData(currentLevel);
         });
     });
@@ -395,12 +396,15 @@ function handleSearch() {
     });
 
     currentPage = 1;
-    // --- REMOVED: toggleSelectMode(false); ---
-    // --- REMOVED: isFocusMode = false; ---
+    // Keep select mode and focus mode state on search
+    // toggleSelectMode(false); // REMOVED
+    // isFocusMode = false; // REMOVED
 
-    // After filtering, re-render the characters.
-    // renderCharacters will use the existing isSelectMode and isFocusMode state.
+    // After filtering, re-render the characters based on the updated filteredData and existing select/focus state
+    // If focus mode is active, renderCharacters will call getFocusedData internally,
+    // which now correctly filters from loadedData.
     renderCharacters(isFocusMode ? getFocusedData() : filteredData, currentDataType);
+
 
     // Update controls and status based on the *new* filtered data and existing select state.
     updateSelectControls();
@@ -447,7 +451,7 @@ function renderCharacters(dataToRender, dataType) {
 
 
     let cardsHtml = dataSubset.map(item => {
-        const characterId = dataType === 'kanji' ? item.kanji : item.karakter;
+        const characterId = dataType === 'kanji' ? item.kanji || '' : item.karakter || ''; // Handle potential undefined IDs
         // A card is selected if select mode is on AND its ID is in the selectedCards set
         const isSelected = isSelectMode && selectedCards.has(characterId);
         const selectedClass = isSelected ? ' selected' : '';
@@ -455,26 +459,44 @@ function renderCharacters(dataToRender, dataType) {
         const selectIndicatorHtml = isSelectMode ? '<div class="select-indicator"><i class="fas fa-check-circle"></i></div>' : '';
 
         if (dataType === 'kanji') {
+             // Ensure data-item attribute is correctly formatted as a string
+             const itemDataString = JSON.stringify({
+                  kanji: item.kanji || '',
+                  furigana: item.furigana || '',
+                  romaji: item.romaji || '',
+                  indo: item.indo || '',
+                  inggris: item.inggris || '',
+                  onyomi: item.onyomi || [],
+                  kunyomi: item.kunyomi || [],
+                  kategori: item.kategori || '',
+                  jlpt: item.jlpt || ''
+              });
             return `
-                <div class="character-card type-kanji${selectedClass}" data-item='${JSON.stringify(item)}'>
+                <div class="character-card type-kanji${selectedClass}" data-item='${itemDataString}'>
                     ${selectIndicatorHtml}
-                    <div class="primary-char">${item.kanji}</div>
+                    <div class="primary-char">${item.kanji || ''}</div>
                     <div class="kanji-card-details">
-                        <div class="furigana">${item.furigana}</div>
-                        <div class="romaji">${item.romaji}</div>
+                        <div class="furigana">${item.furigana || ''}</div>
+                        <div class="romaji">${item.romaji || ''}</div>
                         <div class="meaning">
-                            <div class="indo">${item.indo}</div>
-                            <div class="inggris">${item.inggris}</div>
+                            <div class="indo">${item.indo || ''}</div>
+                            <div class="inggris">${item.inggris || ''}</div>
                         </div>
                     </div>
                 </div>
             `;
         } else if (dataType === 'hiragana' || dataType === 'katakana') {
+             // Ensure data-item attribute is correctly formatted as a string
+             const itemDataString = JSON.stringify({
+                  karakter: item.karakter || '',
+                  romaji: item.romaji || '',
+                  kategori: item.kategori || ''
+             });
             return `
-                <div class="character-card type-${dataType}${selectedClass}" data-item='${JSON.stringify(item)}'>
+                <div class="character-card type-${dataType}${selectedClass}" data-item='${itemDataString}'>
                     ${selectIndicatorHtml}
-                    <div class="primary-char">${item.karakter}</div>
-                    <div class="secondary-text">${item.romaji}</div>
+                    <div class="primary-char">${item.karakter || ''}</div>
+                    <div class="secondary-text">${item.romaji || ''}</div>
                 </div>
             `;
         }
@@ -755,9 +777,9 @@ function handleTouchEnd(event) {
                      if (card.classList.contains('type-kanji')) {
                          showKanjiModal(item);
                      } else if (card.classList.contains('type-hiragana') || card.classList.contains('katakana')) {
-                          console.log(`Tap pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
+                          console.log(`Klik pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
                      }
-                 }
+                }
              }
              // If movedDuringPress is true, it was a drag (but ended on the same target), no specific action here.
          }
@@ -795,7 +817,7 @@ function handleGlobalTouchEnd(event) {
 }
 
 
-// Helper to get character ID regardless of type
+// Helper to get character ID regardless of type from card element
 function getCharacterId(cardElement) {
      // Ensure item data exists
      if (!cardElement || !cardElement.dataset || !cardElement.dataset.item) {
@@ -862,7 +884,7 @@ function updateStatus() {
     const totalFilteredItems = filteredData.length;
     let statusText = '';
 
-    if (totalFilteredItems === 0) {
+    if (totalFilteredItems === 0 && !isFocusMode) { // Only show no items message if not in focus mode and filtered data is empty
         statusText = `Tidak ada karakter ditemukan untuk ${currentLevel.toUpperCase() || currentDataType.charAt(0).toUpperCase() + currentDataType.slice(1)} dengan filter saat ini.`;
          // Keep pagination disabled if no items found
         if(prevBtn) prevBtn.disabled = true;
@@ -965,7 +987,19 @@ function toggleSelectMode(enable) {
          isFocusMode = false; // Exit focus mode
          // When exiting select mode, reset pagination to page 1 and render filtered data
          currentPage = 1;
-         renderCharacters(filteredData, currentDataType); // Render full filtered data
+         // When exiting select mode (via Cancel), we should return to the state
+         // where only the category filter is applied, and search is empty.
+         // Recalculate filteredData based *only* on loadedData and current category filter.
+         const currentCategory = categoryFilter ? categoryFilter.value : '';
+         filteredData = loadedData.filter(item => {
+             const matchesCategory = !currentCategory || (item.kategori && item.kategori === currentCategory);
+             return matchesCategory;
+         });
+         if(searchInput) searchInput.value = ''; // Clear search input
+         populateCategoryFilter(loadedData, currentDataType); // Reset search placeholder
+
+
+         renderCharacters(filteredData, currentDataType); // Render the newly filtered data
     }
 
 
@@ -1038,10 +1072,16 @@ function updateSelectControls() {
 
          // Update 'Pilih Semua' button text immediately after creation
          if (selectAllBtn) {
-              if (selectedCount > 0 && selectedCount === totalDisplayed && totalDisplayed > 0) {
+              if (selectedCount > 0 && totalDisplayed > 0 && selectedCount === totalDisplayed) {
                  selectAllBtn.textContent = 'Batal Pilih Semua';
              } else {
-                 selectAllBtn.textContent = 'Pilih Semua';
+                  // Calculate selected count among currently displayed cards
+                  const selectedInView = currentlyDisplayedCards.filter(card => selectedCards.has(getCharacterId(card))).length;
+                  if (selectedInView > 0 && selectedInView === totalDisplayed && totalDisplayed > 0) {
+                       selectAllBtn.textContent = 'Batal Pilih Semua';
+                  } else {
+                       selectAllBtn.textContent = 'Pilih Semua';
+                  }
              }
          }
 
@@ -1060,7 +1100,9 @@ function updateSelectControls() {
              selectedCountSpan.textContent = selectedCount;
          }
          if (selectAllBtn) {
-              if (selectedCount > 0 && selectedCount === totalDisplayed && totalDisplayed > 0) {
+              // Calculate selected count among currently displayed cards for 'Pilih Semua' text
+              const selectedInView = currentlyDisplayedCards.filter(card => selectedCards.has(getCharacterId(card))).length;
+              if (selectedCount > 0 && totalDisplayed > 0 && selectedInView === totalDisplayed) {
                  selectAllBtn.textContent = 'Batal Pilih Semua';
              } else {
                  selectAllBtn.textContent = 'Pilih Semua';
@@ -1075,8 +1117,11 @@ function updateSelectControls() {
     const focusBtn = selectControlsContainer.querySelector('#focusBtn'); // Ensure focusBtn is referenced here too
 
     if (shuffleBtn) {
-        // Shuffle button should only be disabled if nothing is selected
-        shuffleBtn.disabled = selectedCards.size === 0;
+        // Shuffle button should only be disabled if at least one item is selected *in the currently displayed view*
+         const currentlyDisplayedItems = isFocusMode ? getFocusedData() : (perPage === 0 ? filteredData : filteredData.slice((currentPage - 1) * perPage, (currentPage - 1) * perPage + perPage));
+         const selectedInCurrentView = currentlyDisplayedItems.filter(item => selectedCards.has(getCharacterIdFromItem(item))).length;
+         shuffleBtn.disabled = selectedInCurrentView === 0;
+
     }
      if (focusBtn) {
          // Disable focus if nothing selected AND not already in focus mode
@@ -1086,6 +1131,13 @@ function updateSelectControls() {
 
     if(statusInfo) statusInfo.style.display = isSelectMode ? 'none' : 'block';
 }
+
+// Helper to get character ID from an item object (used in shuffle and updateControls)
+function getCharacterIdFromItem(item) {
+     if (!item) return null;
+     return item.kanji || item.karakter;
+}
+
 
 function handleSelectAllToggle() {
     const cards = kanjiContainer ? kanjiContainer.querySelectorAll('.character-card') : [];
@@ -1125,8 +1177,11 @@ function handleCancelSelect() {
 
 function handleShuffleDisplay() {
     // Shuffle should apply to the data currently *being displayed* (either paginated filtered data or focused data)
-    if (!isSelectMode || selectedCards.size === 0) return; // Need select mode and at least one item selected in total
-
+    if (!isSelectMode || selectedCards.size === 0) {
+         // If select mode is off or nothing is selected at all, shuffle button should be disabled.
+         // If it was somehow clicked, just return.
+         return;
+     }
 
     // Get the data that is currently visible on the screen based on pagination and focus mode
     const dataToShuffle = isFocusMode ? getFocusedData() : (perPage === 0 ? filteredData : filteredData.slice((currentPage - 1) * perPage, (currentPage - 1) * perPage + perPage));
@@ -1149,7 +1204,7 @@ function handleShuffleDisplay() {
          return !selectedCards.has(characterId); // Check if NOT selected in the global set
     });
 
-    // Shuffle only the selected items within the current view
+    // Shuffle only the selected items
     const shuffledSelectedCurrentViewItems = shuffleArray([...selectedCurrentViewItems]);
 
     // Reconstruct the current view's data order with shuffled selected items
@@ -1239,7 +1294,32 @@ function handleFocusToggle() {
         isFocusMode = false;
         // When returning from focus mode, reset pagination to page 1
         currentPage = 1;
-        // Render the full filtered data
+
+        // --- Recalculate filteredData based ONLY on category filter when exiting focus mode ---
+        const currentCategory = categoryFilter ? categoryFilter.value : '';
+        filteredData = loadedData.filter(item => {
+            // Keep only items matching the current category, ignore any previous search keyword
+            const matchesCategory = !currentCategory || (item.kategori && item.kategori === currentCategory);
+            return matchesCategory;
+        });
+         // --- End recalculate filteredData ---
+
+         // Clear search input and reset placeholder when exiting focus mode (already done when entering, but good to ensure)
+        if(searchInput) {
+             searchInput.value = ''; // Clear input value
+             // Reset placeholder based on current data type
+             if (currentDataType === 'kanji') {
+                 searchInput.placeholder = 'Cari kanji (contoh: 水, mizu, air...)';
+             } else if (currentDataType === 'hiragana') {
+                 searchInput.placeholder = 'Cari Hiragana (contoh: あ, a)';
+             } else if (currentDataType === 'katakana') {
+                 searchInput.placeholder = 'Cari Katakana (contoh: ア, a)';
+             } else {
+                 searchInput.placeholder = 'Cari...';
+             }
+         }
+
+        // Render the newly calculated filtered data
         renderCharacters(filteredData, currentDataType);
     } else {
         // Not in focus mode, switch to focused view (show only selected)
@@ -1248,8 +1328,27 @@ function handleFocusToggle() {
             return;
         }
         isFocusMode = true;
+
+        // --- Clear search input and reset placeholder when entering focus mode ---
+        if(searchInput) {
+             searchInput.value = ''; // Clear input value
+             // Reset placeholder based on current data type
+             if (currentDataType === 'kanji') {
+                 searchInput.placeholder = 'Cari kanji (contoh: 水, mizu, air...)';
+             } else if (currentDataType === 'hiragana') {
+                 searchInput.placeholder = 'Cari Hiragana (contoh: あ, a)';
+             } else if (currentDataType === 'katakana') {
+                 searchInput.placeholder = 'Cari Katakana (contoh: ア, a)';
+             } else {
+                 searchInput.placeholder = 'Cari...';
+             }
+         }
+         // --- End clear search input ---
+
+
          // When entering focus mode, display all selected items at once (no pagination)
          // The renderCharacters function handles disabling pagination in focus mode.
+         // Call renderCharacters with the data from getFocusedData(), which now filters from loadedData.
         renderCharacters(getFocusedData(), currentDataType); // Render only selected data
     }
     updateSelectControls(); // Update button text ("Fokus" / "Kembalikan") and button disabled state
@@ -1258,8 +1357,8 @@ function handleFocusToggle() {
 
 // Helper function to get the data subset for focus mode
 function getFocusedData() {
-     // Filter the *entire* filteredData based on current selections
-     const focusedData = filteredData.filter(item => {
+     // Filter the *entire* loadedData based on current selections
+     const focusedData = loadedData.filter(item => {
          const characterId = item.kanji || item.karakter;
          return selectedCards.has(characterId);
      });
