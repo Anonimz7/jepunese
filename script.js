@@ -45,6 +45,9 @@ let startX = 0; // Starting X coordinate of a press (for drag detection)
 let startY = 0; // Starting Y coordinate of a press (for drag detection)
 const MOVE_THRESHOLD = 15; // Pixels threshold to consider it a move/drag
 
+// --- New State Variable for Focus Mode ---
+let isFocusMode = false;
+
 
 const selectControlsContainer = document.createElement('div');
 selectControlsContainer.id = 'selectControls';
@@ -76,7 +79,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('mouseup', handleGlobalMouseEnd); // Use global mouseup for cleanup if release outside card
     document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false, capture: true }); // passive: false needed for preventDefault
     document.addEventListener('touchend', handleGlobalTouchEnd);
-    document.addEventListener('touchcancel', handleGlobalTouchEnd); // Handle touchcancel too
+    document.addEventListener('touchcancel', handleGlobalTouchEnd);
 
 
 });
@@ -127,7 +130,11 @@ async function loadLevelData(level) {
         filteredData = [...loadedData];
         currentPage = 1;
 
+        // Keep select mode state when loading new data?
+        // For simplicity, let's reset select mode on level change
         toggleSelectMode(false);
+        isFocusMode = false; // Reset focus mode on level change
+
 
         populateCategoryFilter(loadedData, currentDataType);
 
@@ -135,7 +142,7 @@ async function loadLevelData(level) {
         if (categoryFilter) categoryFilter.disabled = false;
         if (perPageSelect) perPageSelect.disabled = false;
 
-        setDisplayMode(displayMode);
+        setDisplayMode(displayMode); // This will call renderCharacters
 
         updateStatus();
 
@@ -166,6 +173,7 @@ async function loadLevelData(level) {
         filteredData = [];
         populateCategoryFilter([], currentDataType);
          toggleSelectMode(false);
+         isFocusMode = false;
     }
 }
 
@@ -240,8 +248,9 @@ function setupEventListeners() {
         perPageSelect.addEventListener('change', () => {
             perPage = parseInt(perPageSelect.value);
             currentPage = 1;
-            toggleSelectMode(false);
-            renderCharacters(filteredData, currentDataType);
+            // Do NOT toggleSelectMode(false) here
+            isFocusMode = false; // Exit focus mode if changing pagination
+            renderCharacters(filteredData, currentDataType); // Render based on current filteredData
             updateStatus();
         });
     }
@@ -250,8 +259,9 @@ function setupEventListeners() {
         prevBtn.addEventListener('click', () => {
             if (currentPage > 1) {
                 currentPage--;
-                toggleSelectMode(false);
-                renderCharacters(filteredData, currentDataType);
+                // Do NOT toggleSelectMode(false) here
+                 isFocusMode = false; // Exit focus mode if changing page
+                renderCharacters(filteredData, currentDataType); // Render based on current filteredData
                 updateStatus();
             }
         });
@@ -262,8 +272,9 @@ function setupEventListeners() {
             const totalPages = perPage === 0 ? 1 : Math.ceil(filteredData.length / perPage);
             if (perPage !== 0 && currentPage < totalPages) {
                 currentPage++;
-                toggleSelectMode(false);
-                renderCharacters(filteredData, currentDataType);
+                // Do NOT toggleSelectMode(false) here
+                 isFocusMode = false; // Exit focus mode if changing page
+                renderCharacters(filteredData, currentDataType); // Render based on current filteredData
                 updateStatus();
             }
         });
@@ -280,6 +291,28 @@ function setupEventListeners() {
             }
         });
     }
+
+    // Add event listener for the new focus button
+    // This will be added dynamically by updateSelectControls, so we need delegation or add it after updateSelectControls runs initially
+     // Using delegation on selectControlsContainer for focus and shuffle buttons
+     if (selectControlsContainer) {
+         selectControlsContainer.addEventListener('click', (event) => {
+             const target = event.target;
+             // Check if the clicked element or its parent is a button with the target ID
+             const clickedButton = target.closest('button');
+             if (clickedButton) {
+                 if (clickedButton.id === 'focusBtn') {
+                     handleFocusToggle();
+                 } else if (clickedButton.id === 'shuffleBtn') {
+                     handleShuffleDisplay();
+                 } else if (clickedButton.id === 'selectAllBtn') {
+                     handleSelectAllToggle();
+                 } else if (clickedButton.id === 'cancelSelectBtn') {
+                     handleCancelSelect();
+                 }
+             }
+         });
+     }
 }
 
 function setupDisplayToggleListeners() {
@@ -298,20 +331,22 @@ function setupDisplayToggleListeners() {
 function setDisplayMode(mode) {
     displayMode = mode;
     if (kanjiContainer) {
+        // Remove both classes first
+        kanjiContainer.classList.remove('display-minimal', 'display-full');
         if (mode === 'minimal') {
-            kanjiContainer.classList.remove('display-full');
             kanjiContainer.classList.add('display-minimal');
             if(minimalBtn) minimalBtn.classList.add('active');
             if(fullBtn) fullBtn.classList.remove('active');
-        } else {
-            kanjiContainer.classList.remove('display-minimal');
+        } else { // mode === 'full'
             kanjiContainer.classList.add('display-full');
             if(fullBtn) fullBtn.classList.add('active');
             if(minimalBtn) minimalBtn.classList.remove('active');
         }
+        // Keep select mode active and selections when changing display mode
+        // toggleSelectMode(false); // REMOVE this line
     }
-    toggleSelectMode(false);
-    renderCharacters(filteredData, currentDataType);
+    // Re-render characters with the current selections and focus state
+    renderCharacters(isFocusMode ? getFocusedData() : filteredData, currentDataType);
 }
 
 function handleSearch() {
@@ -357,7 +392,8 @@ function handleSearch() {
     });
 
     currentPage = 1;
-    toggleSelectMode(false);
+    toggleSelectMode(false); // Reset select mode on search/filter change
+    isFocusMode = false; // Reset focus mode on search/filter change
     renderCharacters(filteredData, currentDataType);
     updateStatus();
 }
@@ -369,6 +405,14 @@ function renderCharacters(dataToRender, dataType) {
     }
     kanjiContainer.innerHTML = '';
 
+    // Add/remove focus-mode class based on state
+    if (isFocusMode) {
+        kanjiContainer.classList.add('focus-mode');
+    } else {
+        kanjiContainer.classList.remove('focus-mode');
+    }
+
+
     if (dataToRender.length === 0) {
         kanjiContainer.innerHTML = `<div class="message">Tidak ada karakter yang cocok.</div>`;
         if(prevBtn) prevBtn.disabled = true;
@@ -379,18 +423,32 @@ function renderCharacters(dataToRender, dataType) {
     }
 
     let dataSubset;
-    if (perPage === 0) {
-        dataSubset = dataToRender;
-    } else {
+     // Pagination applies to the *filtered* data, NOT the focused data
+    const dataForPagination = isFocusMode ? dataToRender : filteredData; // Use filteredData for pagination logic if not in focus mode. In focus mode, dataToRender *is* the data for the current view, so paginate on that if needed.
+
+    // Re-evaluate pagination logic based on whether in focus mode or not
+    if (isFocusMode || perPage === 0) { // If in focus mode OR perPage is 0, display all relevant items
+         dataSubset = dataToRender; // In focus mode, dataToRender is already the subset
+         if(prevBtn) prevBtn.disabled = true; // Disable pagination in focus mode
+         if(nextBtn) nextBtn.disabled = true;
+         if(pageInfo) pageInfo.textContent = '';
+    } else { // Not in focus mode and perPage is set, use standard pagination on filteredData
         const start = (currentPage - 1) * perPage;
         const end = start + perPage;
-        dataSubset = dataToRender.slice(start, end);
+        dataSubset = dataForPagination.slice(start, end); // Slice the filteredData based on pagination
+        // Enable/disable pagination buttons based on filteredData length and current page
+        const totalPages = Math.ceil(dataForPagination.length / perPage);
+        if(prevBtn) prevBtn.disabled = currentPage === 1;
+        if(nextBtn) nextBtn.disabled = currentPage === totalPages;
+        if(pageInfo) pageInfo.textContent = `Halaman ${currentPage}/${totalPages}`;
     }
+
 
     let cardsHtml = dataSubset.map(item => {
         const characterId = dataType === 'kanji' ? item.kanji : item.karakter;
         const isSelected = isSelectMode && selectedCards.has(characterId);
         const selectedClass = isSelected ? ' selected' : '';
+        // The select indicator is always rendered if isSelectMode is true
         const selectIndicatorHtml = isSelectMode ? '<div class="select-indicator"><i class="fas fa-check-circle"></i></div>' : '';
 
         if (dataType === 'kanji') {
@@ -422,10 +480,7 @@ function renderCharacters(dataToRender, dataType) {
 
     kanjiContainer.innerHTML = cardsHtml;
 
-    const totalPages = perPage === 0 ? 1 : Math.ceil(filteredData.length / perPage);
-    if(prevBtn) prevBtn.disabled = currentPage === 1 || perPage === 0;
-    if(nextBtn) nextBtn.disabled = currentPage === totalPages || perPage === 0;
-    if(pageInfo) pageInfo.textContent = perPage === 0 ? '' : `Halaman ${currentPage}/${totalPages}`;
+     // Pagination update was moved inside the perPage check
 
     const cards = kanjiContainer.querySelectorAll('.character-card');
     cards.forEach(card => {
@@ -449,7 +504,7 @@ function renderCharacters(dataToRender, dataType) {
     });
 
      updateSelectControls();
-     updateStatus();
+     updateStatus(); // Call updateStatus after rendering
 }
 
 
@@ -539,9 +594,10 @@ function handleMouseUp(event) {
                     toggleCardSelection(card, item);
                 } else {
                     // If not in select mode, show modal (if Kanji)
-                    if (card.classList.contains('type-kanji')) {
+                    // Only show modal if NOT in focus mode
+                    if (!isFocusMode && card.classList.contains('type-kanji')) {
                         showKanjiModal(item);
-                    } else if (card.classList.contains('type-hiragana') || card.classList.contains('katakana')) {
+                    } else if (!isFocusMode && (card.classList.contains('type-hiragana') || card.classList.contains('katakana'))) {
                         console.log(`Klik pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
                     }
                 }
@@ -688,9 +744,10 @@ function handleTouchEnd(event) {
                      toggleCardSelection(card, item);
                  } else {
                      // If not in select mode, show modal (if Kanji)
-                     if (card.classList.contains('type-kanji')) {
+                     // Only show modal if NOT in focus mode
+                      if (!isFocusMode && card.classList.contains('type-kanji')) {
                          showKanjiModal(item);
-                     } else if (card.classList.contains('type-hiragana') || card.classList.contains('katakana')) {
+                     } else if (!isFocusMode && (card.classList.contains('type-hiragana') || card.classList.contains('katakana'))) {
                           console.log(`Tap pendek pada kartu ${card.classList.contains('type-hiragana') ? 'Hiragana' : 'Katakana'}:`, item);
                      }
                  }
@@ -793,26 +850,47 @@ function hideKanjiModal() {
 }
 
 function updateStatus() {
-    const totalItems = filteredData.length;
+    // Status should reflect the total number of items in the current *view*,
+    // and indicate if in focus mode.
+    const totalFilteredItems = filteredData.length;
     let statusText = '';
 
-    if (totalItems === 0) {
+    if (totalFilteredItems === 0) {
         statusText = `Tidak ada karakter ditemukan untuk ${currentLevel.toUpperCase() || currentDataType.charAt(0).toUpperCase() + currentDataType.slice(1)} dengan filter saat ini.`;
+         // Keep pagination disabled if no items found
         if(prevBtn) prevBtn.disabled = true;
         if(nextBtn) nextBtn.disabled = true;
         if(pageInfo) pageInfo.textContent = '';
-    } else {
+    } else if (isFocusMode) {
+         const displayedCount = selectedCards.size; // In focus mode, displayed count is selected count
+         const typeLabel = currentDataType === 'kanji' ? 'kanji' : (currentDataType === 'hiragana' ? 'hiragana' : 'katakana');
+         statusText = `Menampilkan ${displayedCount} karakter terpilih (Fokus Mode)`;
+         // Disable pagination in focus mode
+         if(prevBtn) prevBtn.disabled = true;
+         if(nextBtn) nextBtn.disabled = true;
+         if(pageInfo) pageInfo.textContent = '';
+    }
+    else { // Not in focus mode, show status based on filteredData and pagination
         const typeLabel = currentDataType === 'kanji' ? 'kanji' : (currentDataType === 'hiragana' ? 'hiragana' : 'katakana');
         if (perPage === 0) {
-            statusText = `Menampilkan semua ${totalItems} ${typeLabel} ${currentDataType === 'kanji' ? currentLevel.toUpperCase() : ''}`.trim();
+            statusText = `Menampilkan semua ${totalFilteredItems} ${typeLabel} ${currentDataType === 'kanji' ? currentLevel.toUpperCase() : ''}`.trim();
+            if(prevBtn) prevBtn.disabled = true; // Disable pagination if all are shown
+            if(nextBtn) nextBtn.disabled = true;
+            if(pageInfo) pageInfo.textContent = '';
         } else {
             const start = (currentPage - 1) * perPage + 1;
-            const end = Math.min(currentPage * perPage, totalItems);
-            statusText = `Menampilkan ${start}-${end} dari ${totalItems} ${typeLabel} ${currentDataType === 'kanji' ? currentLevel.toUpperCase() : ''}`.trim();
+            const end = Math.min(currentPage * perPage, totalFilteredItems);
+            const totalPages = Math.ceil(totalFilteredItems / perPage); // Calculate total pages based on filtered data
+            statusText = `Menampilkan ${start}-${end} dari ${totalFilteredItems} ${typeLabel} ${currentDataType === 'kanji' ? currentLevel.toUpperCase() : ''}`.trim();
+            // Enable/disable pagination based on current page and total pages
+            if(prevBtn) prevBtn.disabled = currentPage === 1;
+            if(nextBtn) nextBtn.disabled = currentPage === totalPages;
+             if(pageInfo) pageInfo.textContent = `Halaman ${currentPage}/${totalPages}`;
         }
     }
 
     if(statusInfo) statusInfo.textContent = statusText;
+    // Status info is hidden when select mode is active
     if(statusInfo) statusInfo.style.display = isSelectMode ? 'none' : 'block';
 }
 
@@ -851,11 +929,12 @@ function setTheme(theme) {
 
 function toggleSelectMode(enable) {
     isSelectMode = enable;
-    selectedCards.clear();
+    // Do NOT clear selectedCards here if just entering/exiting select mode.
+    // selectedCards should only be cleared on level change or search/filter change.
 
     const cards = kanjiContainer ? kanjiContainer.querySelectorAll('.character-card') : [];
     cards.forEach(card => {
-        card.classList.remove('selected');
+        // Don't remove 'selected' class here, it's based on selectedCards Set
         const existingIndicator = card.querySelector('.select-indicator');
         if (isSelectMode && !existingIndicator) {
             const indicator = document.createElement('div');
@@ -867,9 +946,16 @@ function toggleSelectMode(enable) {
         }
     });
 
+    // If exiting select mode, also exit focus mode
+    if (!isSelectMode) {
+         isFocusMode = false; // Exit focus mode
+         renderCharacters(filteredData, currentDataType); // Render full filtered data
+    }
+
+
     if(selectControlsContainer) selectControlsContainer.style.display = isSelectMode ? 'flex' : 'none';
     updateSelectControls();
-    updateStatus();
+    updateStatus(); // Update status visibility
 }
 
 function toggleCardSelection(cardElement, item) {
@@ -883,6 +969,8 @@ function toggleCardSelection(cardElement, item) {
         cardElement.classList.add('selected');
     }
     updateSelectControls();
+    // No need to re-render the grid just for selection state
+    // renderCharacters(isFocusMode ? getFocusedData() : filteredData, currentDataType);
 }
 
 function updateSelectControls() {
@@ -891,6 +979,8 @@ function updateSelectControls() {
              selectControlsContainer.innerHTML = '';
              selectControlsContainer.style.display = 'none';
         }
+        // Ensure kanjiContainer doesn't have focus-mode class when select controls are hidden
+        if (kanjiContainer) kanjiContainer.classList.remove('focus-mode');
         return;
     }
 
@@ -899,134 +989,195 @@ function updateSelectControls() {
          return;
     }
 
-    const cards = kanjiContainer ? kanjiContainer.querySelectorAll('.character-card') : [];
-    const totalDisplayed = cards.length;
-    const selectedCount = selectedCards.size;
+    // Check if controls are already rendered to avoid duplicating event listeners
+    const existingShuffleBtn = selectControlsContainer.querySelector('#shuffleBtn');
+    const existingFocusBtn = selectControlsContainer.querySelector('#focusBtn');
+    const existingCancelBtn = selectControlsContainer.querySelector('#cancelSelectBtn');
+    const existingSelectAllBtn = selectControlsContainer.querySelector('#selectAllBtn');
 
-    let selectControlsHtml = `
-        <span id="selectedCountInfo">
-            <span id="selectedCount">${selectedCount}</span> dipilih
-        </span>
-        <button id="selectAllBtn"></button>
-        <button id="cancelSelectBtn">Batal</button>
-        <button id="shuffleBtn">Acak Tampilan Ini</button>
-    `;
-
-    selectControlsContainer.innerHTML = selectControlsHtml;
-
-    const selectAllBtn = document.getElementById('selectAllBtn');
-    const cancelSelectBtn = document.getElementById('cancelSelectBtn');
-    const shuffleBtn = document.getElementById('shuffleBtn');
-
-    if (selectedCount === totalDisplayed && totalDisplayed > 0) {
-        if(selectAllBtn) selectAllBtn.textContent = 'Batal Pilih Semua';
+    if (!existingShuffleBtn || !existingFocusBtn || !existingCancelBtn || !existingSelectAllBtn) {
+        // If controls are not rendered, build them
+         selectControlsContainer.innerHTML = `
+            <span id="selectedCountInfo">
+                <span id="selectedCount">${selectedCards.size}</span> dipilih
+            </span>
+            <button id="selectAllBtn">${selectedCards.size > 0 && selectedCards.size === kanjiContainer.querySelectorAll('.character-card').length ? 'Batal Pilih Semua' : 'Pilih Semua'}</button>
+            <button id="cancelSelectBtn">Batal</button>
+            <button id="shuffleBtn">Acak Tampilan Ini</button>
+            <button id="focusBtn">${isFocusMode ? 'Kembalikan Tampilan' : 'Fokus ke yang Dipilih'}</button>
+        `;
+        // Event listeners are added via delegation in setupEventListeners
     } else {
-        if(selectAllBtn) selectAllBtn.textContent = 'Pilih Semua';
+        // If controls exist, just update the counts and button text
+         const selectedCountSpan = document.getElementById('selectedCount');
+         if(selectedCountSpan) {
+             selectedCountSpan.textContent = selectedCards.size;
+         }
+         const selectAllBtn = document.getElementById('selectAllBtn');
+         if (selectAllBtn) {
+              const totalDisplayed = kanjiContainer ? kanjiContainer.querySelectorAll('.character-card').length : 0;
+              selectAllBtn.textContent = selectedCards.size > 0 && selectedCards.size === totalDisplayed ? 'Batal Pilih Semua' : 'Pilih Semua';
+         }
+         const focusBtn = document.getElementById('focusBtn');
+         if (focusBtn) {
+              focusBtn.textContent = isFocusMode ? 'Kembalikan Tampilan' : 'Fokus ke yang Dipilih';
+         }
     }
+
+
+    const shuffleBtn = document.getElementById('shuffleBtn');
+    const focusBtn = document.getElementById('focusBtn'); // Get reference after potentially creating it
 
     if (shuffleBtn) {
-        shuffleBtn.disabled = selectedCount === 0;
+        // Shuffle button should only be disabled if nothing is selected
+        // Remove the || isFocusMode check
+        shuffleBtn.disabled = selectedCards.size === 0;
     }
-
-    if (selectAllBtn) {
-         selectAllBtn.addEventListener('click', handleSelectAllToggle);
-    }
-    if (cancelSelectBtn) {
-        cancelSelectBtn.addEventListener('click', handleCancelSelect);
-    }
-     if (shuffleBtn) {
-         shuffleBtn.addEventListener('click', handleShuffleDisplay);
+     if (focusBtn) {
+         // Disable focus if nothing selected UNLESS already in focus mode (to allow returning)
+         focusBtn.disabled = selectedCards.size === 0 && !isFocusMode;
      }
 
+
     if(statusInfo) statusInfo.style.display = isSelectMode ? 'none' : 'block';
-    const selectedCountSpan = document.getElementById('selectedCount');
-    if(selectedCountSpan) {
-        selectedCountSpan.textContent = selectedCount;
-    }
 }
 
 function handleSelectAllToggle() {
     const cards = kanjiContainer ? kanjiContainer.querySelectorAll('.character-card') : [];
-    const totalDisplayed = cards.length;
+    // When selecting all, consider the items in the *current view* (whether focused or not)
+    const currentViewItems = [];
+     // Get items based on currently displayed cards
+     cards.forEach(card => {
+         try {
+             // Only process cards that are currently *visible* (not display: none in focus mode)
+             if (card.style.display !== 'none') {
+                currentViewItems.push(JSON.parse(card.dataset.item));
+             }
+         } catch (e) {
+             console.error("Error parsing item data for select all:", e);
+         }
+     });
+
     const selectedCount = selectedCards.size;
 
-    if (selectedCount === totalDisplayed && totalDisplayed > 0) {
-        cards.forEach(card => {
-            const item = JSON.parse(card.dataset.item);
+
+    if (selectedCount > 0 && selectedCount === currentViewItems.length && currentViewItems.length > 0) {
+        // If all currently displayed are selected, deselect all currently displayed
+         currentViewItems.forEach(item => {
              const characterId = item.kanji || item.karakter;
              selectedCards.delete(characterId);
-             card.classList.remove('selected');
-        });
+         });
+         cards.forEach(card => card.classList.remove('selected')); // Visually update all cards
     } else {
-        selectedCards.clear();
+        // Select all currently displayed
+         currentViewItems.forEach(item => {
+             const characterId = item.kanji || item.karakter;
+             selectedCards.add(characterId);
+         });
+        // Visually update only the displayed cards
         cards.forEach(card => {
-            const item = JSON.parse(card.dataset.item);
-            const characterId = item.kanji || item.karakter;
-            selectedCards.add(characterId);
-            card.classList.add('selected');
+             if (card.style.display !== 'none') {
+                 card.classList.add('selected');
+             }
         });
     }
+
     updateSelectControls();
 }
 
 function handleCancelSelect() {
+    // Clear selections and exit select mode
+    selectedCards.clear();
     toggleSelectMode(false);
 }
 
 function handleShuffleDisplay() {
-    if (!isSelectMode || selectedCards.size === 0) return;
+    // Shuffle should apply to selected items within the current *view* (considering focus mode)
+    if (!isSelectMode || selectedCards.size === 0) return; // Need select mode and at least one item selected
 
-    if (!filteredData || filteredData.length === 0) {
-         console.error("Error: Data not found for shuffle.");
-         return;
-    }
+    // Get the data currently being displayed (which is either filteredData subset or focusedData)
+    const dataToShuffle = isFocusMode ? getFocusedData() : (perPage === 0 ? filteredData : filteredData.slice((currentPage - 1) * perPage, (currentPage - 1) * perPage + perPage));
 
-    const startIndex = (currentPage - 1) * perPage;
-    const endIndex = perPage === 0 ? filteredData.length : Math.min(startIndex + perPage, filteredData.length);
-
-    const currentViewItems = filteredData.slice(startIndex, endIndex);
-
-    const selectedCurrentViewItems = currentViewItems.filter(item => {
+     // Filter for selected items within this specific view
+    const selectedCurrentViewItems = dataToShuffle.filter(item => {
          const characterId = item.kanji || item.karakter;
          return selectedCards.has(characterId);
     });
 
-    const nonSelectedCurrentViewItems = currentViewItems.filter(item => {
+     // Only shuffle if there are selected items in the current view
+     if (selectedCurrentViewItems.length === 0) {
+         console.warn("No selected items in the current view to shuffle.");
+         // Although the button should be disabled if selectedCards.size === 0,
+         // this handles the case where selectedCards are not in the current view.
+         return;
+     }
+
+    const nonSelectedCurrentViewItems = dataToShuffle.filter(item => {
          const characterId = item.kanji || item.karakter;
          return !selectedCards.has(characterId);
     });
 
+    // Shuffle only the selected items
     const shuffledSelectedCurrentViewItems = shuffleArray([...selectedCurrentViewItems]);
 
+    // Reconstruct the current view with shuffled selected items and original non-selected items
     const newOrderedCurrentViewItems = [];
     let shuffledIndex = 0;
 
-    currentViewItems.forEach(item => {
+    // Iterate through the original dataToShuffle order to maintain positions of non-selected
+    dataToShuffle.forEach(item => {
          const characterId = item.kanji || item.karakter;
          if (selectedCards.has(characterId)) {
+              // Place shuffled selected items in the positions of original selected items within this view
               if (shuffledIndex < shuffledSelectedCurrentViewItems.length) {
                  newOrderedCurrentViewItems.push(shuffledSelectedCurrentViewItems[shuffledIndex]);
                  shuffledIndex++;
              } else {
+                  // Fallback, though this shouldn't happen if logic is correct
                   newOrderedCurrentViewItems.push(item);
              }
          } else {
+             // Keep non-selected items in their original positions within this view
              newOrderedCurrentViewItems.push(item);
          }
     });
 
-    const updatedFilteredData = [
-        ...filteredData.slice(0, startIndex),
-        ...newOrderedCurrentViewItems,
-        ...filteredData.slice(endIndex)
-    ];
 
-    filteredData = updatedFilteredData;
+    // Now, update the *main* filteredData array with the new order of the current view items.
+    if (isFocusMode) {
+        // If in focus mode, the shuffled items *are* the currently displayed items.
+        // We need to find these items in the original filteredData and update their order.
+        // This is more complex as their original positions in filteredData need to be found.
+        // A simpler approach for focus mode shuffle: just shuffle the focusedData array itself,
+        // then re-render the focused view. The order in the main filteredData remains unchanged.
+        // Let's choose the simpler approach for now. Shuffling only affects the current focused view.
 
-    selectedCards.clear();
-    renderCharacters(filteredData, currentDataType);
-    updateSelectControls();
+         renderCharacters(shuffleArray(newOrderedCurrentViewItems), currentDataType); // Shuffle the displayed items and re-render
+
+    } else {
+         // If NOT in focus mode (standard pagination view), update the order in the filteredData
+         const startIndex = (currentPage - 1) * perPage;
+         const endIndex = perPage === 0 ? filteredData.length : Math.min(startIndex + perPage, filteredData.length);
+
+        const updatedFilteredData = [
+            ...filteredData.slice(0, startIndex),
+            ...newOrderedCurrentViewItems,
+            ...filteredData.slice(endIndex)
+        ];
+         // Update the global filteredData state
+        filteredData = updatedFilteredData;
+        // Re-render the current page from the now shuffled filteredData
+        renderCharacters(filteredData, currentDataType);
+    }
+
+
+    // After shuffling, selections typically cleared, but the request implies persistence. Keep selections.
+    // selectedCards.clear(); // REMOVE this line
+
+    updateSelectControls(); // Update controls
+    updateStatus(); // Update status
 }
+
 
 function shuffleArray(array) {
     let currentIndex = array.length, randomIndex;
@@ -1037,6 +1188,43 @@ function shuffleArray(array) {
     }
     return array;
 }
+
+// --- New Focus Feature Logic ---
+
+function handleFocusToggle() {
+    if (!isSelectMode) return; // Focus only works in select mode
+
+    if (isFocusMode) {
+        // Currently in focus mode, switch back to full filtered view
+        isFocusMode = false;
+        // When returning from focus mode, reset pagination to page 1
+        currentPage = 1;
+        renderCharacters(filteredData, currentDataType); // Render all filtered data
+    } else {
+        // Not in focus mode, switch to focused view (show only selected)
+        if (selectedCards.size === 0) {
+            alert("Pilih minimal satu karakter untuk menggunakan fitur Fokus.");
+            return;
+        }
+        isFocusMode = true;
+         // When entering focus mode, display all selected items at once (no pagination)
+         // The renderCharacters function handles disabling pagination in focus mode.
+        renderCharacters(getFocusedData(), currentDataType); // Render only selected data
+    }
+    updateSelectControls(); // Update button text ("Fokus" / "Kembalikan") and button disabled state
+    updateStatus(); // Update status text
+}
+
+// Helper function to get the data subset for focus mode
+function getFocusedData() {
+     // Filter the *entire* filteredData based on current selections
+     const focusedData = filteredData.filter(item => {
+         const characterId = item.kanji || item.karakter;
+         return selectedCards.has(characterId);
+     });
+     return focusedData;
+}
+
 
 // This click handler is mostly disabled in the new logic,
 // as mouseup/touchend handle the actions.

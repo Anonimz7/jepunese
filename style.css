@@ -19,6 +19,7 @@
   @font-face { font-family: 'Poppins'; src: url('fonts/poppins/Poppins-Black.ttf') format('truetype'); font-weight: 900; font-style: normal; }
    @font-face { font-family: 'Poppins'; src: url('fonts/poppins/Poppins-BlackItalic.ttf') format('truetype'); font-weight: 900; font-style: italic; }
 
+
   /* Menambahkan SEMUA bobot font lokal Noto Sans JP yang Anda punya */
   /* Asumsi file font Noto Sans JP berada di folder 'fonts/notosansjp/' */
   @font-face { font-family: 'Noto Sans JP'; src: url('fonts/notosansjp/NotoSansJP-Thin.ttf') format('truetype'); font-weight: 100; font-style: normal; }
@@ -532,6 +533,15 @@
      background-color: rgba(245, 158, 11, 0.1);
 }
 
+/* New style for the Focus button */
+#selectControls button#focusBtn {
+    color: #4d96ff; /* Example color for focus button (blue) */
+    border-color: #4d96ff;
+}
+#selectControls button#focusBtn:hover {
+     background-color: rgba(77, 150, 255, 0.1);
+}
+
 
 /* Style for the select indicator on the card */
 .character-card .select-indicator {
@@ -559,6 +569,11 @@
 /* Hide the original status text when select controls are shown */
 .status[style*="display: none"] {
     display: none;
+}
+
+/* Style to hide non-selected cards in focus mode */
+.kanji-grid.focus-mode .character-card:not(.selected) {
+    display: none !important; /* Hide non-selected cards when focus-mode class is active */
 }
 
 
