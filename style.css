@@ -325,6 +325,61 @@
    }
 
 
+  /* Styles Khusus untuk Card Hiragana */
+  .character-card.type-hiragana {
+     height: 160px; /* Tinggi tetap untuk hiragana card */
+     display: flex; /* Gunakan flexbox untuk menengahkan */
+     flex-direction: column;
+     justify-content: center;
+     align-items: center;
+     padding: 15px; /* Padding disesuaikan */
+     cursor: default;
+     border-color: var(--secondary); /* Contoh: border warna kuning untuk Hiragana */
+  }
+
+  .character-card.type-hiragana .primary-char { /* Untuk Karakter Hiragana */
+     font-size: 3.5rem; /* Ukuran karakter hiragana lebih besar */
+     font-weight: 600; /* Bobot hiragana */
+     margin-bottom: 5px; /* Jarak dengan romaji */
+     color: var(--primary); /* Warna */
+     line-height: 1;
+  }
+
+   .character-card.type-hiragana .secondary-text { /* Untuk Romaji Hiragana */
+     font-size: 1rem; /* Ukuran romaji hiragana */
+     font-weight: normal; /* Bobot romaji */
+     color: #888; /* Warna romaji */
+     font-style: italic; /* Romaji italic */
+   }
+
+   /* Styles Khusus untuk Card Katakana (Sama seperti Hiragana tapi beda warna border) */
+  .character-card.type-katakana {
+     height: 160px; /* Tinggi tetap */
+     display: flex;
+     flex-direction: column;
+     justify-content: center;
+     align-items: center;
+     padding: 15px;
+     cursor: default;
+     border-color: #4d96ff; /* Contoh: border warna biru untuk Katakana */
+  }
+
+  .character-card.type-katakana .primary-char { /* Untuk Karakter Katakana */
+     font-size: 3.5rem;
+     font-weight: 600;
+     margin-bottom: 5px;
+     color: var(--primary);
+     line-height: 1;
+  }
+
+   .character-card.type-katakana .secondary-text { /* Untuk Romaji Katakana */
+     font-size: 1rem;
+     font-weight: normal;
+     color: #888;
+     font-style: italic;
+   }
+
+
   /* Struktur detail lama dari kanji card (di-inline rendering atau display none) */
   .kanji-card-details { /* Container untuk furigana, romaji, meaning di Kanji Card */
       display: block; /* Defaultnya tampil di Full mode */
