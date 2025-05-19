@@ -143,12 +143,13 @@
     color: var(--text);
 }
 
+/* New Floating Display Toggle (Centered vertically on the right) */
 .display-toggle-fab {
   position: fixed;
-  /* Hapus 'top' yang sebelumnya menempatkannya di bawah themeToggle */
+  /* Hapus 'top' yang sebelumnya menempatkannya di bawah themeToggle jika masih ada */
   /* top: 70px; */
 
-  right: 20px; /* Pertahankan posisi 20px dari kanan */
+  right: 20px; /* Pertahankan posisi 20px dari kanan di desktop */
 
   top: 50%; /* Atur tepi atas elemen di tengah vertikal (50% dari tinggi viewport) */
   transform: translateY(-50%); /* Geser elemen ke atas sebesar setengah tingginya sendiri */
@@ -167,20 +168,21 @@
   transition: background 0.3s, color 0.1s;
 }
 
-/* Adjust for mobile if needed */
+/* Media Query for Mobile - Adjust position and size */
 @media (max-width: 768px) {
   .display-toggle-fab {
-    /* Hapus penyesuaian 'top' untuk mobile jika ada yang spesifik untuk menempatkannya di bawah themeToggle */
-    /* top: 55px; */
+    /* Pastikan properti mobile menimpa desktop */
+    top: 50%; /* Tetap di tengah vertikal di mobile */
+    transform: translateY(-50%); /* Pertahankan penengahan vertikal di mobile */
 
     right: 15px; /* Pertahankan posisi 15px dari kanan di mobile */
 
-    top: 50%; /* Pastikan tetap di tengah vertikal di mobile */
-    transform: translateY(-50%); /* Pastikan penengahan vertikal di mobile */
-
-    width: 40px;
-    height: 40px;
+    width: 35px; /* Ukuran mobile */
+    height: 35px; /* Ukuran mobile */
   }
+   .display-fab-btn i {
+       font-size: 1rem; /* Sesuaikan ukuran ikon di mobile */
+   }
 }
 
 .display-fab-btn {
@@ -258,7 +260,7 @@
     .theme-toggle {
         top: 15px;
         right: 15px;
-        width: 40px; height: 40px; /* Sedikit lebih kecil di mobile */
+        width: 35px; height: 35px; /* Sedikit lebih kecil di mobile */
     }
      .theme-toggle i { font-size: 1rem; } /* Ikon lebih kecil */
 
