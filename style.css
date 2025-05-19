@@ -257,7 +257,7 @@
         top: 50%; /* Pastikan tetap di tengah vertikal di mobile */
         transform: translateY(-50%); /* Pastikan penengahan vertikal di mobile */
         right: 15px; /* Posisi di kanan di mobile */
-        width: 40px; height: 40px; /* Ukuran di mobile */
+        width: 50px; height: 50px; /* Ukuran di mobile */
     }
      .display-fab-btn i {
          font-size: 1rem; /* Samakan ukuran ikon dengan theme toggle mobile */
