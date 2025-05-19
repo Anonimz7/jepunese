@@ -143,23 +143,44 @@
     color: var(--text);
 }
 
-/* New Floating Display Toggle (placed below theme-toggle) */
 .display-toggle-fab {
   position: fixed;
-  top: 70px; /* Posisikan di bawah theme-toggle (sekitar 40px tinggi + 10px jarak + 20px top theme toggle) */
-  right: 20px; /* Sejajarkan dengan theme-toggle */
+  /* Hapus 'top' yang sebelumnya menempatkannya di bawah themeToggle */
+  /* top: 70px; */
+
+  right: 20px; /* Pertahankan posisi 20px dari kanan */
+
+  top: 50%; /* Atur tepi atas elemen di tengah vertikal (50% dari tinggi viewport) */
+  transform: translateY(-50%); /* Geser elemen ke atas sebesar setengah tingginya sendiri */
+
   background: var(--card-bg);
   border: 2px solid var(--border);
   border-radius: 50%;
-  width: 40px; /* Samakan ukuran dengan theme toggle */
-  height: 40px; /* Samakan ukuran dengan theme toggle */
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 100; /* Sama dengan theme-toggle */
+  z-index: 100;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   transition: background 0.3s, color 0.1s;
+}
+
+/* Adjust for mobile if needed */
+@media (max-width: 768px) {
+  .display-toggle-fab {
+    /* Hapus penyesuaian 'top' untuk mobile jika ada yang spesifik untuk menempatkannya di bawah themeToggle */
+    /* top: 55px; */
+
+    right: 15px; /* Pertahankan posisi 15px dari kanan di mobile */
+
+    top: 50%; /* Pastikan tetap di tengah vertikal di mobile */
+    transform: translateY(-50%); /* Pastikan penengahan vertikal di mobile */
+
+    width: 40px;
+    height: 40px;
+  }
 }
 
 .display-fab-btn {
@@ -237,7 +258,7 @@
     .theme-toggle {
         top: 15px;
         right: 15px;
-        width: 35px; height: 35px; /* Sedikit lebih kecil di mobile */
+        width: 40px; height: 40px; /* Sedikit lebih kecil di mobile */
     }
      .theme-toggle i { font-size: 1rem; } /* Ikon lebih kecil */
 
