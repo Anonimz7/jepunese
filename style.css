@@ -123,54 +123,47 @@
   /* Theme Toggle */
   .theme-toggle {
     position: fixed;
-    top: 20px; /* Jarak dari atas */
-    right: 20px; /* Jarak dari kanan */
+    top: 20px; /* Jarak dari atas di desktop */
+    right: 20px; /* Jarak dari kanan di desktop */
     background: var(--card-bg);
     border: 2px solid var(--border);
     border-radius: 50%;
-    width: 40px; /* Ukuran standar */
-    height: 40px; /* Ukuran standar */
+    width: 40px; /* Ukuran standar desktop */
+    height: 40px; /* Ukuran standar desktop */
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     z-index: 100; /* Pastikan di atas konten lain */
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-     transition: background 0.3s, color 0.1s; /* Tambahkan transisi */
+    transition: background 0.3s, color 0.1s, opacity 0.3s ease-out; /* Tambahkan transisi opacity */
 }
 .theme-toggle i {
-    font-size: 1.2rem; /* Ukuran ikon standar */
+    font-size: 1.2rem; /* Ukuran ikon standar desktop */
     color: var(--text);
 }
 
-/* New Floating Display Toggle (Centered vertically on the right) */
+/* Floating Display Toggle */
 .display-toggle-fab {
   position: fixed;
-  /* Hapus 'top' yang sebelumnya menempatkannya di bawah themeToggle jika masih ada */
-  /* top: 70px; */
+  right: 20px; /* Posisi di kanan untuk desktop */
 
-  right: 20px; /* Pertahankan posisi 20px dari kanan di desktop */
-
-  top: 50%; /* Atur tepi atas elemen di tengah vertikal (50% dari tinggi viewport) */
-  transform: translateY(-50%); /* Geser elemen ke atas sebesar setengah tingginya sendiri */
+  /* Posisi vertikal di tengah untuk desktop */
+  top: 50%;
+  transform: translateY(-50%);
 
   background: var(--card-bg);
   border: 2px solid var(--border);
   border-radius: 50%;
-  width: 40px;
-  height: 40px;
+  width: 40px; /* Ukuran standar desktop */
+  height: 40px; /* Ukuran standar desktop */
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 100;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  transition: background 0.3s, color 0.1s;
-}
-
-/* Media Query for Mobile - Adjust position and size */
-@media (max-width: 768px) {
-
+  transition: background 0.3s, color 0.1s, opacity 0.3s ease-out; /* Tambahkan transisi opacity */
 }
 
 .display-fab-btn {
@@ -188,12 +181,18 @@
 }
 
 .display-fab-btn i {
-    font-size: 1.2rem; /* Samakan ukuran ikon dengan theme toggle */
+    font-size: 1.2rem; /* Samakan ukuran ikon dengan theme toggle desktop */
     color: var(--text);
 }
 
 .display-toggle-fab:hover {
     background-color: var(--border);
+}
+
+/* Class to hide the FABs (used by JavaScript) */
+.hide-fab {
+    opacity: 0;
+    pointer-events: none; /* Prevent clicks when hidden */
 }
 
 
@@ -213,19 +212,6 @@
     background: var(--card-bg); padding: 8px 12px;
     border-radius: 8px; border: 1px solid var(--border);
     flex-shrink: 0; font-weight: normal;
-  }
-
-  /* Add this new class to your style.css file */
-  .hide-fab {
-    opacity: 0;
-    pointer-events: none; /* Prevent clicks when hidden */
-    transition: opacity 0.3s ease-out; /* Smooth transition for hiding/showing */
-  }
-
-  /* Ensure the FABs themselves have a transition property for opacity */
-  .theme-toggle,
-  .display-toggle-fab {
-    transition: background 0.3s, color 0.1s, opacity 0.3s ease-out; /* Tambahkan opacity ke properti transisi */
   }
 
   /* Media Query for Mobile */
@@ -257,29 +243,26 @@
         width: 100%; /* Agar grup tombol bisa ditengahkan di dalam flex column parent */
     }
 
-    /* Media query for position on smaller screens */
+    /* Media query for FAB position on smaller screens */
     .theme-toggle {
-        top: 15px;
-        right: 15px;
-        width: 35px; height: 35px; /* Sedikit lebih kecil di mobile */
-        opacity: 0.9;
+        top: 15px; /* Posisi dari atas di mobile */
+        right: 15px; /* Posisi dari kanan di mobile */
+        width: 35px; height: 35px; /* Ukuran di mobile */
     }
-     .theme-toggle i { font-size: 1rem; } /* Ikon lebih kecil */
+     .theme-toggle i { font-size: 1rem; } /* Ikon lebih kecil di mobile */
 
 
-     .display-toggle-fab {
-      /* Pastikan properti mobile menimpa desktop */
-      top: 50%; /* Tetap di tengah vertikal di mobile */
-      transform: translateY(-50%); /* Pertahankan penengahan vertikal di mobile */
-  
-      right: 15px; /* Pertahankan posisi 15px dari kanan di mobile */
-  
-      width: 50px; /* Ukuran mobile */
-      height: 50px; /* Ukuran mobile */
-      opacity: 0.9;
+    .display-toggle-fab {
+        /* Override desktop vertical centering for mobile */
+        top: 60px; /* Atur posisi 'top' agar di bawah themeToggle di mobile (themeToggle top: 15px + height: 35px + sekitar 10px jarak) */
+        transform: none; /* Hapus transform translateY di mobile agar tidak menengahkan vertikal */
+
+        right: 15px; /* Posisi di kanan di mobile */
+
+        width: 35px; height: 35px; /* Ukuran di mobile */
     }
      .display-fab-btn i {
-         font-size: 1rem; /* Sesuaikan ukuran ikon di mobile */
+         font-size: 1rem; /* Samakan ukuran ikon dengan theme toggle mobile */
      }
   }
 
