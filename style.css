@@ -46,6 +46,7 @@
    min-height: 100vh;
    /* Update font stack: Poppins (Latin) -> Noto Sans JP (Japanese) -> Fallbacks */
    font-family: 'Poppins', 'Noto Sans JP', 'Meiryo', 'Yu Gothic', 'Arial Unicode MS', sans-serif;
+   position: relative; /* Tambahkan ini untuk konteks positioning absolute */
   }
 
   /* Header */
@@ -120,11 +121,12 @@
   .status { text-align: center; margin: 20px 0; color: var(--primary); font-weight: normal; }
   .message { text-align: center; grid-column: 1 / -1; padding: 20px; color: var(--text); font-weight: normal; }
 
-  /* Theme Toggle */
+  /* Theme Toggle (Menggunakan absolute, tidak lagi di dalam .controls) */
   .theme-toggle {
-    position: fixed;
-    top: 20px; /* Jarak dari atas di desktop */
-    right: 20px; /* Jarak dari kanan di desktop */
+    position: absolute; /* Menggunakan absolute */
+    top: 20px; /* Jarak dari atas dokumen */
+    right: 20px; /* Jarak dari kanan dokumen */
+
     background: var(--card-bg);
     border: 2px solid var(--border);
     border-radius: 50%;
@@ -134,18 +136,20 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    z-index: 100; /* Pastikan di atas konten lain */
+    z-index: 99; /* Sedikit di bawah FAB jika FAB z-index 100 */
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    transition: background 0.3s, color 0.1s, opacity 0.3s ease-out; /* Tambahkan transisi opacity */
-}
+    transition: background 0.3s, color 0.1s, opacity 0.3s ease-out;
+    /* Hapus properti positioning atau margin/float dari percobaan sebelumnya */
+  }
+
 .theme-toggle i {
     font-size: 1.2rem; /* Ukuran ikon standar desktop */
     color: var(--text);
 }
 
-/* Floating Display Toggle */
+/* Floating Display Toggle (Tetap fixed) */
 .display-toggle-fab {
-  position: fixed;
+  position: fixed; /* Tetap menggunakan fixed */
   right: 20px; /* Posisi di kanan untuk desktop */
 
   /* Posisi vertikal di tengah untuk desktop */
@@ -216,7 +220,7 @@
 
   /* Media Query for Mobile */
   @media (max-width: 768px) {
-    .controls { flex-direction: column; align-items: stretch; }
+    .controls { flex-direction: column; align-items: stretch; gap: 10px; }
     #searchInput { width: 100%; flex: 1 0 auto; }
     .display-toggle, #categoryFilter { width: 100%; justify-content: center; }
 
@@ -244,17 +248,18 @@
     }
 
     /* Media query for FAB position on smaller screens */
-    .theme-toggle {
-        top: 15px; /* Posisi dari atas di mobile */
-        right: 15px; /* Posisi dari kanan di mobile */
-        width: 35px; height: 35px; /* Ukuran di mobile */
-    }
-     .theme-toggle i { font-size: 1rem; } /* Ikon lebih kecil di mobile */
+    /* Theme Toggle (menggunakan absolute di mobile juga) */
+     .theme-toggle {
+         top: 15px; /* Jarak dari atas dokumen di mobile */
+         right: 15px; /* Jarak dari kanan dokumen di mobile */
+         width: 35px; height: 35px; /* Ukuran di mobile */
+     }
+      .theme-toggle i { font-size: 1rem; } /* Ikon lebih kecil di mobile */
 
 
     .display-toggle-fab {
         /* Override desktop vertical centering for mobile */
-        top: 50%; /* Pastikan tetap di tengah vertikal di mobile */
+        top: 80%; /* Pastikan tetap di tengah vertikal di mobile */
         transform: translateY(-50%); /* Pastikan penengahan vertikal di mobile */
         right: 15px; /* Posisi di kanan di mobile */
         width: 50px; height: 50px; /* Ukuran di mobile */

@@ -57,7 +57,7 @@ let isFocusMode = false;
 
 // --- Variables for Auto-hide FABs on Mobile ---
 let hideFabTimer; // Variable to store the timer ID
-const HIDE_DELAY = 2000; // 3 seconds delay
+const HIDE_DELAY = 10000; // 10 seconds delay
 
 const selectControlsContainer = document.createElement('div');
 selectControlsContainer.id = 'selectControls';
