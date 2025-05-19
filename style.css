@@ -254,12 +254,10 @@
 
     .display-toggle-fab {
         /* Override desktop vertical centering for mobile */
-        top: 60px; /* Atur posisi 'top' agar di bawah themeToggle di mobile (themeToggle top: 15px + height: 35px + sekitar 10px jarak) */
-        transform: none; /* Hapus transform translateY di mobile agar tidak menengahkan vertikal */
-
+        top: 50%; /* Pastikan tetap di tengah vertikal di mobile */
+        transform: translateY(-50%); /* Pastikan penengahan vertikal di mobile */
         right: 15px; /* Posisi di kanan di mobile */
-
-        width: 35px; height: 35px; /* Ukuran di mobile */
+        width: 40px; height: 40px; /* Ukuran di mobile */
     }
      .display-fab-btn i {
          font-size: 1rem; /* Samakan ukuran ikon dengan theme toggle mobile */
