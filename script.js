@@ -36,6 +36,8 @@ const fullBtn = document.getElementById('fullBtn');
 const displayToggleFab = document.getElementById('displayToggleFab');
 const displayModeFabToggle = document.getElementById('displayModeFabToggle');
 
+// Variabel untuk Theme Toggle
+const themeToggle = document.getElementById("themeToggle"); // Pastikan ini ada
 
 // --- Revised State Variables ---
 let pressTimer = null; // Stores the setTimeout ID for long press
@@ -53,6 +55,9 @@ const MOVE_THRESHOLD = 15; // Pixels threshold to consider it a move/drag
 // --- New State Variable for Focus Mode ---
 let isFocusMode = false;
 
+// --- Variables for Auto-hide FABs on Mobile ---
+let hideFabTimer; // Variable to store the timer ID
+const HIDE_DELAY = 3000; // 3 seconds delay
 
 const selectControlsContainer = document.createElement('div');
 selectControlsContainer.id = 'selectControls';
@@ -72,22 +77,58 @@ document.addEventListener('DOMContentLoaded', () => {
 
     loadLevelData(currentLevel);
     setupEventListeners();
-    loadTheme();
+    loadTheme(); // Load theme preference
     const currentYearSpan = document.getElementById('currentYear');
     if (currentYearSpan) {
         currentYearSpan.textContent = new Date().getFullYear();
     }
 
     // Add global mouse/touch move/end listeners for robust drag/cleanup detection
-    // Use capture phase (true) for move listeners to ensure they run before specific element handlers
     document.addEventListener('mousemove', handleGlobalMouseMove, true);
-    document.addEventListener('mouseup', handleGlobalMouseEnd); // Use global mouseup for cleanup if release outside card
-    document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false, capture: true }); // passive: false needed for preventDefault
+    document.addEventListener('mouseup', handleGlobalMouseEnd);
+    document.addEventListener('touchmove', handleGlobalTouchMove, { passive: false, capture: true });
     document.addEventListener('touchend', handleTouchEnd);
     document.addEventListener('touchcancel', handleGlobalTouchEnd);
 
     // Panggil setDisplayMode di sini untuk mengatur ikon FAB berdasarkan mode awal ('minimal')
-    setDisplayMode(displayMode); // displayMode defaultnya adalah 'minimal'
+    setDisplayMode(displayMode);
+
+    // --- Auto-hide FABs on Mobile Logic ---
+
+    // Add scroll listener to window
+    window.addEventListener('scroll', () => {
+        // Show FABs immediately when scrolling starts
+        showFabs();
+        // Reset the timer to hide them after scrolling stops
+        resetHideFabTimer();
+    });
+
+    // Initial state on page load: show FABs and set the timer if on mobile
+    if (isMobileView()) {
+         showFabs(); // Ensure FABs are visible initially
+         resetHideFabTimer(); // Start the timer to hide them after inactivity
+    } else {
+        // On desktop/non-mobile views, ensure FABs are always visible
+         showFabs();
+         // Clear any potential lingering timer if resized from mobile
+         clearTimeout(hideFabTimer);
+    }
+
+    // Optional: Handle window resize event
+    window.addEventListener('resize', () => {
+        if (isMobileView()) {
+            // If resized to mobile view, show FABs and start the hide timer
+            showFabs();
+            resetHideFabTimer();
+        } else {
+            // If resized to non-mobile view, ensure FABs are visible and clear the timer
+            showFabs();
+            clearTimeout(hideFabTimer);
+        }
+    });
+
+    // --- End Auto-hide FABs Logic ---
+
 });
 
 async function loadLevelData(level) {
@@ -122,11 +163,12 @@ async function loadLevelData(level) {
             data = await response.json();
             loadedData = data.hiragana;
         } else if (level === 'katakana') {
-            filePath = `data/hirakana.json`;
+            filePath = `data/hirakana.json`; // Assuming hirakana.json also contains katakana
             currentDataType = 'katakana';
-            const response = await fetch(filePath);
+             const response = await fetch(filePath);
             if (!response.ok) { throw new Error(`Gagal memuat data Katakana karena file tidak ditemukan atau ada masalah: ${response.status}`); }
-            data = await response.katakana;
+            data = await response.json();
+            loadedData = data.katakana; // Assuming katakana data is under a 'katakana' key
         } else {
             loadedData = [];
             currentDataType = 'unknown';
@@ -146,7 +188,6 @@ async function loadLevelData(level) {
         if (categoryFilter) categoryFilter.disabled = false;
         if (perPageSelect) perPageSelect.disabled = false;
 
-        // setDisplayMode is called in DOMContentLoaded now, no need here
 
         updateStatus();
 
@@ -183,19 +224,13 @@ async function loadLevelData(level) {
 
 function populateCategoryFilter(data, dataType) {
     const categories = new Set();
-    if (dataType === 'kanji') {
-        data.forEach(item => {
-            if (item.kategori) {
-                categories.add(item.kategori);
-            }
-        });
-    } else if (dataType === 'hiragana' || dataType === 'katakana') {
-        data.forEach(item => {
-            if (item.kategori) {
-                categories.add(item.kategori);
-            }
-        });
-    }
+    // Assuming both kanji and hiragana/katakana items have a 'kategori' property
+    data.forEach(item => {
+        if (item.kategori) {
+            categories.add(item.kategori);
+        }
+    });
+
 
     if (categoryFilter) {
         categoryFilter.innerHTML = '<option value="">Pilih Kategori</option>';
@@ -207,10 +242,8 @@ function populateCategoryFilter(data, dataType) {
             categoryFilter.appendChild(option);
         });
 
-        categoryFilter.disabled = (dataType === 'hiragana' || dataType === 'katakana') && sortedCategories.length === 0;
-        if (dataType === 'kanji') {
-            categoryFilter.disabled = sortedCategories.length === 0;
-        }
+        // Disable filter if no categories found for the current data type
+        categoryFilter.disabled = sortedCategories.length === 0;
     }
 
     // Update search input placeholder based on data type
@@ -291,8 +324,7 @@ function setupEventListeners() {
         });
     }
 
-    const themeToggleBtn = document.getElementById("themeToggle");
-    if(themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
+    if(themeToggle) themeToggle.addEventListener('click', toggleTheme); // Event listener for theme toggle
 
     if(closeModalBtn) closeModalBtn.addEventListener('click', hideKanjiModal);
     if(kanjiModal) {
@@ -1018,6 +1050,35 @@ function setTheme(theme) {
     }
 }
 
+// Helper function to check if currently on a mobile viewport
+function isMobileView() {
+    // Use a media query check that matches your CSS breakpoint
+    return window.matchMedia('(max-width: 768px)').matches;
+}
+
+// Function to show the FABs
+function showFabs() {
+    if (themeToggle) themeToggle.classList.remove('hide-fab');
+    if (displayToggleFab) displayToggleFab.classList.remove('hide-fab');
+}
+
+// Function to hide the FABs
+function hideFabs() {
+    if (themeToggle) themeToggle.classList.add('hide-fab');
+    if (displayToggleFab) displayToggleFab.classList.add('hide-fab');
+}
+
+// Function to reset the hide timer
+function resetHideFabTimer() {
+    // Clear any existing timer
+    clearTimeout(hideFabTimer);
+
+    // If on mobile view, set a new timer to hide FABs
+    if (isMobileView()) {
+        hideFabTimer = setTimeout(hideFabs, HIDE_DELAY);
+    }
+}
+
 
 function toggleSelectMode(enable) {
     isSelectMode = enable;
@@ -1381,7 +1442,7 @@ function handleFocusToggle() {
                  searchInput.placeholder = 'Cari...';
              }
              // Aktifkan kembali input pencarian
-             searchInput.disabled = false; // Tambahkan baris ini
+             searchInput.disabled = false;
          }
 
 
@@ -1411,7 +1472,7 @@ function handleFocusToggle() {
                  searchInput.placeholder = 'Cari...';
              }
             // Nonaktifkan input pencarian
-            searchInput.disabled = true; // Tambahkan baris ini
+            searchInput.disabled = true;
          }
 
 
