@@ -170,19 +170,7 @@
 
 /* Media Query for Mobile - Adjust position and size */
 @media (max-width: 768px) {
-  .display-toggle-fab {
-    /* Pastikan properti mobile menimpa desktop */
-    top: 50%; /* Tetap di tengah vertikal di mobile */
-    transform: translateY(-50%); /* Pertahankan penengahan vertikal di mobile */
 
-    right: 15px; /* Pertahankan posisi 15px dari kanan di mobile */
-
-    width: 35px; /* Ukuran mobile */
-    height: 35px; /* Ukuran mobile */
-  }
-   .display-fab-btn i {
-       font-size: 1rem; /* Sesuaikan ukuran ikon di mobile */
-   }
 }
 
 .display-fab-btn {
@@ -265,13 +253,18 @@
      .theme-toggle i { font-size: 1rem; } /* Ikon lebih kecil */
 
 
-    .display-toggle-fab {
-        top: 55px; /* Sesuaikan top berdasarkan ukuran mobile theme-toggle (35px tinggi + 5px jarak + 15px top) */
-        right: 15px;
-        width: 35px; height: 35px; /* Samakan ukuran dengan theme toggle mobile */
+     .display-toggle-fab {
+      /* Pastikan properti mobile menimpa desktop */
+      top: 50%; /* Tetap di tengah vertikal di mobile */
+      transform: translateY(-50%); /* Pertahankan penengahan vertikal di mobile */
+  
+      right: 15px; /* Pertahankan posisi 15px dari kanan di mobile */
+  
+      width: 35px; /* Ukuran mobile */
+      height: 35px; /* Ukuran mobile */
     }
      .display-fab-btn i {
-         font-size: 1rem; /* Samakan ukuran ikon dengan theme toggle mobile */
+         font-size: 1rem; /* Sesuaikan ukuran ikon di mobile */
      }
   }
 
