@@ -262,6 +262,7 @@
   
       width: 50px; /* Ukuran mobile */
       height: 50px; /* Ukuran mobile */
+      opacity: 0.7;
     }
      .display-fab-btn i {
          font-size: 1rem; /* Sesuaikan ukuran ikon di mobile */
