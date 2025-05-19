@@ -260,8 +260,8 @@
   
       right: 15px; /* Pertahankan posisi 15px dari kanan di mobile */
   
-      width: 35px; /* Ukuran mobile */
-      height: 35px; /* Ukuran mobile */
+      width: 43px; /* Ukuran mobile */
+      height: 43px; /* Ukuran mobile */
     }
      .display-fab-btn i {
          font-size: 1rem; /* Sesuaikan ukuran ikon di mobile */
