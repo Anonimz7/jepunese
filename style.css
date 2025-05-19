@@ -215,18 +215,18 @@
     flex-shrink: 0; font-weight: normal;
   }
 
-/* Add this new class to your style.css file */
-.hide-fab {
-  opacity: 0;
-  pointer-events: none; /* Prevent clicks when hidden */
-  transition: opacity 0.3s ease-out; /* Smooth transition for hiding/showing */
-}
+  /* Add this new class to your style.css file */
+  .hide-fab {
+    opacity: 0;
+    pointer-events: none; /* Prevent clicks when hidden */
+    transition: opacity 0.3s ease-out; /* Smooth transition for hiding/showing */
+  }
 
-/* Ensure the FABs themselves have a transition property for opacity */
-.theme-toggle,
-.display-toggle-fab {
-  transition: background 0.3s, color 0.1s, opacity 0.3s ease-out; /* Tambahkan opacity ke properti transisi */
-}
+  /* Ensure the FABs themselves have a transition property for opacity */
+  .theme-toggle,
+  .display-toggle-fab {
+    transition: background 0.3s, color 0.1s, opacity 0.3s ease-out; /* Tambahkan opacity ke properti transisi */
+  }
 
   /* Media Query for Mobile */
   @media (max-width: 768px) {
